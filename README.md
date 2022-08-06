@@ -4,5 +4,6 @@ Install browser drivers：https://www.selenium.dev/documentation/webdriver/getti
 
 # Required packages
 pip install selenium
+
 pip install python-dateutil
  
