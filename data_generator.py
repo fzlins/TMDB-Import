@@ -1,9 +1,6 @@
 # coding= gbk
 
-url = "https://www.disneyplus.com/zh-hans/series/big-mouth/7kIy3S1m2HNY"
-
-# "zh-Hans"
-language = "zh-Hans"
+url = "https://www.iqiyi.com/v_ik3832z0go.html"
 
 from urllib.parse import urlparse
 import urllib.request, json
@@ -11,7 +8,10 @@ import urllib.request, json
 urlData = urlparse(url)
 domain = urlData.netloc
 importData = {}
-if (domain.endswith("disneyplus.com")): # disney
+if (domain.endswith("disneyplus.com")): # disney plus ex: https://www.disneyplus.com/zh-hans/series/big-mouth/7kIy3S1m2HNY
+    # "zh-Hans"
+    language = "zh-Hans"
+
     seriesID = urlData.path.rsplit('/', 1)[-1]
     disneyData = json.loads(urllib.request.urlopen(f"https://disney.content.edge.bamgrid.com/svc/content/DmcSeriesBundle/version/5.1/region/SG/audience/false/maturity/1850/language/{language}/encodedSeriesId/{seriesID}").read().decode())
     episodes = disneyData["data"]["DmcSeriesBundle"]["episodes"]["videos"]
@@ -31,10 +31,34 @@ if (domain.endswith("disneyplus.com")): # disney
             "overview": description,
             "backdrop": thumbnail
         }
-import csv
-with open('import.csv', "w", newline='', encoding='UTF') as csvfile:
-    writer = csv.DictWriter(csvfile, fieldnames = list(list(importData.values())[0].keys()))
-    writer.writeheader()
-    writer.writerows(importData.values())
-    for value in importData.values():
-        print(value)
+
+if (domain.endswith("iqiyi.com")): # iqiyi ex: https://www.iqiyi.com/v_ik3832z0go.html
+    webPage = urllib.request.urlopen(url).read()
+    albumId = str(webPage).split('\"albumId\":')[1].split(',')[0]
+    disneyData = json.loads(urllib.request.urlopen(f"https://pcw-api.iqiyi.com/albums/album/avlistinfo?aid={albumId}&page=1&size=999&callback=").read().decode())
+    episodes = disneyData["data"]["epsodelist"]
+    for episode in episodes:
+        order = episode["order"]
+        period = episode["period"]
+        description = episode["description"]
+        subtitle = episode["subtitle"]
+        duration = episode["duration"]
+        imageUrl = episode["imageUrl"]
+        
+        importData[order] = {
+            "episode_number": order,
+            "name": subtitle,
+            "air_date": period,
+            "runtime": duration.split(':')[0],
+            "overview": description,
+            "backdrop": imageUrl.replace(".jpg", "_1920_1080.jpg")
+        }
+
+
+# generator import.csv
+if len(importData) > 0:
+    import csv
+    with open('import.csv', "w", newline='', encoding='gbk') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames = list(list(importData.values())[0].keys()))
+        writer.writeheader()
+        writer.writerows(importData.values())
