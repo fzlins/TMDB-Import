@@ -1,8 +1,9 @@
 # coding= gbk
 tmdb_username = "username"
 tmdb_password = "password"
-tmdbID = 208026
+tmdbID = 130368
 seasonID = 1
+uploadBackdrop = False
 
 backdropUrl = ""
 
@@ -13,6 +14,7 @@ currentData = {}
 importData = {}
 
 import csv
+from distutils.command.upload import upload
 with open('import.csv', newline='', encoding='gbk') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
@@ -23,6 +25,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import time
 from dateutil import parser
+import urllib.request
+from urllib.parse import urlparse
 
 options = webdriver.EdgeOptions()
 
@@ -164,5 +168,27 @@ for episoideNumber in updateList:
 
     driver.find_element_by_id("submit").click()
     time.sleep(1)
+
+# Processing backdrop images
+imageFolder = "Image/"
+for imageName in os.listdir(imageFolder):
+    imagePath = os.path.join(imageFolder, imageName)
+    os.remove(imagePath)
+
+for episoideNumber in importData:
+    if (importData[episoideNumber].__contains__("backdrop")):
+        # download backdrop
+        urlData = urlparse(importData[episoideNumber]['backdrop'])
+        fileName = urlData.path.rsplit('/', 1)[-1]
+        urllib.request.urlretrieve(importData[episoideNumber]['backdrop'], imageFolder + fileName)
+        
+        # upload backdrop
+        if (uploadBackdrop):
+            driver.get(f"https://www.themoviedb.org/tv/{tmdbID}/season/{seasonID}/episode/{episoideNumber}/images/backdrops")
+            driver.find_element_by_css_selector("span[class='glyphicons_v2 circle-empty-plus']").click()
+            fileFullName = os.path.dirname(os.path.realpath(__file__)) + "\Image\\" + fileName
+            time.sleep(1)
+            driver.find_element_by_css_selector("input[id='upload_files']").send_keys(fileFullName)
+            time.sleep(10)
 
 driver.quit()

@@ -1,9 +1,10 @@
 # coding= gbk
 
-url = "https://w.mgtv.com/b/419629/17004788.html"
+url = "https://www.iqiyi.com/v_ik3832z0go.html"
 
 from urllib.parse import urlparse
 import urllib.request, json
+from bs4 import BeautifulSoup
 
 urlData = urlparse(url)
 domain = urlData.netloc
@@ -13,8 +14,8 @@ if (domain.endswith("disneyplus.com")): # disney plus ex: https://www.disneyplus
     language = "zh-Hans"
 
     seriesID = urlData.path.rsplit('/', 1)[-1]
-    iqiyiData = json.loads(urllib.request.urlopen(f"https://disney.content.edge.bamgrid.com/svc/content/DmcSeriesBundle/version/5.1/region/SG/audience/false/maturity/1850/language/{language}/encodedSeriesId/{seriesID}").read().decode())
-    episodes = iqiyiData["data"]["DmcSeriesBundle"]["episodes"]["videos"]
+    soureData = json.loads(urllib.request.urlopen(f"https://disney.content.edge.bamgrid.com/svc/content/DmcSeriesBundle/version/5.1/region/SG/audience/false/maturity/1850/language/{language}/encodedSeriesId/{seriesID}").read().decode())
+    episodes = soureData["data"]["DmcSeriesBundle"]["episodes"]["videos"]
     for episode in episodes:
         importData[episode["episodeSequenceNumber"]] = {
             "episode_number": episode["episodeSequenceNumber"],
@@ -28,8 +29,8 @@ if (domain.endswith("disneyplus.com")): # disney plus ex: https://www.disneyplus
 if (domain.endswith("iqiyi.com")): # iqiyi ex: https://www.iqiyi.com/v_ik3832z0go.html
     webPage = urllib.request.urlopen(url).read()
     albumId = str(webPage).split('\"albumId\":')[1].split(',')[0]
-    iqiyiData = json.loads(urllib.request.urlopen(f"https://pcw-api.iqiyi.com/albums/album/avlistinfo?aid={albumId}&page=1&size=999&callback=").read().decode())
-    episodes = iqiyiData["data"]["epsodelist"]
+    soureData = json.loads(urllib.request.urlopen(f"https://pcw-api.iqiyi.com/albums/album/avlistinfo?aid={albumId}&page=1&size=999&callback=").read().decode())
+    episodes = soureData["data"]["epsodelist"]
     for episode in episodes:
         importData[episode["order"]] = {
             "episode_number": episode["order"],
@@ -42,8 +43,8 @@ if (domain.endswith("iqiyi.com")): # iqiyi ex: https://www.iqiyi.com/v_ik3832z0g
 
 if (domain.endswith("mgtv.com")): # mgtv ex: https://w.mgtv.com/b/419629/17004788.html
     videoID = urlData.path.rsplit('/', 1)[-1].split('.')[0]
-    mgtvData = json.loads(urllib.request.urlopen(f"https://pcweb.api.mgtv.com/episode/list?_support=10000000&version=5.5.35&video_id={videoID}&page=0&size=50&&callback=").read().decode())
-    episodes = mgtvData["data"]["list"]
+    soureData = json.loads(urllib.request.urlopen(f"https://pcweb.api.mgtv.com/episode/list?_support=10000000&version=5.5.35&video_id={videoID}&page=0&size=50&&callback=").read().decode())
+    episodes = soureData["data"]["list"]
     for episode in episodes:
         if episode["isIntact"] == "1":
             importData[episode["t1"]] = {
@@ -54,6 +55,12 @@ if (domain.endswith("mgtv.com")): # mgtv ex: https://w.mgtv.com/b/419629/1700478
                 "overview": "",
                 "backdrop": episode["img"].split('.jpg_')[0] + ".jpg_1280x720.jpg" #860*484
             }
+
+if (domain.__contains__("amazon")): # amazon ex: https://www.amazon.com/-/zh/dp/B09Q22VBZY/
+    soureData = BeautifulSoup(urllib.request.urlopen(url).read(), features = 'html.parser' )
+    episodes = soureData.find_all("li", id = lambda x:x and x.startswith('av-ep-episodes-'))
+    for episode in episodes:
+        print(episode)
 
 # generator import.csv
 if len(importData) > 0:
