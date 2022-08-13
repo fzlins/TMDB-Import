@@ -1,6 +1,6 @@
 # coding= gbk
 
-url = "https://www.iqiyi.com/v_ik3832z0go.html"
+url = "https://w.mgtv.com/b/419629/17004788.html"
 
 from urllib.parse import urlparse
 import urllib.request, json
@@ -13,47 +13,47 @@ if (domain.endswith("disneyplus.com")): # disney plus ex: https://www.disneyplus
     language = "zh-Hans"
 
     seriesID = urlData.path.rsplit('/', 1)[-1]
-    disneyData = json.loads(urllib.request.urlopen(f"https://disney.content.edge.bamgrid.com/svc/content/DmcSeriesBundle/version/5.1/region/SG/audience/false/maturity/1850/language/{language}/encodedSeriesId/{seriesID}").read().decode())
-    episodes = disneyData["data"]["DmcSeriesBundle"]["episodes"]["videos"]
+    iqiyiData = json.loads(urllib.request.urlopen(f"https://disney.content.edge.bamgrid.com/svc/content/DmcSeriesBundle/version/5.1/region/SG/audience/false/maturity/1850/language/{language}/encodedSeriesId/{seriesID}").read().decode())
+    episodes = iqiyiData["data"]["DmcSeriesBundle"]["episodes"]["videos"]
     for episode in episodes:
-        episodeSequenceNumber = episode["episodeSequenceNumber"]
-        releaseDate = episode["releases"][0]["releaseDate"]
-        description = episode["text"]["description"]["full"]["program"]["default"]["content"]
-        title = episode["text"]["title"]["full"]["program"]["default"]["content"]
-        runtimeMillis = episode["mediaMetadata"]["runtimeMillis"]
-        thumbnail = episode["image"]["thumbnail"]["1.78"]["program"]["default"]["url"]
-        
-        importData[episodeSequenceNumber] = {
-            "episode_number": episodeSequenceNumber,
-            "name": title,
-            "air_date": releaseDate,
-            "runtime": round(runtimeMillis/6000),
-            "overview": description,
-            "backdrop": thumbnail
+        importData[episode["episodeSequenceNumber"]] = {
+            "episode_number": episode["episodeSequenceNumber"],
+            "name": episode["text"]["title"]["full"]["program"]["default"]["content"],
+            "air_date": episode["releases"][0]["releaseDate"],
+            "runtime": round(episode["mediaMetadata"]["runtimeMillis"]/6000),
+            "overview": episode["text"]["description"]["full"]["program"]["default"]["content"],
+            "backdrop": episode["image"]["thumbnail"]["1.78"]["program"]["default"]["url"]
         }
 
 if (domain.endswith("iqiyi.com")): # iqiyi ex: https://www.iqiyi.com/v_ik3832z0go.html
     webPage = urllib.request.urlopen(url).read()
     albumId = str(webPage).split('\"albumId\":')[1].split(',')[0]
-    disneyData = json.loads(urllib.request.urlopen(f"https://pcw-api.iqiyi.com/albums/album/avlistinfo?aid={albumId}&page=1&size=999&callback=").read().decode())
-    episodes = disneyData["data"]["epsodelist"]
+    iqiyiData = json.loads(urllib.request.urlopen(f"https://pcw-api.iqiyi.com/albums/album/avlistinfo?aid={albumId}&page=1&size=999&callback=").read().decode())
+    episodes = iqiyiData["data"]["epsodelist"]
     for episode in episodes:
-        order = episode["order"]
-        period = episode["period"]
-        description = episode["description"]
-        subtitle = episode["subtitle"]
-        duration = episode["duration"]
-        imageUrl = episode["imageUrl"]
-        
-        importData[order] = {
-            "episode_number": order,
-            "name": subtitle,
-            "air_date": period,
-            "runtime": duration.split(':')[0],
-            "overview": description,
-            "backdrop": imageUrl.replace(".jpg", "_1920_1080.jpg")
+        importData[episode["order"]] = {
+            "episode_number": episode["order"],
+            "name": episode["subtitle"],
+            "air_date": episode["period"],
+            "runtime": episode["duration"].split(':')[0],
+            "overview": episode["description"],
+            "backdrop": episode["imageUrl"].replace(".jpg", "_1280_720.jpg") #1080*680
         }
 
+if (domain.endswith("mgtv.com")): # mgtv ex: https://w.mgtv.com/b/419629/17004788.html
+    videoID = urlData.path.rsplit('/', 1)[-1].split('.')[0]
+    mgtvData = json.loads(urllib.request.urlopen(f"https://pcweb.api.mgtv.com/episode/list?_support=10000000&version=5.5.35&video_id={videoID}&page=0&size=50&&callback=").read().decode())
+    episodes = mgtvData["data"]["list"]
+    for episode in episodes:
+        if episode["isIntact"] == "1":
+            importData[episode["t1"]] = {
+                "episode_number": episode["t1"],
+                "name": episode["t2"],
+                "air_date": episode["ts"].split(' ')[0],
+                "runtime": episode["time"].split(':')[0],
+                "overview": "",
+                "backdrop": episode["img"].split('.jpg_')[0] + ".jpg_1280x720.jpg" #860*484
+            }
 
 # generator import.csv
 if len(importData) > 0:
