@@ -1,8 +1,10 @@
 # coding= gbk
 tmdb_username = "username"
 tmdb_password = "password"
-tmdbID = 207590
+tmdbID = 208026
 seasonID = 1
+
+backdropUrl = ""
 
 # "zh-CN", "ja-JP", "en-US"
 language = "ja-JP"
@@ -11,9 +13,6 @@ currentData = {}
 importData = {}
 
 import csv
-from errno import ESTALE
-from os import system
-from unicodedata import name
 with open('import.csv', newline='', encoding='gbk') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
@@ -83,9 +82,11 @@ for episodeNumber in importData:
             updateEpisodeData["overview"] = importData[episodeNumber]["overview"]
             updateEpisode = True
         
-        if len(importData[episodeNumber]["runtime"]) > 0 and importData[episodeNumber]["runtime"] != currentData[episodeNumber]["runtime"]:
-            updateEpisodeData["runtime"] = importData[episodeNumber]["runtime"]
-            updateEpisode = True
+        if importData[episodeNumber].__contains__("runtime"):
+            importData[episodeNumber]["runtime"] = ''.join(filter(str.isdigit, importData[episodeNumber]["runtime"]))
+            if len(importData[episodeNumber]["runtime"]) > 0 and importData[episodeNumber]["runtime"] != currentData[episodeNumber]["runtime"]:
+                updateEpisodeData["runtime"] = importData[episodeNumber]["runtime"]
+                updateEpisode = True
 
         if updateEpisode:
             updateList[episodeNumber] = updateEpisodeData
@@ -107,14 +108,8 @@ if len(createList) > 0:
             episodeNumberField.send_keys(episoideNumber)
 
         episoideName = driver.find_element_by_id(f"{language}_name_text_input_field")
-        if (createList[episoideNumber].__contains__("name") and len(createList[episoideNumber]['name']) > 0) :        
+        if (createList[episoideNumber].__contains__("name") and len(createList[episoideNumber]['name']) > 0) :       
             episoideName.send_keys(createList[episoideNumber]['name'])
-        else:
-            match language:
-                case "ja-JP":
-                    episoideName.send_keys(f"第{episoideNumber}話")
-                case "zh-CN":
-                    episoideName.send_keys(f"第 {episoideNumber} 集")
 
         overview = driver.find_element_by_id(f"{language}_overview_text_box_field")
         if (createList[episoideNumber].__contains__("overview") and len(createList[episoideNumber]['overview']) > 0) :
@@ -144,7 +139,8 @@ for episoideNumber in updateList:
         nameInputID = f"{language}_name".replace('-','_')
         nameInput = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element_by_id(nameInputID))
         nameInput.clear()
-        nameInput.send_keys(updateList[episoideNumber]["name"])
+        if updateList[episoideNumber]["name"] != "null":
+            nameInput.send_keys(updateList[episoideNumber]["name"])
 
     # update overview
     if updateList[episoideNumber].__contains__("overview"):
