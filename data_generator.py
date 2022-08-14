@@ -128,7 +128,7 @@ if (domain.endswith("viki.com")): # viki ex: https://www.viki.com/tv/37350c-a-ma
                 "episode_number": episode["number"],
                 #"name": episode["long_title"],
                 #"air_date": episode["release_date"],
-                #"runtime": round(episode["duration"]/60000),
+                "runtime": round(episode["duration"]/60),
                 "overview": episode["descriptions"][language],
                 "backdrop": episode["images"]["poster"]["url"].rsplit('/', 1)[0] + '.jpg'
             }
