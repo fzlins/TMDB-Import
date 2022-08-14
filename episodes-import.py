@@ -1,4 +1,4 @@
-# coding= gbk
+# coding= utf-8
 tmdb_username = "username"
 tmdb_password = "password"
 tmdbID = 130368
@@ -15,7 +15,7 @@ importData = {}
 
 import csv
 from distutils.command.upload import upload
-with open('import.csv', newline='', encoding='gbk') as csvfile:
+with open('import.csv', newline='', encoding='utf-8') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
         importData[row['episode_number'].strip()] = row 
@@ -23,14 +23,12 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-import time
+import time, os
 from dateutil import parser
 import urllib.request
 from urllib.parse import urlparse
 
 options = webdriver.EdgeOptions()
-
-import os
 
 # load user data
 options.add_argument("user-data-dir=" + os.getcwd() + "\\Selenium") 

@@ -1,10 +1,14 @@
-# coding= gbk
+# coding= utf-8
 
-url = "https://www.iqiyi.com/v_ik3832z0go.html"
+url = "https://www.amazon.com/-/zh/dp/B09Q22VBZY/"
 
+from multiprocessing.sharedctypes import Value
 from urllib.parse import urlparse
-import urllib.request, json
-from bs4 import BeautifulSoup
+import urllib.request, json, os
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
 urlData = urlparse(url)
 domain = urlData.netloc
@@ -56,16 +60,29 @@ if (domain.endswith("mgtv.com")): # mgtv ex: https://w.mgtv.com/b/419629/1700478
                 "backdrop": episode["img"].split('.jpg_')[0] + ".jpg_1280x720.jpg" #860*484
             }
 
-if (domain.__contains__("amazon")): # amazon ex: https://www.amazon.com/-/zh/dp/B09Q22VBZY/
-    soureData = BeautifulSoup(urllib.request.urlopen(url).read(), features = 'html.parser' )
-    episodes = soureData.find_all("li", id = lambda x:x and x.startswith('av-ep-episodes-'))
+if (domain.__contains__("amazon")): # amazon ex: https://www.amazon.co.jp/%E7%AC%AC02%E8%A9%B1/dp/B07TRLY369/
+    options = webdriver.EdgeOptions()
+    # load user data
+    options.add_argument("user-data-dir=" + os.getcwd() + "\\Selenium") 
+    driver = webdriver.Edge(options=options)
+    driver.get(url)
+    episodes = WebDriverWait(driver, timeout=60).until(lambda d: d.find_elements(By.CSS_SELECTOR, value="li[id*='av-ep-episodes-']"))
+    episodeNumber = 1
     for episode in episodes:
-        print(episode)
+        importData[episodeNumber] = {
+            "episode_number": episodeNumber,
+            "name": episode.find_elements(By.CSS_SELECTOR, value="span[dir='auto']")[0].text,
+            "air_date": episode.get_attribute('innerHTML').split('<div>')[1].split('</div>')[0],
+            "runtime": episode.get_attribute('innerHTML').split('<div>')[2].split('</div>')[0],
+            "overview": episode.find_element(By.CSS_SELECTOR, value="div[data-automation-id*='synopsis'] div[dir='auto']").get_attribute('innerText').split('(C)')[0],
+            "backdrop": episode.find_element(By.CSS_SELECTOR, value="noscript").get_attribute('innerText').split('src=\"')[1].split('\"')[0]
+        }
+        episodeNumber = episodeNumber + 1
 
 # generator import.csv
 if len(importData) > 0:
     import csv
-    with open('import.csv', "w", newline='', encoding='gbk') as csvfile:
+    with open('import.csv', "w", newline='', encoding='utf-8') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames = list(list(importData.values())[0].keys()))
         writer.writeheader()
         writer.writerows(importData.values())
