@@ -1,8 +1,9 @@
 # coding= utf-8
 tmdb_username = "username"
 tmdb_password = "password"
-tmdbID = 130368
+tmdbID = 116644
 seasonID = 1
+donwloadBacdrop = False
 uploadBackdrop = False
 
 backdropUrl = ""
@@ -72,15 +73,15 @@ for episodeNumber in importData:
         updateEpisode = False
         updateEpisodeData = {}
 
-        if len(importData[episodeNumber]["air_date"]) > 0 and (currentData[episodeNumber]["air_date"].lower() == 'null' or parser.parse(importData[episodeNumber]["air_date"]) != parser.parse(currentData[episodeNumber]["air_date"])):
+        if importData[episodeNumber].__contains__("air_date") > 0 and (currentData[episodeNumber]["air_date"].lower() == 'null' or parser.parse(importData[episodeNumber]["air_date"]) != parser.parse(currentData[episodeNumber]["air_date"])):
             updateEpisodeData["air_date"] = importData[episodeNumber]["air_date"]
             updateEpisode = True
 
-        if len(importData[episodeNumber]["name"]) > 0 and importData[episodeNumber]["name"] != currentData[episodeNumber]["name"]:
+        if importData[episodeNumber].__contains__("name") and importData[episodeNumber]["name"] != currentData[episodeNumber]["name"]:
             updateEpisodeData["name"] = importData[episodeNumber]["name"]
             updateEpisode = True
 
-        if len(importData[episodeNumber]["overview"]) > 0 and len(currentData[episodeNumber]["overview"]) == 0:
+        if importData[episodeNumber].__contains__("overview") and len(currentData[episodeNumber]["overview"]) == 0:
             updateEpisodeData["overview"] = importData[episodeNumber]["overview"]
             updateEpisode = True
         
@@ -175,21 +176,21 @@ else:
     for imageName in os.listdir(imageFolder):
         imagePath = os.path.join(imageFolder, imageName)
         os.remove(imagePath)
-
-for episoideNumber in importData:
-    if (importData[episoideNumber].__contains__("backdrop")):
-        # download backdrop
-        urlData = urlparse(importData[episoideNumber]['backdrop'])
-        fileName = urlData.path.rsplit('/', 1)[-1]
-        urllib.request.urlretrieve(importData[episoideNumber]['backdrop'], imageFolder + fileName)
-        
-        # upload backdrop
-        if (uploadBackdrop):
-            driver.get(f"https://www.themoviedb.org/tv/{tmdbID}/season/{seasonID}/episode/{episoideNumber}/images/backdrops")
-            driver.find_element_by_css_selector("span[class='glyphicons_v2 circle-empty-plus']").click()
-            fileFullName = os.path.dirname(os.path.realpath(__file__)) + "\Image\\" + fileName
-            time.sleep(1)
-            driver.find_element_by_css_selector("input[id='upload_files']").send_keys(fileFullName)
-            time.sleep(10)
+if (donwloadBacdrop):
+    for episoideNumber in importData:
+        if (importData[episoideNumber].__contains__("backdrop")):
+            # download backdrop
+            urlData = urlparse(importData[episoideNumber]['backdrop'])
+            fileName = urlData.path.rsplit('/', 1)[-1]
+            urllib.request.urlretrieve(importData[episoideNumber]['backdrop'], imageFolder + fileName)
+            
+            # upload backdrop
+            if (uploadBackdrop):
+                driver.get(f"https://www.themoviedb.org/tv/{tmdbID}/season/{seasonID}/episode/{episoideNumber}/images/backdrops")
+                driver.find_element_by_css_selector("span[class='glyphicons_v2 circle-empty-plus']").click()
+                fileFullName = os.path.dirname(os.path.realpath(__file__)) + "\Image\\" + fileName
+                time.sleep(1)
+                driver.find_element_by_css_selector("input[id='upload_files']").send_keys(fileFullName)
+                time.sleep(10)
 
 driver.quit()

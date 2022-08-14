@@ -1,6 +1,6 @@
 # coding= utf-8
 
-url = "https://www.amazon.com/-/zh/dp/B09Q22VBZY/"
+url = "https://www.paravi.jp/title/64465"
 
 from multiprocessing.sharedctypes import Value
 from urllib.parse import urlparse
@@ -60,7 +60,7 @@ if (domain.endswith("mgtv.com")): # mgtv ex: https://w.mgtv.com/b/419629/1700478
                 "backdrop": episode["img"].split('.jpg_')[0] + ".jpg_1280x720.jpg" #860*484
             }
 
-if (domain.__contains__("amazon")): # amazon ex: https://www.amazon.co.jp/%E7%AC%AC02%E8%A9%B1/dp/B07TRLY369/
+if (domain.__contains__("amazon.")): # amazon ex: https://www.amazon.co.jp/%E7%AC%AC02%E8%A9%B1/dp/B07TRLY369/
     options = webdriver.EdgeOptions()
     # load user data
     options.add_argument("user-data-dir=" + os.getcwd() + "\\Selenium") 
@@ -76,6 +76,26 @@ if (domain.__contains__("amazon")): # amazon ex: https://www.amazon.co.jp/%E7%AC
             "runtime": episode.get_attribute('innerHTML').split('<div>')[2].split('</div>')[0],
             "overview": episode.find_element(By.CSS_SELECTOR, value="div[data-automation-id*='synopsis'] div[dir='auto']").get_attribute('innerText').split('(C)')[0],
             "backdrop": episode.find_element(By.CSS_SELECTOR, value="noscript").get_attribute('innerText').split('src=\"')[1].split('\"')[0]
+        }
+        episodeNumber = episodeNumber + 1
+
+if (domain.endswith("paravi.jp")): # amazon ex: https://www.paravi.jp/title/64465
+    options = webdriver.EdgeOptions()
+    # load user data
+    options.add_argument("user-data-dir=" + os.getcwd() + "\\Selenium") 
+    driver = webdriver.Edge(options=options)
+    driver.get(url)
+    WebDriverWait(driver, timeout=60).until(lambda d: d.find_element(By.CSS_SELECTOR, value="i[class='fa-angle_down']")).click()
+    episodes = WebDriverWait(driver, timeout=60).until(lambda d: d.find_elements(By.CSS_SELECTOR, value="div[class='card episode-card']"))
+    episodeNumber = 1
+    for episode in episodes:
+        importData[episodeNumber] = {
+            "episode_number": episodeNumber,
+            "name": episode.find_element(By.CSS_SELECTOR, value="h2[class='title'] p").text,
+            #"air_date": episode.get_attribute('innerHTML').split('<div>')[1].split('</div>')[0],
+            "runtime": episode.find_element(By.CSS_SELECTOR, value="span[class='duration']").text,
+            "overview": episode.find_element(By.CSS_SELECTOR, value="div[class='synopsis']").text,
+            "backdrop": episode.find_element(By.CSS_SELECTOR, value="div[class='artwork']").get_attribute('style').split('url(\"')[1].split('?')[0]
         }
         episodeNumber = episodeNumber + 1
 
