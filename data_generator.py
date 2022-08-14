@@ -1,7 +1,8 @@
 # coding= utf-8
 
-url = "https://www.bilibili.com/bangumi/media/md28234541"
+url = "https://www.viki.com/tv/37350c-a-man-in-a-veil"
 
+from ast import While
 from multiprocessing.sharedctypes import Value
 from urllib.parse import urlparse
 import urllib.request, json, os
@@ -114,6 +115,28 @@ if (domain.endswith("bilibili.com")): # bilibili ex: https://www.bilibili.com/ba
             "overview": "",
             "backdrop": episode["cover"]
         }
+
+if (domain.endswith("viki.com")): # viki ex: https://www.viki.com/tv/37350c-a-man-in-a-veil
+    language = "en"
+    containerID = urlData.path.rsplit('/', 1)[-1].split('-')[0]
+    page = 1
+    while True:
+        soureData = json.loads(urllib.request.urlopen(f"https://api.viki.io/v4/containers/{containerID}/episodes.json?token=undefined&per_page=50&page={page}&direction=asc&sort=number&app=100000a").read().decode())
+        episodes = soureData["response"]
+        for episode in episodes:
+            importData[episode["number"]] = {
+                "episode_number": episode["number"],
+                #"name": episode["long_title"],
+                #"air_date": episode["release_date"],
+                #"runtime": round(episode["duration"]/60000),
+                "overview": episode["descriptions"][language],
+                "backdrop": episode["images"]["poster"]["url"].rsplit('/', 1)[0] + '.jpg'
+            }
+        
+        if (soureData["more"]):
+            page = page + 1
+        else:
+            break
 
 # generator import.csv
 if len(importData) > 0:
