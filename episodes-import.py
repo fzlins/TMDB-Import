@@ -171,9 +171,12 @@ for episoideNumber in updateList:
 
 # Processing backdrop images
 imageFolder = "Image/"
-for imageName in os.listdir(imageFolder):
-    imagePath = os.path.join(imageFolder, imageName)
-    os.remove(imagePath)
+if not os.path.exists(imageFolder):
+    os.makedirs(imageFolder)
+else:
+    for imageName in os.listdir(imageFolder):
+        imagePath = os.path.join(imageFolder, imageName)
+        os.remove(imagePath)
 
 for episoideNumber in importData:
     if (importData[episoideNumber].__contains__("backdrop")):
