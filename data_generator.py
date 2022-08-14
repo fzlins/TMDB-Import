@@ -1,6 +1,6 @@
 # coding= utf-8
 
-url = "https://www.paravi.jp/title/64465"
+url = "https://www.bilibili.com/bangumi/media/md28234541"
 
 from multiprocessing.sharedctypes import Value
 from urllib.parse import urlparse
@@ -25,7 +25,7 @@ if (domain.endswith("disneyplus.com")): # disney plus ex: https://www.disneyplus
             "episode_number": episode["episodeSequenceNumber"],
             "name": episode["text"]["title"]["full"]["program"]["default"]["content"],
             "air_date": episode["releases"][0]["releaseDate"],
-            "runtime": round(episode["mediaMetadata"]["runtimeMillis"]/6000),
+            "runtime": round(episode["mediaMetadata"]["runtimeMillis"]/60000),
             "overview": episode["text"]["description"]["full"]["program"]["default"]["content"],
             "backdrop": episode["image"]["thumbnail"]["1.78"]["program"]["default"]["url"]
         }
@@ -79,7 +79,7 @@ if (domain.__contains__("amazon.")): # amazon ex: https://www.amazon.co.jp/%E7%A
         }
         episodeNumber = episodeNumber + 1
 
-if (domain.endswith("paravi.jp")): # amazon ex: https://www.paravi.jp/title/64465
+if (domain.endswith("paravi.jp")): # paravi ex: https://www.paravi.jp/title/64465
     options = webdriver.EdgeOptions()
     # load user data
     options.add_argument("user-data-dir=" + os.getcwd() + "\\Selenium") 
@@ -98,6 +98,22 @@ if (domain.endswith("paravi.jp")): # amazon ex: https://www.paravi.jp/title/6446
             "backdrop": episode.find_element(By.CSS_SELECTOR, value="div[class='artwork']").get_attribute('style').split('url(\"')[1].split('?')[0]
         }
         episodeNumber = episodeNumber + 1
+
+if (domain.endswith("bilibili.com")): # bilibili ex: https://www.bilibili.com/bangumi/media/md28234541
+    mediaID = ''.join(filter(str.isdigit, urlData.path))
+    mediaData = json.loads(urllib.request.urlopen(f"https://api.bilibili.com/pgc/review/user?media_id={mediaID}").read().decode())
+    seasonID = mediaData["result"]["media"]["season_id"]
+    soureData = json.loads(urllib.request.urlopen(f"https://api.bilibili.com/pgc/view/web/season?season_id={seasonID}").read().decode())
+    episodes = soureData["result"]["episodes"]
+    for episode in episodes:
+        importData[episode["title"]] = {
+            "episode_number": episode["title"],
+            "name": episode["long_title"],
+            "air_date": episode["release_date"],
+            "runtime": round(episode["duration"]/60000),
+            "overview": "",
+            "backdrop": episode["cover"]
+        }
 
 # generator import.csv
 if len(importData) > 0:
