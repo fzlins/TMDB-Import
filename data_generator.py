@@ -1,22 +1,24 @@
-# coding= utf-8
+# coding= utf-8-sig
 
-url = "https://v.youku.com/v_show/id_XNDAzNzE0Mzc2MA==.html"
+url = "https://anidb.net/anime/2073"
 
 from urllib.parse import urlparse
-import urllib.request, json, os
+import urllib.request, json, os, time
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 urlData = urlparse(url)
+urlPath = urlData.path.rstrip('/')
 domain = urlData.netloc
+
 importData = {}
 if (domain.endswith("disneyplus.com")): # disney plus ex: https://www.disneyplus.com/zh-hans/series/big-mouth/7kIy3S1m2HNY
     # "zh-Hans"
     language = "zh-Hans"
 
-    seriesID = urlData.path.rsplit('/', 1)[-1]
+    seriesID = urlPath.rsplit('/', 1)[-1]
     soureData = json.loads(urllib.request.urlopen(f"https://disney.content.edge.bamgrid.com/svc/content/DmcSeriesBundle/version/5.1/region/SG/audience/false/maturity/1850/language/{language}/encodedSeriesId/{seriesID}").read().decode())
     episodes = soureData["data"]["DmcSeriesBundle"]["episodes"]["videos"]
     for episode in episodes:
@@ -45,7 +47,7 @@ if (domain.endswith("iqiyi.com")): # iqiyi ex: https://www.iqiyi.com/v_ik3832z0g
         }
 
 if (domain.endswith("mgtv.com")): # mgtv ex: https://w.mgtv.com/b/419629/17004788.html
-    videoID = urlData.path.rsplit('/', 1)[-1].split('.')[0]
+    videoID = urlPath.rsplit('/', 1)[-1].split('.')[0]
     soureData = json.loads(urllib.request.urlopen(f"https://pcweb.api.mgtv.com/episode/list?_support=10000000&version=5.5.35&video_id={videoID}&page=0&size=50&&callback=").read().decode())
     episodes = soureData["data"]["list"]
     for episode in episodes:
@@ -99,7 +101,7 @@ if (domain.endswith("paravi.jp")): # paravi ex: https://www.paravi.jp/title/6446
         episodeNumber = episodeNumber + 1
 
 if (domain.endswith("bilibili.com")): # bilibili ex: https://www.bilibili.com/bangumi/media/md28234541
-    mediaID = ''.join(filter(str.isdigit, urlData.path))
+    mediaID = ''.join(filter(str.isdigit, urlPath))
     mediaData = json.loads(urllib.request.urlopen(f"https://api.bilibili.com/pgc/review/user?media_id={mediaID}").read().decode())
     seasonID = mediaData["result"]["media"]["season_id"]
     soureData = json.loads(urllib.request.urlopen(f"https://api.bilibili.com/pgc/view/web/season?season_id={seasonID}").read().decode())
@@ -116,7 +118,7 @@ if (domain.endswith("bilibili.com")): # bilibili ex: https://www.bilibili.com/ba
 
 if (domain.endswith("viki.com")): # viki ex: https://www.viki.com/tv/37350c-a-man-in-a-veil
     language = "en"
-    containerID = urlData.path.rsplit('/', 1)[-1].split('-')[0]
+    containerID = urlPath.rsplit('/', 1)[-1].split('-')[0]
     page = 1
     while True:
         soureData = json.loads(urllib.request.urlopen(f"https://api.viki.io/v4/containers/{containerID}/episodes.json?token=undefined&per_page=50&page={page}&direction=asc&sort=number&app=100000a").read().decode())
@@ -124,8 +126,8 @@ if (domain.endswith("viki.com")): # viki ex: https://www.viki.com/tv/37350c-a-ma
         for episode in episodes:
             importData[episode["number"]] = {
                 "episode_number": episode["number"],
-                #"name": episode["long_title"],
-                #"air_date": episode["release_date"],
+                "name": "",
+                "air_date": "",
                 "runtime": round(episode["duration"]/60),
                 "overview": episode["descriptions"][language],
                 "backdrop": episode["images"]["poster"]["url"].rsplit('/', 1)[0] + '.jpg'
@@ -136,6 +138,55 @@ if (domain.endswith("viki.com")): # viki ex: https://www.viki.com/tv/37350c-a-ma
         else:
             break
 
+if (domain.endswith("nhk.jp")): # nhk ex: https://www.nhk.jp/p/comecome/ts/8PMRWK3MGZ
+    seriesID = urlPath.rsplit('/', 1)[-1]
+    nextURL = f"https://api.nhk.jp/r6/l/tvepisode/ts/{seriesID}.json?offset=0&size=100&order=asc"
+    episoideNumber = 1
+    while True:
+        soureData = json.loads(urllib.request.urlopen(nextURL).read().decode())
+        episodes = soureData["result"]
+        for episode in episodes:
+
+            importData[episoideNumber] = {
+                "episode_number": episoideNumber,
+                "name": episode["name"],
+                "air_date": episode["releasedEvent"]["startDate"].split('T')[0],
+                "runtime": "",
+                "overview": episode["description"]
+            }
+
+            if episode.__contains__("eyecatch"):
+                importData[episoideNumber]["backdrop"] = episode["eyecatch"]["main"]["url"]
+
+            episoideNumber = episoideNumber + 1
+        
+        if soureData.__contains__("nextUrl"):
+            nextURL = soureData["nextUrl"]
+        else:
+            break
+
+if (domain.endswith("anidb.net")): # anidb ex: https://anidb.net/anime/2073
+    options = webdriver.EdgeOptions()
+    # log in to display Japanese title
+    options.add_argument("user-data-dir=" + os.getcwd() + "\\Selenium") 
+    driver = webdriver.Edge(options=options)
+    driver.get(url)
+    
+    episodes = WebDriverWait(driver, timeout=60).until(lambda d: d.find_elements(By.CSS_SELECTOR, value="tr[itemprop='episode']"))
+    for episode in episodes:
+        all_columns = episode.find_elements(By.TAG_NAME,"td")
+        episodeNumber = all_columns[1].text.strip()
+        if episodeNumber.isnumeric():
+            importData[episodeNumber] = {
+                "episode_number": episodeNumber,
+                "name": all_columns[2].text.strip(),
+                "air_date": all_columns[4].get_attribute('content'),
+                "runtime": all_columns[3].text.strip(),
+                "overview": "",
+                "backdrop": ""
+            }
+
+# not ready
 if (domain.endswith("youku.com")): # youku ex: https://v.youku.com/v_show/id_XNDAzNzE0Mzc2MA==.html
     options = webdriver.EdgeOptions()
     # load user data
@@ -144,14 +195,12 @@ if (domain.endswith("youku.com")): # youku ex: https://v.youku.com/v_show/id_XND
     driver.get(url)
 
     showid = driver.page_source.split('showid_en:')[1].split(',')[0].replace('\'', '').strip()
-    print(showid)
-
     driver.get(f"https://list.youku.com/show/module?id={showid}&tab=showInfo&callback=jQuery")
 
 # generator import.csv
 if len(importData) > 0:
     import csv
-    with open('import.csv', "w", newline='', encoding='utf-8') as csvfile:
+    with open('import.csv', "w", newline='', encoding='utf-8-sig') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames = list(list(importData.values())[0].keys()))
         writer.writeheader()
         writer.writerows(importData.values())

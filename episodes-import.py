@@ -1,10 +1,10 @@
-# coding= utf-8
+# coding= utf-8-sig
 tmdb_username = "username"
 tmdb_password = "password"
-tmdbID = 116644
+tmdbID = 114558
 seasonID = 1
-donwloadBacdrop = False
-uploadBackdrop = False
+donwloadBacdrop = True
+uploadBackdrop = True
 
 backdropUrl = ""
 
@@ -15,7 +15,7 @@ currentData = {}
 importData = {}
 
 import csv
-with open('import.csv', newline='', encoding='utf-8') as csvfile:
+with open('import.csv', newline='', encoding='utf-8-sig') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
         importData[row['episode_number'].strip()] = row 
@@ -72,15 +72,15 @@ for episodeNumber in importData:
         updateEpisode = False
         updateEpisodeData = {}
 
-        if importData[episodeNumber].__contains__("air_date") > 0 and (currentData[episodeNumber]["air_date"].lower() == 'null' or parser.parse(importData[episodeNumber]["air_date"]) != parser.parse(currentData[episodeNumber]["air_date"])):
+        if importData[episodeNumber].__contains__("air_date") and len(importData[episodeNumber]["air_date"]) > 0 and (currentData[episodeNumber]["air_date"].lower() == 'null' or parser.parse(importData[episodeNumber]["air_date"]) != parser.parse(currentData[episodeNumber]["air_date"])):
             updateEpisodeData["air_date"] = importData[episodeNumber]["air_date"]
             updateEpisode = True
 
-        if importData[episodeNumber].__contains__("name") and importData[episodeNumber]["name"] != currentData[episodeNumber]["name"]:
+        if importData[episodeNumber].__contains__("name") and len(importData[episodeNumber]["name"]) > 0 and importData[episodeNumber]["name"] != currentData[episodeNumber]["name"]:
             updateEpisodeData["name"] = importData[episodeNumber]["name"]
             updateEpisode = True
 
-        if importData[episodeNumber].__contains__("overview") and len(currentData[episodeNumber]["overview"]) == 0:
+        if importData[episodeNumber].__contains__("overview") and len(importData[episodeNumber]["overview"]) > 0 and len(currentData[episodeNumber]["overview"]) == 0:
             updateEpisodeData["overview"] = importData[episodeNumber]["overview"]
             updateEpisode = True
         
@@ -177,7 +177,7 @@ else:
         os.remove(imagePath)
 if (donwloadBacdrop):
     for episoideNumber in importData:
-        if (importData[episoideNumber].__contains__("backdrop")):
+        if (importData[episoideNumber].__contains__("backdrop") and len(importData[episoideNumber]['backdrop']) > 0 ):
             # download backdrop
             urlData = urlparse(importData[episoideNumber]['backdrop'])
             fileName = urlData.path.rsplit('/', 1)[-1]
