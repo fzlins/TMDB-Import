@@ -1,9 +1,7 @@
 # coding= utf-8
 
-url = "https://www.viki.com/tv/37350c-a-man-in-a-veil"
+url = "https://v.youku.com/v_show/id_XNDAzNzE0Mzc2MA==.html"
 
-from ast import While
-from multiprocessing.sharedctypes import Value
 from urllib.parse import urlparse
 import urllib.request, json, os
 from selenium import webdriver
@@ -137,6 +135,18 @@ if (domain.endswith("viki.com")): # viki ex: https://www.viki.com/tv/37350c-a-ma
             page = page + 1
         else:
             break
+
+if (domain.endswith("youku.com")): # youku ex: https://v.youku.com/v_show/id_XNDAzNzE0Mzc2MA==.html
+    options = webdriver.EdgeOptions()
+    # load user data
+    options.add_argument("user-data-dir=" + os.getcwd() + "\\Selenium") 
+    driver = webdriver.Edge(options=options)
+    driver.get(url)
+
+    showid = driver.page_source.split('showid_en:')[1].split(',')[0].replace('\'', '').strip()
+    print(showid)
+
+    driver.get(f"https://list.youku.com/show/module?id={showid}&tab=showInfo&callback=jQuery")
 
 # generator import.csv
 if len(importData) > 0:

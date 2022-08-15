@@ -15,7 +15,6 @@ currentData = {}
 importData = {}
 
 import csv
-from distutils.command.upload import upload
 with open('import.csv', newline='', encoding='utf-8') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
