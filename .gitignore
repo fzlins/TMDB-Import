@@ -1,3 +1,6 @@
-# Ignore directory
+# ignore directory
 Selenium/
 Image/
+
+# ignore file
+import.csv
