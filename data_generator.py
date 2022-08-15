@@ -1,6 +1,6 @@
 # coding= utf-8-sig
 
-url = "https://anidb.net/anime/2073"
+url = "https://fod.fujitv.co.jp/title/4v97/"
 
 from urllib.parse import urlparse
 import urllib.request, json, os, time
@@ -185,6 +185,31 @@ if (domain.endswith("anidb.net")): # anidb ex: https://anidb.net/anime/2073
                 "overview": "",
                 "backdrop": ""
             }
+
+if (domain.__contains__("fod.fujitv")): # fod.fujitv: https://fod.fujitv.co.jp/title/4v97/
+    seriesID = urlPath.rsplit('/', 1)[-1]
+    options = webdriver.EdgeOptions()
+    # load user data
+    options.add_argument("user-data-dir=" + os.getcwd() + "\\Selenium") 
+    driver = webdriver.Edge(options=options)
+    driver.get(url)
+    token = driver.get_cookie("CT")["value"]
+    userAgent = driver.execute_script("return navigator.userAgent")
+    req = urllib.request.Request(f"https://i.fod.fujitv.co.jp/apps/api/lineup/detail/?lu_id={seriesID}&is_premium=false&dv_type=web", headers={'x-authorization': f'Bearer {token}', 'User-Agent' : f'{userAgent}'})
+    soureData = json.loads(urllib.request.urlopen(req).read().decode())
+    
+    episodes = soureData["episodes"]
+    episodeNumber = 1
+    for episode in episodes:
+        importData[episodeNumber] = {
+            "episode_number": episodeNumber,
+            "name": episode["ep_title"],
+            "air_date": "",
+            "runtime": episode["duration"],
+            "overview": episode["ep_description"],
+            "backdrop": f'https://i.fod.fujitv.co.jp/img/program/{seriesID}/episode/{episode["ep_id"]}_a.jpg'
+        }
+        episodeNumber = episodeNumber + 1
 
 # not ready
 if (domain.endswith("youku.com")): # youku ex: https://v.youku.com/v_show/id_XNDAzNzE0Mzc2MA==.html
