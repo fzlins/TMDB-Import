@@ -1,7 +1,10 @@
 # coding= utf-8-sig
+import logging
+logging.basicConfig(filename='episodes-import.log', level=logging.INFO)
+
 tmdb_username = "username"
 tmdb_password = "password"
-tmdbID = 208221
+tmdbID = 208301
 seasonID = 1
 donwloadBacdrop = True
 uploadBackdrop = True
@@ -32,6 +35,10 @@ options = webdriver.EdgeOptions()
 
 # load user data
 options.add_argument("user-data-dir=" + os.getcwd() + "\\Selenium") 
+options.add_argument('--disable-gpu')
+options.add_argument('log-level=3')
+options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 1})
+
 driver = webdriver.Edge(options=options)
 
 # login
@@ -175,18 +182,21 @@ else:
 if (donwloadBacdrop):
     for episoideNumber in importData:
         if (importData[episoideNumber].__contains__("backdrop") and len(importData[episoideNumber]['backdrop']) > 0 ):
-            # download backdrop
-            urlData = urlparse(importData[episoideNumber]['backdrop'])
-            fileName = urlData.path.rsplit('/', 1)[-1]
-            urllib.request.urlretrieve(importData[episoideNumber]['backdrop'], imageFolder + fileName)
-            
-            # upload backdrop
-            if (uploadBackdrop):
-                driver.get(f"https://www.themoviedb.org/tv/{tmdbID}/season/{seasonID}/episode/{episoideNumber}/images/backdrops")
-                driver.find_element_by_css_selector("span[class='glyphicons_v2 circle-empty-plus']").click()
-                fileFullName = os.path.dirname(os.path.realpath(__file__)) + "\Image\\" + fileName
-                time.sleep(1)
-                driver.find_element_by_css_selector("input[id='upload_files']").send_keys(fileFullName)
-                time.sleep(10)
+            try:
+                # download backdrop
+                urlData = urlparse(importData[episoideNumber]['backdrop'])
+                fileName = urlData.path.rsplit('/', 1)[-1]
+                urllib.request.urlretrieve(importData[episoideNumber]['backdrop'], imageFolder + fileName)
+                
+                # upload backdrop
+                if (uploadBackdrop):
+                    driver.get(f"https://www.themoviedb.org/tv/{tmdbID}/season/{seasonID}/episode/{episoideNumber}/images/backdrops")
+                    driver.find_element_by_css_selector("span[class='glyphicons_v2 circle-empty-plus']").click()
+                    fileFullName = os.path.dirname(os.path.realpath(__file__)) + "\Image\\" + fileName
+                    time.sleep(1)
+                    driver.find_element_by_css_selector("input[id='upload_files']").send_keys(fileFullName)
+                    time.sleep(10)
+            except Exception as e:
+                logging.error(f"Download/upload backrip error for: {importData[episoideNumber]['backdrop']}.", exc_info= e)
 
 driver.quit()
