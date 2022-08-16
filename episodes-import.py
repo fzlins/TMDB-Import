@@ -1,7 +1,7 @@
 # coding= utf-8-sig
 tmdb_username = "username"
 tmdb_password = "password"
-tmdbID = 114558
+tmdbID = 208221
 seasonID = 1
 donwloadBacdrop = True
 uploadBackdrop = True
@@ -71,10 +71,10 @@ for episodeNumber in importData:
         # generate update list
         updateEpisode = False
         updateEpisodeData = {}
-
-        if importData[episodeNumber].__contains__("air_date") and len(importData[episodeNumber]["air_date"]) > 0 and (currentData[episodeNumber]["air_date"].lower() == 'null' or parser.parse(importData[episodeNumber]["air_date"]) != parser.parse(currentData[episodeNumber]["air_date"])):
-            updateEpisodeData["air_date"] = importData[episodeNumber]["air_date"]
-            updateEpisode = True
+        if importData[episodeNumber].__contains__("air_date") and len(importData[episodeNumber]["air_date"]) > 0: 
+            if (currentData[episodeNumber]["air_date"].lower() == 'null' and importData[episodeNumber]["air_date"].lower() != 'null') or parser.parse(importData[episodeNumber]["air_date"]) != parser.parse(currentData[episodeNumber]["air_date"]):
+                updateEpisodeData["air_date"] = importData[episodeNumber]["air_date"]
+                updateEpisode = True
 
         if importData[episodeNumber].__contains__("name") and len(importData[episodeNumber]["name"]) > 0 and importData[episodeNumber]["name"] != currentData[episodeNumber]["name"]:
             updateEpisodeData["name"] = importData[episodeNumber]["name"]
@@ -123,9 +123,6 @@ if len(createList) > 0:
 
         if (createList[episoideNumber].__contains__("air_date") and len(createList[episoideNumber]['air_date']) > 0) :
             airdate = driver.find_element_by_id("air_date_date_picker_field")
-            dateFormate = createList[episoideNumber]['air_date'].split('.')
-            if (len(dateFormate) == 3):
-                createList[episoideNumber]['air_date'] = dateFormate[2] + "/" + dateFormate[1] + "/" + dateFormate[0]
             airdate.clear()
             if createList[episoideNumber]['air_date'].lower() != "null":
                 airdate.send_keys(createList[episoideNumber]['air_date'])
