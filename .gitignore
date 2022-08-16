@@ -3,4 +3,5 @@ Selenium/
 Image/
 
 # ignore file
-import.csv
+*.csv
+*.log
