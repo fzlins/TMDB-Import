@@ -3,7 +3,7 @@ import logging
 from unicodedata import name
 logging.basicConfig(filename='data_generator.log', level=logging.INFO)
 
-url = "https://www.amazon.co.jp/12-%E9%89%84%E3%82%92%E3%81%8F%E3%81%84%E3%81%AD%E3%81%88%E3%81%AE%E5%B7%BB%EF%BC%8F%E3%81%8A%E3%82%89%E3%82%A4%E3%82%AB%E3%83%83%E3%81%9F%E3%81%A9%E3%81%AE%E5%B7%BB/dp/B087CYC22Y/"
+url = "https://www.iqiyi.com/v_19rskrf4mo.html"
 logging.info(f"Extracting data from {url} has started")
 
 # same as TMDB
@@ -41,19 +41,35 @@ if (domain.endswith("disneyplus.com")): # disney plus ex: https://www.disneyplus
         }
 
 if (domain.endswith("iqiyi.com")): # iqiyi ex: https://www.iqiyi.com/v_ik3832z0go.html
+    logging.info("iqiyi is detected")
     webPage = urllib.request.urlopen(url).read()
-    albumId = str(webPage).split('\"albumId\":')[1].split(',')[0]
-    soureData = json.loads(urllib.request.urlopen(f"https://pcw-api.iqiyi.com/albums/album/avlistinfo?aid={albumId}&page=1&size=999&callback=").read().decode())
+    albumId = re.search(r'\"albumId\":(.*?),', str(webPage)).group(1)
+    logging.info(f"AlumbID is {albumId}")
+    apiRequest = f"https://pcw-api.iqiyi.com/albums/album/avlistinfo?aid={albumId}&page=1&size=999&callback="
+    logging.info(f"API request url: {apiRequest}")
+    soureData = json.loads(urllib.request.urlopen(apiRequest).read().decode())
     episodes = soureData["data"]["epsodelist"]
     for episode in episodes:
-        importData[episode["order"]] = {
-            "episode_number": episode["order"],
+        episodeNumber = episode["order"]
+        importData[episodeNumber] = {
+            "episode_number": episodeNumber,
             "name": episode["subtitle"],
             "air_date": episode["period"],
             "runtime": episode["duration"].split(':')[0],
             "overview": episode["description"],
-            "backdrop": episode["imageUrl"].replace(".jpg", "_1280_720.jpg") #1080*680
+            "backdrop": episode["imageUrl"] #1080*680
         }
+
+        pixel = ""
+        for imageSize in episode["imageSize"]:
+            if len(pixel) == 0:
+                pixel =  imageSize
+            else:
+                if int((imageSize.split)('_')[0]) > int((pixel.split)('_')[0]):
+                    pixel = imageSize
+
+        if len(pixel) > 0:
+            importData[episodeNumber]["backdrop"] = os.path.splitext(importData[episodeNumber]["backdrop"])[0] + "_" + pixel + ".jpg"
 
 if (domain.endswith("mgtv.com")): # mgtv ex: https://w.mgtv.com/b/419629/17004788.html
     videoID = urlPath.rsplit('/', 1)[-1].split('.')[0]

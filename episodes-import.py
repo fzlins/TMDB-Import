@@ -4,7 +4,7 @@ logging.basicConfig(filename='episodes-import.log', level=logging.INFO)
 
 tmdb_username = "username"
 tmdb_password = "password"
-tmdbID = 208301
+tmdbID = 126334
 seasonID = 1
 donwloadBacdrop = True
 uploadBackdrop = True
@@ -12,7 +12,7 @@ uploadBackdrop = True
 backdropUrl = ""
 
 # "zh-CN", "ja-JP", "en-US"
-language = "ja-JP"
+language = "zh-CN"
 
 currentData = {}
 importData = {}
@@ -44,8 +44,8 @@ driver = webdriver.Edge(options=options)
 # login
 try:
     driver.get("https://www.themoviedb.org/login")
-    username = driver.find_element_by_id("username")
-    password = driver.find_element_by_id("password")
+    username = driver.find_element(By.ID, value="username")
+    password = driver.find_element(By.ID, value="password")
 
     username.send_keys(tmdb_username)
     password.send_keys(tmdb_password)
@@ -58,10 +58,10 @@ except:
 driver.get(f"https://www.themoviedb.org/tv/{tmdbID}/season/{seasonID}/edit?active_nav_item=episodes&language={language}")
 
 try:
-    WebDriverWait(driver, timeout=3).until(lambda d: d.find_element_by_class_name("k-grid-norecords")) # There are no episodes added to this season.
+    WebDriverWait(driver, timeout=3).until(lambda d: d.find_element(By.CLASS_NAME, value="k-grid-norecords")) # There are no episodes added to this season.
 except:
-    WebDriverWait(driver, timeout=60).until(lambda d: d.find_element_by_class_name("k-master-row"))
-    for k_master_row in driver.find_elements_by_class_name("k-master-row"):
+    WebDriverWait(driver, timeout=60).until(lambda d: d.find_element(By.CLASS_NAME, value="k-master-row"))
+    for k_master_row in driver.find_elements(By.CLASS_NAME, value="k-master-row"):
         all_columns = k_master_row.find_elements(By.TAG_NAME,"td")
         episode_number = all_columns[0].text.strip()
         currentData[episode_number] = {}
@@ -143,7 +143,7 @@ for episoideNumber in updateList:
     # update name
     if updateList[episoideNumber].__contains__("name"):
         nameInputID = f"{language}_name".replace('-','_')
-        nameInput = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element_by_id(nameInputID))
+        nameInput = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element(By.ID, value=nameInputID))
         nameInput.clear()
         if updateList[episoideNumber]["name"] != "null":
             nameInput.send_keys(updateList[episoideNumber]["name"])
@@ -151,27 +151,29 @@ for episoideNumber in updateList:
     # update overview
     if updateList[episoideNumber].__contains__("overview"):
         overviewInputID = f"{language}_overview".replace('-','_')
-        overviewInput = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element_by_id(overviewInputID))
+        overviewInput = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element(By.ID, value=overviewInputID))
         overviewInput.clear()
         overviewInput.send_keys(updateList[episoideNumber]["overview"])
 
     # update runtime
     if updateList[episoideNumber].__contains__("runtime"):
-        runtimeInput = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element_by_id("runtime"))
+        runtimeInput = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element(By.ID, value="runtime"))
         runtimeInput.clear()
         runtimeInput.send_keys(updateList[episoideNumber]["runtime"])   
 
     # Update air date
     if updateList[episoideNumber].__contains__("air_date"):
-        airDateField = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element_by_id("air_date"))
+        airDateField = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element(By.ID, value="air_date"))
         airDateField.clear()
         if updateList[episoideNumber]["air_date"].lower() != "null":
             airDateField.send_keys(updateList[episoideNumber]["air_date"])
 
-    driver.find_element_by_id("submit").click()
+    driver.find_element(By.ID, value="submit").click()
     time.sleep(1)
 
 # Processing backdrop images
+from PIL import Image
+
 imageFolder = "Image/"
 if not os.path.exists(imageFolder):
     os.makedirs(imageFolder)
@@ -186,8 +188,35 @@ if (donwloadBacdrop):
                 # download backdrop
                 urlData = urlparse(importData[episoideNumber]['backdrop'])
                 fileName = urlData.path.rsplit('/', 1)[-1]
-                urllib.request.urlretrieve(importData[episoideNumber]['backdrop'], imageFolder + fileName)
+                image_path = imageFolder + fileName
+                urllib.request.urlretrieve(importData[episoideNumber]['backdrop'], image_path)
+
+                # skip invalid image size
+                image = Image.open(image_path)
+                image_widith, image_heigh = image.size
+                logging.info(f"Backdrop size: {image_widith} * {image_heigh}")
+                if image_widith < 1280 or image_heigh < 720:
+                    if round(image_widith/image_heigh, 2) != 1.78:
+                        logging.info("Skip: invalid aspect ration")
+                        continue
+
+                    # upscale image to valid size
+                    elif (image_widith > 1000):
+                        logging.info("Upscale image to 1280*720")
+                        image = image.resize((1280, 720), resample=Image.Resampling.LANCZOS)
+                        image.save(image_path, format= "JPEG", quality= 90)
+                    else:
+                        logging.info("Skip: too small")
+                        continue
                 
+                # Convert other format to jpg
+                if image.mode != "RGB":
+                    logging.info("Convert other format to jpg")
+                    image = image.convert("RGB")
+                    image.save(image_path, format= "JPEG", quality= 90)
+
+                image.close()
+
                 # upload backdrop
                 if (uploadBackdrop):
                     driver.get(f"https://www.themoviedb.org/tv/{tmdbID}/season/{seasonID}/episode/{episoideNumber}/images/backdrops")
