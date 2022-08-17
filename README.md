@@ -3,9 +3,11 @@
 Install browser drivers：https://www.selenium.dev/documentation/webdriver/getting_started/install_drivers/
 
 # Required packages
+```
 pip install selenium
-
 pip install python-dateutil
+pip install Pillow
+```
 
 # 说明
 - data_genatory.py：修改url变量里的网页链接来抓取剧集数据（包括标题、内容简介、时长、首播时间和背景图链接），并生成import.csv文件用于之后的导入。
