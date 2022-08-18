@@ -1,15 +1,15 @@
 # coding= utf-8-sig
 import logging
-from unicodedata import name
+from datetime import datetime
 logging.basicConfig(filename='data_generator.log', level=logging.INFO)
 
-url = "https://www.iqiyi.com/v_19rskrf4mo.html"
+url = "https://www.bilibili.com/bangumi/media/md28234967/"
 logging.info(f"Extracting data from {url} has started")
 
 # same as TMDB
 language = "zh-CN"
 
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 import urllib.request, json, os, time, re
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -22,13 +22,16 @@ domain = urlData.netloc
 
 importData = {}
 if (domain.endswith("disneyplus.com")): # disney plus ex: https://www.disneyplus.com/zh-hans/series/big-mouth/7kIy3S1m2HNY
+    logging.info("disneyplus is detected")
     if language == "":
         language == ""
     else: # default "zh-Hans"
         language = "zh-Hans"
 
     seriesID = urlPath.rsplit('/', 1)[-1]
-    soureData = json.loads(urllib.request.urlopen(f"https://disney.content.edge.bamgrid.com/svc/content/DmcSeriesBundle/version/5.1/region/SG/audience/false/maturity/1850/language/{language}/encodedSeriesId/{seriesID}").read().decode())
+    apiRequest = f"https://disney.content.edge.bamgrid.com/svc/content/DmcSeriesBundle/version/5.1/region/SG/audience/false/maturity/1850/language/{language}/encodedSeriesId/{seriesID}"
+    logging.info(f"API request url: {apiRequest}")
+    soureData = json.loads(urllib.request.urlopen(apiRequest).read().decode())
     episodes = soureData["data"]["DmcSeriesBundle"]["episodes"]["videos"]
     for episode in episodes:
         importData[episode["episodeSequenceNumber"]] = {
@@ -44,7 +47,6 @@ if (domain.endswith("iqiyi.com")): # iqiyi ex: https://www.iqiyi.com/v_ik3832z0g
     logging.info("iqiyi is detected")
     webPage = urllib.request.urlopen(url).read()
     albumId = re.search(r'\"albumId\":(.*?),', str(webPage)).group(1)
-    logging.info(f"AlumbID is {albumId}")
     apiRequest = f"https://pcw-api.iqiyi.com/albums/album/avlistinfo?aid={albumId}&page=1&size=999&callback="
     logging.info(f"API request url: {apiRequest}")
     soureData = json.loads(urllib.request.urlopen(apiRequest).read().decode())
@@ -60,20 +62,23 @@ if (domain.endswith("iqiyi.com")): # iqiyi ex: https://www.iqiyi.com/v_ik3832z0g
             "backdrop": episode["imageUrl"] #1080*680
         }
 
-        pixel = ""
+        pixel = ("0", "0")
         for imageSize in episode["imageSize"]:
-            if len(pixel) == 0:
-                pixel =  imageSize
+            size = imageSize.split('_')
+            if pixel == ("0", "0"):
+                pixel =  size
             else:
-                if int((imageSize.split)('_')[0]) > int((pixel.split)('_')[0]):
-                    pixel = imageSize
-
-        if len(pixel) > 0:
-            importData[episodeNumber]["backdrop"] = os.path.splitext(importData[episodeNumber]["backdrop"])[0] + "_" + pixel + ".jpg"
+                if int(size[0]) > int(pixel[0]):
+                    pixel = size
+        if pixel != ("0", "0"):
+            importData[episodeNumber]["backdrop"] = os.path.splitext(importData[episodeNumber]["backdrop"])[0] + f"_imageWidth_imageHeight.jpg?imageWidth={pixel[0]}&imageHeight={pixel[1]}"
 
 if (domain.endswith("mgtv.com")): # mgtv ex: https://w.mgtv.com/b/419629/17004788.html
-    videoID = urlPath.rsplit('/', 1)[-1].split('.')[0]
-    soureData = json.loads(urllib.request.urlopen(f"https://pcweb.api.mgtv.com/episode/list?_support=10000000&version=5.5.35&video_id={videoID}&page=0&size=50&&callback=").read().decode())
+    logging.info("mgtv is detected")
+    videoID =  urlPath.rsplit('/', 1)[-1].split('.')[0]
+    apiRequest = f"https://pcweb.api.mgtv.com/episode/list?_support=10000000&version=5.5.35&video_id={videoID}&page=0&size=50&&callback="
+    logging.info(f"API request url: {apiRequest}")
+    soureData = json.loads(urllib.request.urlopen(apiRequest).read().decode())
     episodes = soureData["data"]["list"]
     for episode in episodes:
         if episode["isIntact"] == "1":
@@ -138,16 +143,22 @@ if (domain.endswith("paravi.jp")): # paravi ex: https://www.paravi.jp/title/6446
         episodeNumber = episodeNumber + 1
 
 if (domain.endswith("bilibili.com")): # bilibili ex: https://www.bilibili.com/bangumi/media/md28234541
+    logging.info("bilibili is detected")
     mediaID = ''.join(filter(str.isdigit, urlPath))
-    mediaData = json.loads(urllib.request.urlopen(f"https://api.bilibili.com/pgc/review/user?media_id={mediaID}").read().decode())
+    apiRequest = f"https://api.bilibili.com/pgc/review/user?media_id={mediaID}"
+    logging.info(f"API request url: {apiRequest}")
+    mediaData = json.loads(urllib.request.urlopen(apiRequest).read().decode())
+
     seasonID = mediaData["result"]["media"]["season_id"]
-    soureData = json.loads(urllib.request.urlopen(f"https://api.bilibili.com/pgc/view/web/season?season_id={seasonID}").read().decode())
+    apiRequest = f"https://api.bilibili.com/pgc/view/web/season?season_id={seasonID}"
+    logging.info(f"API request url: {apiRequest}")
+    soureData = json.loads(urllib.request.urlopen(apiRequest).read().decode())
     episodes = soureData["result"]["episodes"]
     for episode in episodes:
         importData[episode["title"]] = {
             "episode_number": episode["title"],
             "name": episode["long_title"],
-            "air_date": episode["release_date"],
+            "air_date": datetime.fromtimestamp(episode["pub_time"]).date(),
             "runtime": round(episode["duration"]/60000),
             "overview": "",
             "backdrop": episode["cover"]
@@ -268,8 +279,31 @@ if (domain.__contains__("fod.fujitv")): # fod.fujitv: https://fod.fujitv.co.jp/t
         }
         episodeNumber = episodeNumber + 1
 
-# not ready
+# language: kr
+# backdrop: 1280*720
+if (domain.endswith("wavve.com")): # wavve: https://www.wavve.com/player/vod?programid=H04_SP0000054887&page=1
+    logging.info("wavve is detected")
+    programid = parse_qs(urlData.query)["programid"][0]
+    apiRequest = f"https://apis.wavve.com/fz/vod/programs-contents/H04_SP0000054887?limit=50&offset=0&orderby=old&apikey=E5F3E0D30947AA5440556471321BB6D9&credential=none&device=pc&drm=wm&partner=pooq&pooqzone=none&region=kor&targetage=all"
+    logging.info(f"API request url: {apiRequest}")
+    soureData = json.loads(urllib.request.urlopen(apiRequest).read().decode())
+    episodes = soureData["cell_toplist"]["celllist"]
+    episodeNumber = 1
+    for episode in episodes:
+        importData[episodeNumber] = {
+            "episode_number": episodeNumber,
+            "name": episode["title_list"][0]["text"],
+            "air_date": episode["title_list"][1]["text"].rsplit(' ', 1)[-1].split("(")[0],
+            "runtime": round(int(episode["_playtime_log"].split(',')[0])/60),
+            "overview": episode["synopsis"],
+            "backdrop": episode["thumbnail"]
+        }
+
+        episodeNumber = episodeNumber + 1
+            
+
 if (domain.endswith("youku.com")): # youku ex: https://v.youku.com/v_show/id_XNDAzNzE0Mzc2MA==.html
+    logging.info("youku is detected")
     options = webdriver.EdgeOptions()
     # load user data
     options.add_argument("user-data-dir=" + os.getcwd() + "\\Selenium") 
@@ -287,24 +321,28 @@ if (domain.endswith("youku.com")): # youku ex: https://v.youku.com/v_show/id_XND
     driver.get(f"https://list.youku.com/show/module?id={showid}&tab=showInfo&callback=jQuery")
     episodesURL = re.search(r'&lt;ul class(.*?)ul&gt;&lt;', driver.page_source).group(1)
 
+    episodeNumber = 1
     for episode in re.findall(r'id_(.*?).html', episodesURL):
-        episodeURL = f'https://v.youku.com/v_show/id_{episode}.html'
-        logging.info(f"Extracting data from {episodeURL}")
-        driver.get(episodeURL)
-        irAlbumName = driver.find_element(By.CSS_SELECTOR, "meta[name='irAlbumName']").get_attribute('content')
-        irTitle = driver.find_element(By.CSS_SELECTOR, "meta[name='irTitle']").get_attribute('content')
-        episodeNumber = ''.join(filter(str.isdigit, irTitle.replace(irAlbumName, "")))
-        thumbnailUrl = driver.find_element(By.CSS_SELECTOR, "meta[itemprop='thumbnailUrl']").get_attribute('content')
-        backdrop = thumbnailUrl[0:23] + "F" + thumbnailUrl[24:]
+        try:
+            episodeURL = f'https://v.youku.com/v_show/id_{episode}.html'
+            logging.info(f"Extracting data from {episodeURL}")
+            driver.get(episodeURL)
+            time.sleep(3)
 
-        importData[episodeNumber] = {
-            "episode_number": episodeNumber,
-            "name": driver.find_element(By.CSS_SELECTOR, "meta[property='og:title']").get_attribute('content').replace(irAlbumName, ""),
-            "air_date": driver.find_element(By.CSS_SELECTOR, "meta[itemprop='datePublished']").get_attribute('content').split(' ')[0],
-            "runtime": "",
-            "overview": driver.find_element(By.CSS_SELECTOR, "meta[name='description']").get_attribute('content').split('视频内容简介:')[1],
-            "backdrop": backdrop,
-        }
+            thumbnailUrl = driver.find_element(By.CSS_SELECTOR, "meta[itemprop='thumbnailUrl']").get_attribute('content')
+            backdrop = thumbnailUrl[0:23] + "F" + thumbnailUrl[24:]
+
+            importData[episodeNumber] = {
+                "episode_number": episodeNumber,
+                "name": driver.find_element(By.CSS_SELECTOR, "meta[property='og:title']").get_attribute('content').split(' ')[2],
+                "air_date": driver.find_element(By.CSS_SELECTOR, "meta[itemprop='datePublished']").get_attribute('content').split(' ')[0],
+                "runtime": "",
+                "overview": driver.find_element(By.CSS_SELECTOR, "meta[name='description']").get_attribute('content').split('视频内容简介:')[1],
+                "backdrop": backdrop,
+            }
+            episodeNumber = episodeNumber + 1
+        except Exception as err:
+            logging.error(err)
 
 logging.info(f"Extracting data from {url} is complete")
 

@@ -1,10 +1,10 @@
 # coding= utf-8-sig
-import logging
+import logging, re
 logging.basicConfig(filename='episodes-import.log', level=logging.INFO)
 
 tmdb_username = "username"
 tmdb_password = "password"
-tmdbID = 126334
+tmdbID = 200940
 seasonID = 1
 donwloadBacdrop = True
 uploadBackdrop = True
@@ -29,7 +29,7 @@ from selenium.webdriver.common.by import By
 import time, os
 from dateutil import parser
 import urllib.request
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs
 
 options = webdriver.EdgeOptions()
 
@@ -50,7 +50,7 @@ try:
     username.send_keys(tmdb_username)
     password.send_keys(tmdb_password)
 
-    driver.find_element_by_id("login_button").click()
+    driver.find_element(By.ID, value="login_button").click()
 except:
     print('User is logged')
 
@@ -87,7 +87,7 @@ for episodeNumber in importData:
             updateEpisodeData["name"] = importData[episodeNumber]["name"]
             updateEpisode = True
 
-        if importData[episodeNumber].__contains__("overview") and len(importData[episodeNumber]["overview"]) > 0 and len(currentData[episodeNumber]["overview"]) == 0:
+        if importData[episodeNumber].__contains__("overview") and len(importData[episodeNumber]["overview"]) > len(currentData[episodeNumber]["overview"]) + 50:
             updateEpisodeData["overview"] = importData[episodeNumber]["overview"]
             updateEpisode = True
         
@@ -108,33 +108,33 @@ if len(createList) > 0:
     for episoideNumber in createList:
         WebDriverWait(driver, 60).until_not(EC.presence_of_element_located((By.CSS_SELECTOR, "a[class='k-button k-button-icontext k-primary k-grid-update']")))
         time.sleep(1)
-        driver.find_element_by_css_selector("a[class='k-button k-button-icontext k-grid-add']").click()
-        episoideID = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element_by_id("episode_number_numeric_text_box_field").get_attribute("value"))
+        driver.find_element(By.CSS_SELECTOR, value="a[class='k-button k-button-icontext k-grid-add']").click()
+        episoideID = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element(By.ID, value="episode_number_numeric_text_box_field").get_attribute("value"))
 
         if (int(episoideID) != int(episoideNumber)):
-            episodeNumberField = driver.find_element_by_id("episode_number_numeric_text_box_field")
+            episodeNumberField = driver.find_element(By.ID, value="episode_number_numeric_text_box_field")
             episodeNumberField.clear()
             episodeNumberField.send_keys(episoideNumber)
 
-        episoideName = driver.find_element_by_id(f"{language}_name_text_input_field")
+        episoideName = driver.find_element(By.ID, value=f"{language}_name_text_input_field")
         if (createList[episoideNumber].__contains__("name") and len(createList[episoideNumber]['name']) > 0) :       
             episoideName.send_keys(createList[episoideNumber]['name'])
 
-        overview = driver.find_element_by_id(f"{language}_overview_text_box_field")
+        overview = driver.find_element(By.ID, value=f"{language}_overview_text_box_field")
         if (createList[episoideNumber].__contains__("overview") and len(createList[episoideNumber]['overview']) > 0) :
             overview.send_keys(importData[episoideNumber]['overview'])
 
-        runtime = driver.find_element_by_id(f"{language}_runtime_text_input_field")
+        runtime = driver.find_element(By.ID, value=f"{language}_runtime_text_input_field")
         if (createList[episoideNumber].__contains__("runtime") and len(createList[episoideNumber]['runtime']) > 0) :
             runtime.send_keys(importData[episoideNumber]['runtime'])
 
         if (createList[episoideNumber].__contains__("air_date") and len(createList[episoideNumber]['air_date']) > 0) :
-            airdate = driver.find_element_by_id("air_date_date_picker_field")
+            airdate = driver.find_element(By.ID, value="air_date_date_picker_field")
             airdate.clear()
             if createList[episoideNumber]['air_date'].lower() != "null":
                 airdate.send_keys(createList[episoideNumber]['air_date'])
 
-        driver.find_element_by_css_selector("a[class='k-button k-button-icontext k-primary k-grid-update']").click()
+        driver.find_element(By.CSS_SELECTOR, value="a[class='k-button k-button-icontext k-primary k-grid-update']").click()
 
 # update episoides
 for episoideNumber in updateList:
@@ -172,7 +172,7 @@ for episoideNumber in updateList:
     time.sleep(1)
 
 # Processing backdrop images
-from PIL import Image
+from PIL import Image, ImageOps
 
 imageFolder = "Image/"
 if not os.path.exists(imageFolder):
@@ -189,43 +189,61 @@ if (donwloadBacdrop):
                 urlData = urlparse(importData[episoideNumber]['backdrop'])
                 fileName = urlData.path.rsplit('/', 1)[-1]
                 image_path = imageFolder + fileName
-                urllib.request.urlretrieve(importData[episoideNumber]['backdrop'], image_path)
+                if urlData.query.__contains__('imageWidth') and urlData.query.__contains__('imageHeight'):
+                    backdrop_url = importData[episoideNumber]['backdrop'].split('?')[0]
+                    new_backdrop_url = backdrop_url.replace("imageWidth", "0").replace("imageHeight", "0")
+                    try:
+                        urllib.request.urlretrieve(new_backdrop_url, image_path)
+                    except:
+                        urlQuery = parse_qs(urlData.query)
+                        imageWidth = urlQuery["imageWidth"][0]
+                        imageHeight = urlQuery["imageHeight"][0]
+                        logging.info(f"Download backdrop with 0*0 failed, try to use default pixel: {imageWidth}*{imageHeight}")
+                        new_backdrop_url = backdrop_url.replace("imageWidth", imageWidth).replace("imageHeight", imageHeight)
+                        urllib.request.urlretrieve(new_backdrop_url, image_path)
+                else:
+                    urllib.request.urlretrieve(importData[episoideNumber]['backdrop'], image_path)
 
-                # skip invalid image size
                 image = Image.open(image_path)
-                image_widith, image_heigh = image.size
-                logging.info(f"Backdrop size: {image_widith} * {image_heigh}")
-                if image_widith < 1280 or image_heigh < 720:
-                    if round(image_widith/image_heigh, 2) != 1.78:
-                        logging.info("Skip: invalid aspect ration")
-                        continue
 
-                    # upscale image to valid size
-                    elif (image_widith > 1000):
-                        logging.info("Upscale image to 1280*720")
-                        image = image.resize((1280, 720), resample=Image.Resampling.LANCZOS)
-                        image.save(image_path, format= "JPEG", quality= 90)
-                    else:
-                        logging.info("Skip: too small")
-                        continue
-                
                 # Convert other format to jpg
                 if image.mode != "RGB":
                     logging.info("Convert other format to jpg")
                     image = image.convert("RGB")
-                    image.save(image_path, format= "JPEG", quality= 90)
+                    image.save(image_path, format= "JPEG", quality= 85)
 
+                image_widith, image_heigh = image.size
+                logging.info(f"Backdrop size: {image_widith} * {image_heigh}")
+                aspectRatio = round(image_widith/image_heigh, 2)
+                if aspectRatio == 1.78 and (image_widith >= 1280 and image_heigh >= 720) and (image_widith <= 3840 and image_heigh <= 2106):
+                    # valid image siez
+                    pass
+                elif (aspectRatio >= 1.6 or aspectRatio <= 1.9) and (image_widith >= 960 and image_heigh >= 540):
+                    # resize image to fit valid size
+                    re_size = (1280, 720)
+                    if image_widith < 1728 or image_heigh < 972: # (1280, 720)*1.35
+                        re_size = (1280, 720)
+                    elif image_widith < 2592 or image_heigh < 1458: # (1920, 1080)*1.35
+                        re_size = (1920, 1080)
+                    elif image_widith < 3600 or image_heigh < 2025: # (2880, 1620)*1.25
+                        re_size = (2880, 1620)
+                    logging.info(f"Upscale image to {re_size[0]}*{re_size[1]}")
+                    image = ImageOps.fit(image=image, size=re_size, method=Image.Resampling.LANCZOS, bleed=0.0, centering=(0.5, 0.5))
+                    image.save(image_path, format= "JPEG", quality= 90)
+                else:
+                    logging.info("Skip: unable to use fit function to meet TMDB requirments")
+                    continue
                 image.close()
 
                 # upload backdrop
                 if (uploadBackdrop):
                     driver.get(f"https://www.themoviedb.org/tv/{tmdbID}/season/{seasonID}/episode/{episoideNumber}/images/backdrops")
-                    driver.find_element_by_css_selector("span[class='glyphicons_v2 circle-empty-plus']").click()
+                    driver.find_element(By.CSS_SELECTOR, value="span[class='glyphicons_v2 circle-empty-plus']").click()
                     fileFullName = os.path.dirname(os.path.realpath(__file__)) + "\Image\\" + fileName
                     time.sleep(1)
-                    driver.find_element_by_css_selector("input[id='upload_files']").send_keys(fileFullName)
+                    driver.find_element(By.CSS_SELECTOR, value="input[id='upload_files']").send_keys(fileFullName)
                     time.sleep(10)
             except Exception as e:
-                logging.error(f"Download/upload backrip error for: {importData[episoideNumber]['backdrop']}.", exc_info= e)
+                logging.error(f"Download/upload backdrop error for: {importData[episoideNumber]['backdrop']}.", exc_info= e)
 
 driver.quit()
