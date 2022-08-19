@@ -7,6 +7,7 @@ Install browser drivers：https://www.selenium.dev/documentation/webdriver/getti
 pip install selenium
 pip install python-dateutil
 pip install Pillow
+pip install bordercrop
 ```
 
 # 说明

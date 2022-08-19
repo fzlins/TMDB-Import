@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 logging.basicConfig(filename='data_generator.log', level=logging.INFO)
 
-url = "https://www.bilibili.com/bangumi/media/md28234967/"
+url = "https://www.wavve.com/player/vod?programid=C9902_C99000000010&page=1"
 logging.info(f"Extracting data from {url} has started")
 
 # same as TMDB
@@ -88,7 +88,7 @@ if (domain.endswith("mgtv.com")): # mgtv ex: https://w.mgtv.com/b/419629/1700478
                 "air_date": episode["ts"].split(' ')[0],
                 "runtime": episode["time"].split(':')[0],
                 "overview": "",
-                "backdrop": episode["img"].split('.jpg_')[0] + ".jpg_1280x720.jpg" #860*484
+                "backdrop": episode["img"].rsplit('_', 1)[0] #860*484
             }
 
 if (domain.__contains__("amazon.")): # amazon ex: https://www.amazon.co.jp/%E7%AC%AC02%E8%A9%B1/dp/B07TRLY369/
@@ -165,11 +165,14 @@ if (domain.endswith("bilibili.com")): # bilibili ex: https://www.bilibili.com/ba
         }
 
 if (domain.endswith("viki.com")): # viki ex: https://www.viki.com/tv/37350c-a-man-in-a-veil
+    logging.info("viki is detected")
     language = "en"
     containerID = urlPath.rsplit('/', 1)[-1].split('-')[0]
     page = 1
     while True:
-        soureData = json.loads(urllib.request.urlopen(f"https://api.viki.io/v4/containers/{containerID}/episodes.json?token=undefined&per_page=50&page={page}&direction=asc&sort=number&app=100000a").read().decode())
+        apiRequest = f"https://api.viki.io/v4/containers/{containerID}/episodes.json?token=undefined&per_page=50&page={page}&direction=asc&sort=number&app=100000a"
+        logging.info(f"API request url: {apiRequest}")
+        soureData = json.loads(urllib.request.urlopen(apiRequest).read().decode())
         episodes = soureData["response"]
         for episode in episodes:
             importData[episode["number"]] = {
@@ -284,7 +287,7 @@ if (domain.__contains__("fod.fujitv")): # fod.fujitv: https://fod.fujitv.co.jp/t
 if (domain.endswith("wavve.com")): # wavve: https://www.wavve.com/player/vod?programid=H04_SP0000054887&page=1
     logging.info("wavve is detected")
     programid = parse_qs(urlData.query)["programid"][0]
-    apiRequest = f"https://apis.wavve.com/fz/vod/programs-contents/H04_SP0000054887?limit=50&offset=0&orderby=old&apikey=E5F3E0D30947AA5440556471321BB6D9&credential=none&device=pc&drm=wm&partner=pooq&pooqzone=none&region=kor&targetage=all"
+    apiRequest = f"https://apis.wavve.com/fz/vod/programs-contents/{programid}?limit=50&offset=0&orderby=old&apikey=E5F3E0D30947AA5440556471321BB6D9&credential=none&device=pc&drm=wm&partner=pooq&pooqzone=none&region=kor&targetage=all"
     logging.info(f"API request url: {apiRequest}")
     soureData = json.loads(urllib.request.urlopen(apiRequest).read().decode())
     episodes = soureData["cell_toplist"]["celllist"]
@@ -296,7 +299,7 @@ if (domain.endswith("wavve.com")): # wavve: https://www.wavve.com/player/vod?pro
             "air_date": episode["title_list"][1]["text"].rsplit(' ', 1)[-1].split("(")[0],
             "runtime": round(int(episode["_playtime_log"].split(',')[0])/60),
             "overview": episode["synopsis"],
-            "backdrop": episode["thumbnail"]
+            "backdrop": f"https://{episode['thumbnail']}"
         }
 
         episodeNumber = episodeNumber + 1
@@ -320,31 +323,83 @@ if (domain.endswith("youku.com")): # youku ex: https://v.youku.com/v_show/id_XND
     showid = re.search(r'showid_en:(.*?),', driver.page_source).group(1).replace('\'', '').strip()
     driver.get(f"https://list.youku.com/show/module?id={showid}&tab=showInfo&callback=jQuery")
     episodesURL = re.search(r'&lt;ul class(.*?)ul&gt;&lt;', driver.page_source).group(1)
-
+    #https://openapi.youku.com/v2/shows/videos.json?show_id=4e9f2bf1dca64a11a098&client_id=3d01f04416cbe807
     episodeNumber = 1
-    for episode in re.findall(r'id_(.*?).html', episodesURL):
+    for episode in re.findall(r'id_(.*?)==.html', episodesURL):
         try:
-            episodeURL = f'https://v.youku.com/v_show/id_{episode}.html'
-            logging.info(f"Extracting data from {episodeURL}")
-            driver.get(episodeURL)
-            time.sleep(3)
+            apiRequest = f"https://api.youku.com/videos/show.json?video_id={episode}&client_id=3d01f04416cbe807"
+            logging.info(f"API request url: {apiRequest}")
+            videoData = json.loads(urllib.request.urlopen(apiRequest).read().decode())
 
-            thumbnailUrl = driver.find_element(By.CSS_SELECTOR, "meta[itemprop='thumbnailUrl']").get_attribute('content')
+            thumbnailUrl = videoData["bigThumbnail"]
             backdrop = thumbnailUrl[0:23] + "F" + thumbnailUrl[24:]
 
             importData[episodeNumber] = {
                 "episode_number": episodeNumber,
-                "name": driver.find_element(By.CSS_SELECTOR, "meta[property='og:title']").get_attribute('content').split(' ')[2],
-                "air_date": driver.find_element(By.CSS_SELECTOR, "meta[itemprop='datePublished']").get_attribute('content').split(' ')[0],
-                "runtime": "",
-                "overview": driver.find_element(By.CSS_SELECTOR, "meta[name='description']").get_attribute('content').split('视频内容简介:')[1],
+                "name": "",
+                "air_date": videoData["published"].split(" ")[0],
+                "runtime": round(float(videoData["duration"])/60),
+                "overview": videoData["description"],
                 "backdrop": backdrop,
             }
             episodeNumber = episodeNumber + 1
         except Exception as err:
             logging.error(err)
 
-logging.info(f"Extracting data from {url} is complete")
+if (domain.endswith("qq.com")): # qq ex: https://v.qq.com/x/cover/mzc00200t0fg7k8/o0043eaefxx.html?ptag=douban.tv
+    logging.info("qq is detected")
+    cid = urlPath.rsplit('/', 2)[1]
+    apiRequest = f"https://access.video.qq.com/fcgi/PlayVidListReq?raw=1&vappid=17174171&vsecret=a06edbd9da3f08db096edab821b3acf3c27ee46e6d57c2fa&page_size=100&type=4&cid={cid}"
+    logging.info(f"API request url: {apiRequest}")
+    soureData = json.loads(urllib.request.urlopen(apiRequest).read().decode())
+    episodes = soureData["data"]["vid_list"]
+    count_episode = 1
+    idlist = ""
+    for episode in episodes:
+        if count_episode == 1 or count_episode == 31:
+            idlist = episode['vid']
+            count_episode = 1
+        else:
+            idlist = idlist + "," + episode['vid']
+
+        if count_episode == 30 or count_episode == len(episodes):
+            apiRequest = f"https://union.video.qq.com/fcgi-bin/data?otype=json&tid=682&appid=20001238&appkey=6c03bbe9658448a4&idlist={idlist}&callback="
+            logging.info(f"API request url: {apiRequest}")
+            videoData = json.loads(urllib.request.urlopen(apiRequest).read().decode().lstrip("QZOutputJson=").rstrip(";"))
+            for episodeDate in videoData["results"]:
+                # skip previews
+                if (episodeDate["fields"]["category_map"][1] == "正片"):
+                    episodeNumber = int(episodeDate["fields"]["episode"])
+                    importData[episodeNumber] = {
+                        "episode_number": episodeNumber,
+                        "name": "", #episodeDate["fields"]["title""]
+                        "air_date": episodeDate["fields"]["video_checkup_time"].split(" ")[0],
+                        "runtime": round(int(episodeDate["fields"]["duration"])/60),
+                        "overview": "",
+                        "backdrop": episodeDate["fields"]["pic160x90"].rsplit("/", 1)[0],
+                    }
+        count_episode = count_episode + 1
+
+if (domain.__contains__(".kktv.")): # kktv ex: https://www.kktv.me/titles/01000577
+    logging.info("kktv is detected")
+    title = urlPath.rsplit('/', 1)[-1]
+    apiRequest = f"https://api.kktv.me//api.kktv.me/v3/titles/{title}"
+    logging.info(f"API request url: {apiRequest}")
+    soureData = json.loads(urllib.request.urlopen(apiRequest).read().decode())
+    episodes = soureData["data"]["series"][0]["episodes"]
+    episodeNumber = 1
+    for episode in episodes:
+        importData[episodeNumber] = {
+            "episode_number": episodeNumber,
+            "name": episode["title"],
+            "air_date": datetime.fromtimestamp(episode["publish_time"]).date(),
+            "runtime": round(int(episode["duration"])/60),
+            "overview": "",
+            "backdrop": episode["still"].replace(".xs.",".md.")
+        }
+        episodeNumber = episodeNumber + 1
+
+logging.info(f"Extracting data is complete")
 
 # generator import.csv
 if len(importData) > 0:

@@ -1,10 +1,11 @@
 # coding= utf-8-sig
+from asyncio.windows_events import NULL
 import logging, re
 logging.basicConfig(filename='episodes-import.log', level=logging.INFO)
 
 tmdb_username = "username"
 tmdb_password = "password"
-tmdbID = 200940
+tmdbID = 205576
 seasonID = 1
 donwloadBacdrop = True
 uploadBackdrop = True
@@ -12,7 +13,7 @@ uploadBackdrop = True
 backdropUrl = ""
 
 # "zh-CN", "ja-JP", "en-US"
-language = "zh-CN"
+language = "ko-KR"
 
 currentData = {}
 importData = {}
@@ -26,7 +27,7 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-import time, os
+import time, os, imghdr
 from dateutil import parser
 import urllib.request
 from urllib.parse import urlparse, parse_qs
@@ -140,39 +141,50 @@ if len(createList) > 0:
 for episoideNumber in updateList:
     driver.get(f"https://www.themoviedb.org/tv/{tmdbID}/season/{seasonID}/episode/{episoideNumber}/edit?active_nav_item=primary_facts&language={language}")
     
+    save_submit = False
     # update name
     if updateList[episoideNumber].__contains__("name"):
         nameInputID = f"{language}_name".replace('-','_')
         nameInput = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element(By.ID, value=nameInputID))
-        nameInput.clear()
-        if updateList[episoideNumber]["name"] != "null":
-            nameInput.send_keys(updateList[episoideNumber]["name"])
+        if nameInput.get_attribute("disabled") != "true":
+            nameInput.clear()
+            if updateList[episoideNumber]["name"] != "null":
+                nameInput.send_keys(updateList[episoideNumber]["name"])
+                save_submit = True
 
     # update overview
     if updateList[episoideNumber].__contains__("overview"):
         overviewInputID = f"{language}_overview".replace('-','_')
         overviewInput = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element(By.ID, value=overviewInputID))
-        overviewInput.clear()
-        overviewInput.send_keys(updateList[episoideNumber]["overview"])
+        if overviewInput.get_attribute("disabled") != "true":
+            overviewInput.clear()
+            overviewInput.send_keys(updateList[episoideNumber]["overview"])
+            save_submit = True
 
     # update runtime
     if updateList[episoideNumber].__contains__("runtime"):
         runtimeInput = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element(By.ID, value="runtime"))
-        runtimeInput.clear()
-        runtimeInput.send_keys(updateList[episoideNumber]["runtime"])   
+        if runtimeInput.get_attribute("disabled") != "true":
+            runtimeInput.clear()
+            runtimeInput.send_keys(updateList[episoideNumber]["runtime"])   
+            save_submit = True
 
     # Update air date
     if updateList[episoideNumber].__contains__("air_date"):
         airDateField = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element(By.ID, value="air_date"))
-        airDateField.clear()
-        if updateList[episoideNumber]["air_date"].lower() != "null":
-            airDateField.send_keys(updateList[episoideNumber]["air_date"])
+        if airDateField.get_attribute("disabled") != "true":
+            airDateField.clear()
+            if updateList[episoideNumber]["air_date"].lower() != "null":
+                airDateField.send_keys(updateList[episoideNumber]["air_date"])
+            save_submit = True
 
-    driver.find_element(By.ID, value="submit").click()
-    time.sleep(1)
+    if save_submit:
+        driver.find_element(By.ID, value="submit").click()
+        time.sleep(1)
 
 # Processing backdrop images
 from PIL import Image, ImageOps
+import bordercrop
 
 imageFolder = "Image/"
 if not os.path.exists(imageFolder):
@@ -208,9 +220,21 @@ if (donwloadBacdrop):
 
                 # Convert other format to jpg
                 if image.mode != "RGB":
-                    logging.info("Convert other format to jpg")
+                    logging.info(f"Convert {image.mode} to RGB")
                     image = image.convert("RGB")
-                    image.save(image_path, format= "JPEG", quality= 85)
+                    image.save(image_path, format= "JPEG", quality= 90)
+                elif image.format != "JPEG": 
+                    logging.info(f"Convert {image.format} to JPEG")
+                    image.save(image_path, format= "JPEG", quality= 90)
+
+                # Crop black border
+                try:
+                    tempImage = bordercrop.crop(image_path, 1, round(image.size[0]*0.9), 100)
+                    if (tempImage.size[0] < image.size[0]):
+                        logging.info(f"Original backdrop size: {image_widith} * {image_heigh}")
+                        image = tempImage
+                except:
+                    pass
 
                 image_widith, image_heigh = image.size
                 logging.info(f"Backdrop size: {image_widith} * {image_heigh}")
@@ -229,12 +253,13 @@ if (donwloadBacdrop):
                         re_size = (2880, 1620)
                     logging.info(f"Upscale image to {re_size[0]}*{re_size[1]}")
                     image = ImageOps.fit(image=image, size=re_size, method=Image.Resampling.LANCZOS, bleed=0.0, centering=(0.5, 0.5))
-                    image.save(image_path, format= "JPEG", quality= 90)
+                    image.save(image_path, format= "JPEG", quality= 85)
                 else:
                     logging.info("Skip: unable to use fit function to meet TMDB requirments")
                     continue
+                
                 image.close()
-
+                
                 # upload backdrop
                 if (uploadBackdrop):
                     driver.get(f"https://www.themoviedb.org/tv/{tmdbID}/season/{seasonID}/episode/{episoideNumber}/images/backdrops")
