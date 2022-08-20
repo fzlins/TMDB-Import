@@ -1,5 +1,4 @@
 # coding= utf-8-sig
-import imghdr
 import os
 import time
 import bordercrop
@@ -18,9 +17,10 @@ logging.basicConfig(filename='episodes-import.log', level=logging.INFO)
 
 tmdb_username = ""
 tmdb_password = ""
-tmdbID = 155852
+tmdbID = 89542
 seasonID = 1
-uploadBackdrop = True
+forced_upload = False
+thumbs_up = False
 
 # "zh-CN", "ja-JP", "en-US"
 language = "zh-CN"
@@ -301,17 +301,35 @@ for episoideNumber in importData:
             image.close()
 
             # upload backdrop
-            if (uploadBackdrop):
+            driver.get(
+                f"https://www.themoviedb.org/tv/{tmdbID}/season/{seasonID}/episode/{episoideNumber}/images/backdrops")
+            if len(driver.find_elements(By.CSS_SELECTOR, value="ul[id='image_menu']")) != 0 and not forced_upload:
+                continue
+
+            driver.find_element(
+                By.CSS_SELECTOR, value="span[class='glyphicons_v2 circle-empty-plus']").click()
+            fileFullName = os.path.dirname(
+                os.path.realpath(__file__)) + "\Image\\" + fileName
+            time.sleep(1)
+            driver.find_element(
+                By.CSS_SELECTOR, value="input[id='upload_files']").send_keys(fileFullName)
+            time.sleep(10)
+
+            # thumbs up upload backdrop
+            if (thumbs_up):
                 driver.get(
-                    f"https://www.themoviedb.org/tv/{tmdbID}/season/{seasonID}/episode/{episoideNumber}/images/backdrops")
-                driver.find_element(
-                    By.CSS_SELECTOR, value="span[class='glyphicons_v2 circle-empty-plus']").click()
-                fileFullName = os.path.dirname(
-                    os.path.realpath(__file__)) + "\Image\\" + fileName
-                time.sleep(1)
-                driver.find_element(
-                    By.CSS_SELECTOR, value="input[id='upload_files']").send_keys(fileFullName)
-                time.sleep(10)
+                    f"https://www.themoviedb.org/tv/{tmdbID}/season/{seasonID}/episode/{episoideNumber}/images/backdrops?image_language=xx")
+                
+                user_link = driver.find_element(By.CSS_SELECTOR, value="class='rounded logged_in'").get_attribute("href")
+
+                backdrop_id = ""
+                for card_compact in driver.find_elements(By.CSS_SELECTOR, value="li[class='card compact']"):
+                    if card_compact.find_element(By.CSS_SELECTOR, value=f"a[href='{user_link}']") and card_compact.get_attribute("id") > backdrop_id:
+                        backdrop_id = card_compact.get_attribute("id")
+
+                if backdrop_id != "":
+                    driver.find_element(By.CSS_SELECTOR, value=f"a[id='{backdrop_id}'][class='thumbs_up']").click()
+
         except Exception as e:
             logging.error(
                 f"Download/upload backdrop error for: {importData[episoideNumber]['backdrop']}.", exc_info=e)

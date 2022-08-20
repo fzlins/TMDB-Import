@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 logging.basicConfig(filename='data_generator.log', level=logging.INFO)
 
-url = "https://www.iqiyi.com/v_23nm2ls7z78.html"
+url = "https://www.iqiyi.com/v_19rsn15ux8.html"
 logging.info(f"Extracting data from {url} has started")
 
 # same as TMDB
@@ -357,16 +357,17 @@ if (domain.endswith("qq.com")): # qq ex: https://v.qq.com/x/cover/mzc00200t0fg7k
     logging.info(f"API request url: {apiRequest}")
     soureData = json.loads(urllib.request.urlopen(apiRequest).read().decode())
     episodes = soureData["data"]["vid_list"]
+    total_vid = soureData["data"]["total_vid"]
     count_episode = 1
     idlist = ""
+    page_size = 30
     for episode in episodes:
-        if count_episode == 1 or count_episode == 31:
+        if count_episode % page_size == 1:
             idlist = episode['vid']
-            count_episode = 1
         else:
             idlist = idlist + "," + episode['vid']
 
-        if count_episode == 30 or count_episode == len(episodes):
+        if count_episode % page_size == 0 or count_episode == total_vid:
             apiRequest = f"https://union.video.qq.com/fcgi-bin/data?otype=json&tid=682&appid=20001238&appkey=6c03bbe9658448a4&idlist={idlist}&callback="
             logging.info(f"API request url: {apiRequest}")
             videoData = json.loads(urllib.request.urlopen(apiRequest).read().decode().lstrip("QZOutputJson=").rstrip(";"))
