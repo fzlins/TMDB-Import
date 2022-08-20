@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 logging.basicConfig(filename='data_generator.log', level=logging.INFO)
 
-url = "https://v.youku.com/v_show/id_XNTIwMzU3MzY3Mg==.html"
+url = "https://www.iqiyi.com/v_w93xi9ghm8.html?vfm=m_331_dbdy&fv=4904d94982104144a1548dd9040df241"
 logging.info(f"Extracting data from {url} has started")
 
 # same as TMDB
@@ -56,7 +56,7 @@ if (domain.endswith("iqiyi.com")): # iqiyi ex: https://www.iqiyi.com/v_ik3832z0g
         importData[episodeNumber] = {
             "episode_number": episodeNumber,
             "name": episode["subtitle"],
-            "air_date": episode["period"],
+            "air_date": datetime.fromtimestamp(episode["publishTime"]/1000).date(),
             "runtime": episode["duration"].split(':')[0],
             "overview": episode["description"],
             "backdrop": episode["imageUrl"] #1080*680

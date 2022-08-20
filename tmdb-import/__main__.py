@@ -8,12 +8,10 @@ from .version import script_name, __version__
 _options = [
     'help',
     'version',
-    'gui',
     'force',
-    'playlists',
 ]
 
-_short_options = 'hVgfl'
+_short_options = 'hVf'
 
 _help = f"Usage: {script_name} [OPTION]... [URL]..."
 
