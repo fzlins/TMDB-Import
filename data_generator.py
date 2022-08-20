@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 logging.basicConfig(filename='data_generator.log', level=logging.INFO)
 
-url = "https://www.iqiyi.com/v_19rsn15ux8.html"
+url = "https://v.youku.com/v_show/id_XNTIwMzU3MzY3Mg==.html"
 logging.info(f"Extracting data from {url} has started")
 
 # same as TMDB
@@ -306,7 +306,7 @@ if (domain.endswith("wavve.com")): # wavve: https://www.wavve.com/player/vod?pro
 
 if (domain.endswith("youku.com")): # youku ex: https://v.youku.com/v_show/id_XNDAzNzE0Mzc2MA==.html
     logging.info("youku is detected")
-    episodeID =  re.search(r'id_(.*?)==', url).group(1)
+    episodeID =  re.search(r'id_(.*?)\.html', url).group(1).rstrip("==")
     apiRequest = f"https://api.youku.com/videos/show.json?video_id={episodeID}&ext=show&client_id=3d01f04416cbe807"
     # https://list.youku.com/show/module?id={showid}&tab=showInfo&callback=jQuery
     logging.info(f"API request url: {apiRequest}")
@@ -341,9 +341,10 @@ if (domain.endswith("youku.com")): # youku ex: https://v.youku.com/v_show/id_XND
                     "overview": videoData["description"],
                     "backdrop": backdrop,
                 }
-                episodeNumber = episodeNumber + 1
             except Exception as err:
                 logging.error(err)
+
+            episodeNumber = episodeNumber + 1
 
         if page * 30 > total:
             break
