@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 logging.basicConfig(filename='data_generator.log', level=logging.INFO)
 
-url = "https://www.wavve.com/player/vod?programid=C9902_C99000000010&page=1"
+url = "https://www.iqiyi.com/v_23nm2ls7z78.html"
 logging.info(f"Extracting data from {url} has started")
 
 # same as TMDB
@@ -302,49 +302,53 @@ if (domain.endswith("wavve.com")): # wavve: https://www.wavve.com/player/vod?pro
             "backdrop": f"https://{episode['thumbnail']}"
         }
 
-        episodeNumber = episodeNumber + 1
-            
+        episodeNumber = episodeNumber + 1 
 
 if (domain.endswith("youku.com")): # youku ex: https://v.youku.com/v_show/id_XNDAzNzE0Mzc2MA==.html
     logging.info("youku is detected")
-    options = webdriver.EdgeOptions()
-    # load user data
-    options.add_argument("user-data-dir=" + os.getcwd() + "\\Selenium") 
-
-    options.add_argument('--headless')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--mute-audio')
-    options.add_argument('log-level=3')
-    options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2})
-
-    driver = webdriver.Edge(options=options)
-
-    driver.get(url)
-    showid = re.search(r'showid_en:(.*?),', driver.page_source).group(1).replace('\'', '').strip()
-    driver.get(f"https://list.youku.com/show/module?id={showid}&tab=showInfo&callback=jQuery")
-    episodesURL = re.search(r'&lt;ul class(.*?)ul&gt;&lt;', driver.page_source).group(1)
-    #https://openapi.youku.com/v2/shows/videos.json?show_id=4e9f2bf1dca64a11a098&client_id=3d01f04416cbe807
+    episodeID =  re.search(r'id_(.*?)==', url).group(1)
+    apiRequest = f"https://api.youku.com/videos/show.json?video_id={episodeID}&ext=show&client_id=3d01f04416cbe807"
+    # https://list.youku.com/show/module?id={showid}&tab=showInfo&callback=jQuery
+    logging.info(f"API request url: {apiRequest}")
+    videoData = json.loads(urllib.request.urlopen(apiRequest).read().decode())
+    showID = videoData["show"]["id"]
+    page = 1
     episodeNumber = 1
-    for episode in re.findall(r'id_(.*?)==.html', episodesURL):
-        try:
-            apiRequest = f"https://api.youku.com/videos/show.json?video_id={episode}&client_id=3d01f04416cbe807"
-            logging.info(f"API request url: {apiRequest}")
-            videoData = json.loads(urllib.request.urlopen(apiRequest).read().decode())
+    total = 0
+    while True:
+        apiRequest = f"https://openapi.youku.com/v2/shows/videos.json?show_id={showID}&show_videotype=%E6%AD%A3%E7%89%87&page={page}&count=30&client_id=3d01f04416cbe807"
+        logging.info(f"API request url: {apiRequest}")
+        showData = json.loads(urllib.request.urlopen(apiRequest).read().decode())
+        if total == 0:
+            total = int(showData["total"])
+        
+        episodes = showData["videos"]
+        for episode in episodes:
+            episodeID = episode["id"].strip("==")
+            try:
+                apiRequest = f"https://api.youku.com/videos/show.json?video_id={episodeID}&client_id=3d01f04416cbe807"
+                logging.info(f"API request url: {apiRequest}")
+                videoData = json.loads(urllib.request.urlopen(apiRequest).read().decode())
 
-            thumbnailUrl = videoData["bigThumbnail"]
-            backdrop = thumbnailUrl[0:23] + "F" + thumbnailUrl[24:]
+                thumbnailUrl = videoData["bigThumbnail"]
+                backdrop = thumbnailUrl[0:23] + "F" + thumbnailUrl[24:]
 
-            importData[episodeNumber] = {
-                "episode_number": episodeNumber,
-                "name": "",
-                "air_date": videoData["published"].split(" ")[0],
-                "runtime": round(float(videoData["duration"])/60),
-                "overview": videoData["description"],
-                "backdrop": backdrop,
-            }
-            episodeNumber = episodeNumber + 1
-        except Exception as err:
-            logging.error(err)
+                importData[episodeNumber] = {
+                    "episode_number": episodeNumber,
+                    "name": "",
+                    "air_date": videoData["published"].split(" ")[0],
+                    "runtime": round(float(videoData["duration"])/60),
+                    "overview": videoData["description"],
+                    "backdrop": backdrop,
+                }
+                episodeNumber = episodeNumber + 1
+            except Exception as err:
+                logging.error(err)
+
+        if page * 30 > total:
+            break
+        else:
+            page = page + 1
 
 if (domain.endswith("qq.com")): # qq ex: https://v.qq.com/x/cover/mzc00200t0fg7k8/o0043eaefxx.html?ptag=douban.tv
     logging.info("qq is detected")
