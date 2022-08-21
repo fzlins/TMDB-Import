@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 from .version import script_name, __version__
-from .extractors import wavve
+from .extractor import *
 from .common import *
 
 _options = [
@@ -18,6 +18,8 @@ _short_options = 'hVf'
 _help = f"Usage: {script_name} [OPTION]... [URL]..."
 
 def main(**kwargs):
+    opts = {}
+    args = {}
     try:
         opts, args = getopt.getopt(sys.argv[1:], _short_options, _options)
     except getopt.GetoptError as e:
@@ -40,8 +42,7 @@ def main(**kwargs):
         
     if args:
         url = args[0]
-        if url.__contains__("www.wavve.com"):
-            create_csv("import.csv", wavve.wavve_extractor(url))
+        extract_from_url(url)
 
 if __name__ == '__main__':
     main()

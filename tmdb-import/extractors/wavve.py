@@ -1,12 +1,12 @@
 import json
-from ..extractor import Episode
 import urllib.request
 import logging
 import re
+from ..common import Episode
 
 # language: kr
 # backdrop: 1280*720
-# sample:"https://www.wavve.com/player/vod?programid=H04_SP0000054887&page=1"
+# Ex:"https://www.wavve.com/player/vod?programid=H04_SP0000054887&page=1"
 def wavve_extractor(url):
     logging.info("wavve_extractor is started")
     programid = re.search(r'programid=(.*?)[\&$]', str(url)).group(1)
