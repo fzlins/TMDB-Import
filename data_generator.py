@@ -181,7 +181,7 @@ if (domain.endswith("viki.com")): # viki ex: https://www.viki.com/tv/37350c-a-ma
                 "air_date": "",
                 "runtime": round(episode["duration"]/60),
                 "overview": "",
-                "backdrop": episode["images"]["poster"]["url"].rsplit('/', 1)[0] + '.jpg'
+                "backdrop": episode["images"]["poster"]["url"].split("?")[0].replace("/dummy.jpg", ".jpg")
             }
 
             if (importData[episode["number"]].__contains__(language)):
