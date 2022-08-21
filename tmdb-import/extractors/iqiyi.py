@@ -8,7 +8,7 @@ from ..common import Episode
 # language: zh
 # Ex:"https://www.iqiyi.com/v_ik3832z0go.html"
 def iqiyi_extractor(url):
-    logging.info("iqiyi_extractor is detected")
+    logging.info("iqiyi_extractor is called")
     webPage = urllib.request.urlopen(url).read()
     albumId = re.search(r'\"albumId\":(.*?),', str(webPage)).group(1)
     apiRequest = f"https://pcw-api.iqiyi.com/albums/album/avlistinfo?aid={albumId}&page=1&size=999&callback="

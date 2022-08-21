@@ -1,5 +1,6 @@
 import json
 import urllib.request
+from urllib.parse import urlparse
 import logging
 from ..common import Episode
 
@@ -7,6 +8,8 @@ from ..common import Episode
 # backdrop: 860*484
 # Ex:"https://w.mgtv.com/b/419629/17004788.html"
 def mgtv_extractor(url):
+    logging.info("mgtv_extractor is called")
+
     videoID =  url.rsplit('/', 1)[-1].split('.html')[0]
     apiRequest = f"https://pcweb.api.mgtv.com/episode/list?_support=10000000&version=5.5.35&video_id={videoID}&page=0&size=50&&callback="
     logging.info(f"API request url: {apiRequest}")
