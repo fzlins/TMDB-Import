@@ -14,6 +14,10 @@ class Episode:
         self.runtime = runtime
         self.overview = overview
         self.backdrop = backdrop
+        self.csv_header = ["episode_number", "name", "air_date", "runtime", "overview", "backdrop"]
+
+    def __iter__(self):
+        return iter([self.episode_number, self.name, self.air_date, self.runtime, self.overview, self.backdrop])
 
 class Season():
     def __init__(self, season_number, name="", overview="", episodes={}, poster="", crew={}, guest_stars={}):

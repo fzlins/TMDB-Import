@@ -9,10 +9,10 @@ import re
 # sample:"https://www.wavve.com/player/vod?programid=H04_SP0000054887&page=1"
 def wavve_extractor(url):
     logging.info("wavve_extractor is started")
-    programid = re.search(r'programid=(.*?)[&$]', str(url)).group(1)
+    programid = re.search(r'programid=(.*?)[\&$]', str(url)).group(1)
     apiRequest = f"https://apis.wavve.com/fz/vod/programs-contents/{programid}?limit=50&offset=0&orderby=old&apikey=E5F3E0D30947AA5440556471321BB6D9&credential=none&device=pc&drm=wm&partner=pooq&pooqzone=none&region=kor&targetage=all"
     logging.info(f"API request url: {apiRequest}")
-    sourceData = json.loads(urllib.request.urlopen(apiRequest).read().decode())
+    sourceData = json.loads(urllib.request.urlopen(apiRequest).read().decode('utf-8-sig'))
     episodes = {}
     episode_number = 1
     for episode in sourceData["cell_toplist"]["celllist"]:
@@ -21,7 +21,6 @@ def wavve_extractor(url):
         episode_runtime = round(int(episode["_playtime_log"].split(',')[0])/60)
         episode_overview = episode["synopsis"]
         episode_backdrop = f"https://{episode['thumbnail']}"
-
-        episodes[episode_number] = Episode(episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
+        episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
         episode_number = episode_number + 1 
     return episodes
