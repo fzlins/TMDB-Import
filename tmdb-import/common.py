@@ -40,3 +40,18 @@ def create_csv(filename, import_data = {}, encoding='utf-8-sig'):
         writer = csv.writer(csvfile)
         writer.writerow(list(import_data.values())[0].csv_header)
         writer.writerows(list(import_data.values()))
+
+from selenium import webdriver
+def ini_webdriver(headless=True, images = False):
+    options = webdriver.EdgeOptions()
+    if headless:
+        options.add_argument('--headless')
+    options.add_argument('--disable-gpu')
+    options.add_argument('log-level=3')
+    if images:
+        options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 1})
+    else:
+        options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2})
+
+    driver = webdriver.Edge(options=options)
+    return driver

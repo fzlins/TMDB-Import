@@ -2,38 +2,51 @@ from .common import *
 import logging
 
 def extract_from_url(url, language="zh-CN"):
+    from urllib.parse import urlparse
+    urlData = urlparse(url)
+    domain = urlData.netloc
+    
     episodes = {}
-    if url.__contains__(".bilibili.com/"):
+    if domain.endswith(".bilibili.com"):
         from .extractors import bilibili
         episodes = bilibili.bilibili_extractor(url)
-    elif url.__contains__(".disneyplus.com/"):
+    elif domain.endswith(".disneyplus.com"):
         from .extractors import disneyplus
         episodes = disneyplus.disneyplus_extractor(url=url, language=language)
-    elif url.__contains__(".iqiyi.com/"):
+    elif domain.__contains__("fod.fujitv."):
+        from .extractors import fod
+        episodes = fod.fod_extractor(url)
+    elif domain.endswith(".iqiyi.com"):
         from .extractors import iqiyi
         episodes = iqiyi.iqiyi_extractor(url)
-    elif url.__contains__(".kktv.me/"):
+    elif domain.endswith(".kktv.me"):
         from .extractors import kktv
         episodes = kktv.kktv_extractor(url)
-    elif url.__contains__(".mgtv.com/"):
+    elif domain.endswith(".mgtv.com"):
         from .extractors import mgtv
         episodes = mgtv.mgtv_extractor(url)
-    elif url.__contains__(".paravi.jp/"):
+    elif domain.endswith(".nhk.jp"):
+        from .extractors import nhk
+        episodes = nhk.nhk_extractor(url)
+    elif domain.endswith(".paravi.jp"):
         from .extractors import paravi
         episodes = paravi.paravi_extractor(url)
-    elif url.__contains__(".qq.com/"):
+    elif domain.__contains__(".amazon.") or domain.__contains__(".primevideo."):
+        from .extractors import primevideo
+        episodes = primevideo.primevideo_extractor(url)
+    elif domain.endswith(".qq.com"):
         from .extractors import qq
         episodes = qq.qq_extractor(url)
-    elif url.__contains__(".viki.com/"):
+    elif domain.endswith(".viki.com"):
         from .extractors import viki
         episodes = viki.viki_extractor(url)
-    elif url.__contains__(".viu.com/"):
+    elif domain.endswith(".viu.com"):
         from .extractors import viu
         episodes = viu.viu_extractor(url)
-    elif url.__contains__(".wavve.com/"):
+    elif domain.endswith(".wavve.com"):
         from .extractors import wavve
         episodes = wavve.wavve_extractor(url)
-    elif url.__contains__("youku.com"):
+    elif domain.endswith(".youku.com"):
         from .extractors import youku
         episodes = youku.youku_extractor(url)
 

@@ -15,7 +15,7 @@ def kktv_extractor(url):
     title = urlPath.rsplit('/', 1)[-1]
     apiRequest = f"https://api.kktv.me//api.kktv.me/v3/titles/{title}"
     logging.info(f"API request url: {apiRequest}")
-    soureData = json.loads(urllib.request.urlopen(apiRequest).read().decode())
+    soureData = json.loads(urllib.request.urlopen(apiRequest).read().decode('utf-8-sig'))
     episodes = {}
     episodeNumber = 1
     for episode in soureData["data"]["series"][0]["episodes"]:
