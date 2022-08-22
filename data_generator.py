@@ -386,7 +386,7 @@ if (domain.endswith("qq.com")): # qq ex: https://v.qq.com/x/cover/mzc00200t0fg7k
                     }
         count_episode = count_episode + 1
 
-if (domain.__contains__(".kktv.")): # kktv ex: https://www.kktv.me/titles/01000577
+if (domain.endswith(".kktv.me")): # kktv ex: https://www.kktv.me/titles/01000577
     logging.info("kktv is detected")
     title = urlPath.rsplit('/', 1)[-1]
     apiRequest = f"https://api.kktv.me//api.kktv.me/v3/titles/{title}"

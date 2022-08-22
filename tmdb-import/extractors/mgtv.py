@@ -1,6 +1,5 @@
 import json
 import urllib.request
-from urllib.parse import urlparse
 import logging
 from ..common import Episode
 
