@@ -34,9 +34,25 @@ class TV():
         self.overview = None
         self.poster = None
 
-def create_csv(filename, import_data = {}, encoding='utf-8-sig'):
+def remove_duplicate_overview(import_data):
+    overview_dict = {}
+    for value in import_data.values():
+        if value.overview != "":
+            if (value.overview in overview_dict.keys()):
+                overview_dict[value.overview] = overview_dict[value.overview] + 1
+            else:
+                overview_dict[value.overview] = 1
+                
+    for value in import_data.values():
+        if value.overview != "" and overview_dict[value.overview] > 1:
+            import_data[value.episode_number].overview = ""
+        
+    return import_data
+
+def create_csv(filename, import_data = {}, encoding='utf-8-sig'):    
+    import_data = remove_duplicate_overview(import_data)
     import csv
-    with open(filename, "w", newline='', encoding='utf-8-sig') as csvfile:
+    with open(filename, "w", newline='', encoding=encoding) as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(list(import_data.values())[0].csv_header)
         writer.writerows(list(import_data.values()))
