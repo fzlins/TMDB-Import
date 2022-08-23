@@ -6,11 +6,22 @@ from ..common import Episode
 # language: zh
 # backdrop: 860*484
 # Ex:"https://w.mgtv.com/b/419629/17004788.html"
+#    "https://www.mgtv.com/h/390933.html"
 def mgtv_extractor(url):
     logging.info("mgtv_extractor is called")
 
-    videoID =  url.rsplit('/', 1)[-1].split('.html')[0]
-    apiRequest = f"https://pcweb.api.mgtv.com/episode/list?_support=10000000&version=5.5.35&video_id={videoID}&page=0&size=50&&callback="
+    url = url.split('.html', 1)[0]
+    
+    collection_id = ""
+    for part in url.split('/'):
+        if (part.isdigit()):
+            collection_id = part
+            break
+    if collection_id == "":
+        return {} 
+    
+    apiRequest = f"https://pcweb.api.mgtv.com/episode/list?_support=10000000&version=5.5.35&collection_id={collection_id}&page=0&size=50&&callback="
+    #apiRequest = f"https://pcweb.api.mgtv.com/episode/list?_support=10000000&version=5.5.35&video_id={videoID}&page=0&size=50&&callback="
     logging.info(f"API request url: {apiRequest}")
     soureData = json.loads(urllib.request.urlopen(apiRequest).read().decode('utf-8-sig'))
     episodes = {}

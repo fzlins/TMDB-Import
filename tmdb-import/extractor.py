@@ -10,6 +10,9 @@ def extract_from_url(url, language="zh-CN"):
     if domain.endswith(".bilibili.com"):
         from .extractors import bilibili
         episodes = bilibili.bilibili_extractor(url)
+    if domain.endswith(".cctv.com"):
+        from .extractors import cctv
+        episodes = cctv.cctv_extractor(url)
     elif domain.endswith(".disneyplus.com"):
         from .extractors import disneyplus
         episodes = disneyplus.disneyplus_extractor(url=url, language=language)
@@ -25,6 +28,9 @@ def extract_from_url(url, language="zh-CN"):
     elif domain.endswith(".mgtv.com"):
         from .extractors import mgtv
         episodes = mgtv.mgtv_extractor(url)
+    elif url.__contains__("www.netflix.com"):
+        from .extractors import netflix
+        episodes = netflix.netflix_extractor(url)
     elif domain.endswith(".nhk.jp"):
         from .extractors import nhk
         episodes = nhk.nhk_extractor(url)

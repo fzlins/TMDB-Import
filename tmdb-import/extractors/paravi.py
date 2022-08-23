@@ -1,4 +1,3 @@
-from lib2to3.pgen2 import driver
 import logging
 import re
 from selenium.webdriver.common.by import By
@@ -17,10 +16,10 @@ def paravi_extractor(url):
     #source_data = WebDriverWait(driver, timeout=60).until(lambda d: d.find_elements(By.CSS_SELECTOR, value="div[class='card episode-card']"))
     driver.close()
 
-    episodeNumber = 1
+    episode_number = 1
     episodes = {}
     for episode in source_data:
-        episode_number = episodeNumber
+        episode_number = episode_number
         episode_name = episode.find_element(By.CSS_SELECTOR, value="h2[class='title'] p").text.split(" ", 1)[1]
         episode_air_date = ""
         episode_runtime = episode.find_element(By.CSS_SELECTOR, value="span[class='duration']").text
@@ -29,5 +28,5 @@ def paravi_extractor(url):
         episode_backdrop = re.search(r'url\(\"(.*?)\?', episode_backdrop).group(1)
         
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
-        episodeNumber = episodeNumber + 1
+        episode_number = episode_number + 1
     return episodes

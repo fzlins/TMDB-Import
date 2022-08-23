@@ -12,12 +12,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium import webdriver
 import csv
 import logging
-import re
 logging.basicConfig(filename='episodes-import.log', level=logging.INFO)
 
 tmdb_username = ""
 tmdb_password = ""
-tmdbID = 89542
+tmdbID = 206232
 seasonID = 1
 forced_upload = False
 thumbs_up = False
@@ -101,7 +100,7 @@ for episodeNumber in importData:
             updateEpisodeData["name"] = importData[episodeNumber]["name"]
             updateEpisode = True
 
-        if importData[episodeNumber].__contains__("overview") and len(importData[episodeNumber]["overview"]) > len(currentData[episodeNumber]["overview"]) + 50:
+        if importData[episodeNumber].__contains__("overview") and len(importData[episodeNumber]["overview"]) > len(currentData[episodeNumber]["overview"]) + 2:
             updateEpisodeData["overview"] = importData[episodeNumber]["overview"]
             updateEpisode = True
 
@@ -128,7 +127,7 @@ if len(createList) > 0:
             By.CSS_SELECTOR, value="a[class='k-button k-button-icontext k-grid-add']").click()
         episoideID = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element(
             By.ID, value="episode_number_numeric_text_box_field").get_attribute("value"))
-
+        time.sleep(1)
         if (int(episoideID) != int(episoideNumber)):
             episodeNumberField = driver.find_element(
                 By.ID, value="episode_number_numeric_text_box_field")
@@ -155,6 +154,7 @@ if len(createList) > 0:
                 By.ID, value="air_date_date_picker_field")
             airdate.clear()
             if createList[episoideNumber]['air_date'].lower() != "null":
+                print(createList[episoideNumber]['air_date'])
                 airdate.send_keys(createList[episoideNumber]['air_date'])
 
         driver.find_element(
@@ -219,6 +219,15 @@ else:
     for imageName in os.listdir(imageFolder):
         imagePath = os.path.join(imageFolder, imageName)
         os.remove(imagePath)
+
+if not forced_upload:
+    driver.get(f"https://www.themoviedb.org/tv/{tmdbID}/season/{seasonID}")
+    time.sleep(3)
+    for episoideNumber in importData:
+        if (importData[episoideNumber].__contains__("backdrop") and len(importData[episoideNumber]['backdrop']) > 0):
+            css_selector = f"div[class='image'] a[episode='{episoideNumber}'][season='{seasonID}'] img"
+            if len(driver.find_elements(By.CSS_SELECTOR, value=css_selector)) > 0:
+                importData[episoideNumber]['backdrop'] = ""
 
 for episoideNumber in importData:
     if (importData[episoideNumber].__contains__("backdrop") and len(importData[episoideNumber]['backdrop']) > 0):

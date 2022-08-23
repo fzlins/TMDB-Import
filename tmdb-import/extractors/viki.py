@@ -2,7 +2,6 @@ import json
 import urllib.request
 import logging
 from urllib.parse import urlparse
-from datetime import datetime
 from ..common import Episode
 
 
