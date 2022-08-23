@@ -1,3 +1,7 @@
+import configparser
+config = configparser.ConfigParser()
+config.read('config.ini')
+
 class Person:
     def __init__(self, *args):
         self.id = None
@@ -59,15 +63,31 @@ def create_csv(filename, import_data = {}, encoding='utf-8-sig'):
 
 from selenium import webdriver
 def ini_webdriver(headless=True, images = False):
-    options = webdriver.EdgeOptions()
-    if headless:
-        options.add_argument('--headless')
-    options.add_argument('--disable-gpu')
-    options.add_argument('log-level=3')
-    if images:
-        options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 1})
-    else:
-        options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2})
+    browser = config.get("DEFAULT","browser", fallback="edge")
+    if browser.lower() == "chrome":
+        options = webdriver.Chrome()
+        if headless:
+            options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+        options.add_argument('log-level=3')
+        options.add_argument("--autoplay-policy=no-user-gesture-required")
+        if images:
+            options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 1})
+        else:
+            options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2})
 
-    driver = webdriver.Edge(options=options)
+        driver = webdriver.Chrome(options=options)
+    else:
+        options = webdriver.EdgeOptions()
+        if headless:
+            options.add_argument('--headless')
+        options.add_argument('--disable-gpu')
+        options.add_argument('log-level=3')
+        options.add_argument("--autoplay-policy=no-user-gesture-required")
+        if images:
+            options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 1})
+        else:
+            options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2})
+
+        driver = webdriver.Edge(options=options)
     return driver
