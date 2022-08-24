@@ -272,7 +272,7 @@ for episoideNumber in importData:
             # Crop black border
             try:
                 tempImage = bordercrop.crop(
-                    image_path, 1, round(image.size[0]*0.9), 100)
+                    image_path, 1, round(image.size[1]), 100)
                 if (tempImage.size[0] < image.size[0]):
                     logging.info(
                         f"Original backdrop size: {image_widith} * {image_heigh}")
