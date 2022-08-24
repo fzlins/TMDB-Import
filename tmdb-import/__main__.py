@@ -5,6 +5,7 @@ import os
 import sys
 from .version import script_name, __version__
 from .extractor import *
+from .importor import *
 from .common import *
 
 _options = [
@@ -42,7 +43,10 @@ def main(**kwargs):
         
     if args:
         url = args[0]
-        extract_from_url(url)
+        if url.__contains__("www.themoviedb.org"):
+            import_from_url(url)
+        else:
+            extract_from_url(url)
 
 if __name__ == '__main__':
     main()
