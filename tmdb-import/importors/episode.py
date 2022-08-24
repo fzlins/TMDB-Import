@@ -10,12 +10,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 import logging
 from ..common import *
+logging.basicConfig(filename='tmdb-import.log', level=logging.INFO)
 
 def import_spisode(tmdb_id, season_number, language):
     tmdb_username = ""
     tmdb_password = ""
     forced_upload = False
-    thumbs_up = False
 
     # "zh-CN", "ja-JP", "en-US"
 
@@ -165,8 +165,7 @@ def import_spisode(tmdb_id, season_number, language):
 
         # Update air date
         if updateList[episoideNumber].__contains__("air_date"):
-            airDateField = WebDriverWait(driver, timeout=30).until(
-                lambda d: d.find_element(By.ID, value="air_date"))
+            airDateField = WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(By.ID, value="air_date"))
             if airDateField.get_attribute("disabled") != "true":
                 airDateField.clear()
                 if updateList[episoideNumber]["air_date"].lower() != "null":
@@ -230,13 +229,14 @@ def import_spisode(tmdb_id, season_number, language):
 
                 # Crop black border
                 try:
-                    tempImage = bordercrop.crop(
-                        image_path, 1, round(image.size[1]), 100)
-                    if (tempImage.size[0] < image.size[0]):
-                        logging.info(f"Original backdrop size: {image_widith} * {image_heigh}")
+                    
+                    tempImage = bordercrop.crop(image_path, 1, round(image.size[1]*0.99), 100)
+                    logging.info(tempImage.size[1])
+                    if (tempImage.size[0] < image.size[0] or tempImage.size[1] < image.size[1]):
+                        logging.info(f"Original backdrop size: {image.size[0]} * {image.size[1]}")
                         image = tempImage
-                except:
-                    pass
+                except Exception as err:
+                    logging.error(err)
 
                 image_widith, image_heigh = image.size
                 logging.info(f"Backdrop size: {image_widith} * {image_heigh}")

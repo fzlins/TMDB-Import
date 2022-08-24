@@ -1,5 +1,5 @@
 # TMDB-Import
-脚本仅支持edge和Chrome。将浏览器更新的最新版本，再到Selenium官网下载对应的浏览器驱动。  
+脚本仅支持edge和Chrome。将浏览器更新的最新版本，再到Selenium官网下载对应的浏览器驱动版本，放到目录下。
 下载地址：https://www.selenium.dev/documentation/webdriver/getting_started/install_drivers/  
 Edge为默认允许脚本的浏览器，如要使用Chrome允许脚本，在config.ini文件中，将browser的值改为chrome。
 
@@ -20,7 +20,7 @@ python -m tmdb-import "http://www.***.com/video.html"
 python -m tmdb-import "https://www.themoviedb.org/tv/{tv_id}/season/{season_number}?language={language}"
 # ex: -m tmdb-import "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
 ```
-- 导入目录下的import.csv文件里的数据到TMDB。上传背景图时，自动切除黑边和适配TMDB所要求的1.78比例。第一次运行需要在登陆界面手动登陆（或者在代码中填写实现自动登陆），forced_upload（值为True时，在允许在TMDB已有背景图片的情况下继续上传），thumbs_up(值为True时，给最自己最后上传的图片点赞)
+- 导入目录下的import.csv文件里的数据到TMDB。上传背景图时，自动切除黑边和适配TMDB所要求的1.78比例。第一次运行需要在登陆界面手动登陆（或者在代码中填写实现自动登陆），forced_upload（值为True时，在允许在TMDB已有背景图片的情况下继续上传）
 
 # 测试环境
 Window11、Edge、Python3和Vistual Studio Code。
