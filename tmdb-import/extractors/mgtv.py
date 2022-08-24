@@ -1,7 +1,6 @@
 import json
-import urllib.request
 import logging
-from ..common import Episode
+from ..common import Episode, open_url
 
 # language: zh
 # backdrop: 860*484
@@ -23,7 +22,7 @@ def mgtv_extractor(url):
     apiRequest = f"https://pcweb.api.mgtv.com/episode/list?_support=10000000&version=5.5.35&collection_id={collection_id}&page=0&size=50&&callback="
     #apiRequest = f"https://pcweb.api.mgtv.com/episode/list?_support=10000000&version=5.5.35&video_id={videoID}&page=0&size=50&&callback="
     logging.info(f"API request url: {apiRequest}")
-    soureData = json.loads(urllib.request.urlopen(apiRequest).read().decode('utf-8-sig'))
+    soureData = json.loads(open_url(apiRequest))
     episodes = {}
     for episode in soureData["data"]["list"]:
         if episode["isIntact"] == "1":

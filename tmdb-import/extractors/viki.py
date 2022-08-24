@@ -1,8 +1,7 @@
 import json
-import urllib.request
 import logging
 from urllib.parse import urlparse
-from ..common import Episode
+from ..common import Episode, open_url
 
 
 # ex: https://www.viki.com/tv/37350c-a-man-in-a-veil
@@ -22,7 +21,7 @@ def viki_extractor(url, language="en-US"):
     while True:
         apiRequest = f"https://api.viki.io/v4/containers/{containerID}/episodes.json?token=undefined&per_page=50&page={page}&direction=asc&sort=number&app=100000a"
         logging.info(f"API request url: {apiRequest}")
-        soureData = json.loads(urllib.request.urlopen(apiRequest, timeout=30).read().decode('utf-8-sig'))
+        soureData = json.loads(open_url(apiRequest))
         for episode in soureData["response"]:
             episode_number = episode["number"]
             episode_name = ""

@@ -1,9 +1,8 @@
 import json
-import urllib.request
 from urllib.parse import urlparse
 import logging
 from datetime import datetime
-from ..common import Episode
+from ..common import Episode, open_url
 
 # ex: https://www.kktv.me/titles/01000577
 def kktv_extractor(url):
@@ -15,7 +14,7 @@ def kktv_extractor(url):
     title = urlPath.rsplit('/', 1)[-1]
     apiRequest = f"https://api.kktv.me//api.kktv.me/v3/titles/{title}"
     logging.info(f"API request url: {apiRequest}")
-    soureData = json.loads(urllib.request.urlopen(apiRequest).read().decode('utf-8-sig'))
+    soureData = json.loads(open_url(apiRequest))
     episodes = {}
     episodeNumber = 1
     for episode in soureData["data"]["series"][0]["episodes"]:

@@ -1,8 +1,7 @@
 import json
-import urllib.request
 from urllib.parse import urlparse
 import logging
-from ..common import Episode
+from ..common import Episode, open_url
 
 # ex: https://www.disneyplus.com/zh-hans/series/big-mouth/7kIy3S1m2HNY
 def disneyplus_extractor(url, language="zh-CN"): 
@@ -18,7 +17,7 @@ def disneyplus_extractor(url, language="zh-CN"):
     seriesID = urlPath.rsplit("/", 1)[-1]
     apiRequest = f"https://disney.content.edge.bamgrid.com/svc/content/DmcSeriesBundle/version/5.1/region/SG/audience/false/maturity/1850/language/{language}/encodedSeriesId/{seriesID}"
     logging.info(f"API request url: {apiRequest}")
-    soureData = json.loads(urllib.request.urlopen(apiRequest).read().decode('utf-8-sig'))
+    soureData = json.loads(open_url(apiRequest))
     episodes = {}
     for episode in soureData["data"]["DmcSeriesBundle"]["episodes"]["videos"]:
         episode_number = episode["episodeSequenceNumber"]

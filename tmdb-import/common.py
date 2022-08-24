@@ -53,7 +53,8 @@ def remove_duplicate_overview(import_data):
         
     return import_data
 
-def create_csv(filename, import_data = {}, encoding='utf-8-sig'):    
+def create_csv(filename, import_data = {}):
+    encoding = config.get("DEFAULT","encoding", fallback="utf-8-sig")
     import_data = remove_duplicate_overview(import_data)
     import csv
     with open(filename, "w", newline='', encoding=encoding) as csvfile:
@@ -61,8 +62,8 @@ def create_csv(filename, import_data = {}, encoding='utf-8-sig'):
         writer.writerow(list(import_data.values())[0].csv_header)
         writer.writerows(list(import_data.values()))
 
-from selenium import webdriver
 def ini_webdriver(headless=True, images = False):
+    from selenium import webdriver
     browser = config.get("DEFAULT","browser", fallback="edge")
     if browser.lower() == "chrome":
         options = webdriver.Chrome()
@@ -91,3 +92,8 @@ def ini_webdriver(headless=True, images = False):
 
         driver = webdriver.Edge(options=options)
     return driver
+
+def open_url(url):
+    encoding = config.get("DEFAULT","encoding", fallback="utf-8-sig")
+    import urllib.request
+    return urllib.request.urlopen(url, timeout=30).read().decode(encoding)

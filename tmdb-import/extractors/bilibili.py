@@ -1,9 +1,8 @@
 import json
-import urllib.request
 from urllib.parse import urlparse
 import logging
 from datetime import datetime
-from ..common import Episode
+from ..common import Episode, open_url
 
 # ex: https://www.bilibili.com/bangumi/media/md28234541
 def bilibili_extractor(url):
@@ -15,12 +14,12 @@ def bilibili_extractor(url):
     mediaID = ''.join(filter(str.isdigit, urlPath))
     apiRequest = f"https://api.bilibili.com/pgc/review/user?media_id={mediaID}"
     logging.info(f"API request url: {apiRequest}")
-    mediaData = json.loads(urllib.request.urlopen(apiRequest).read().decode('utf-8-sig'))
+    mediaData = json.loads(open_url(apiRequest))
     
     seasonID = mediaData["result"]["media"]["season_id"]
     apiRequest = f"https://api.bilibili.com/pgc/view/web/season?season_id={seasonID}"
     logging.info(f"API request url: {apiRequest}")
-    soureData = json.loads(urllib.request.urlopen(apiRequest).read().decode('utf-8-sig'))
+    soureData = json.loads(open_url(apiRequest))
     episodes = {}
     for episode in soureData["result"]["episodes"]:
         episode_number = episode["title"]

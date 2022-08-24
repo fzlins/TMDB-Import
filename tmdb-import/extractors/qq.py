@@ -1,8 +1,7 @@
 import json
-import urllib.request
 import logging
 import re
-from ..common import Episode
+from ..common import Episode, open_url
 
 # ex: https://v.qq.com/x/cover/mzc00200t0fg7k8/o0043eaefxx.html?ptag=douban.tv
 def qq_extractor(url):
@@ -10,7 +9,7 @@ def qq_extractor(url):
     cid = re.search(r'/cover/(.*?)/', url).group(1)
     apiRequest = f"https://access.video.qq.com/fcgi/PlayVidListReq?raw=1&vappid=17174171&vsecret=a06edbd9da3f08db096edab821b3acf3c27ee46e6d57c2fa&page_size=100&type=4&cid={cid}"
     logging.info(f"API request url: {apiRequest}")
-    soureData = json.loads(urllib.request.urlopen(apiRequest).read().decode('utf-8-sig'))
+    soureData = json.loads(open_url(apiRequest))
     
     episodes = {}
     total_vid = soureData["data"]["total_vid"]
@@ -26,7 +25,7 @@ def qq_extractor(url):
         if count_episode % page_size == 0 or count_episode == total_vid:
             apiRequest = f"https://union.video.qq.com/fcgi-bin/data?otype=json&tid=682&appid=20001238&appkey=6c03bbe9658448a4&idlist={idlist}&callback="
             logging.info(f"API request url: {apiRequest}")
-            videoData = json.loads(urllib.request.urlopen(apiRequest).read().decode('utf-8-sig').lstrip("QZOutputJson=").rstrip(";"))
+            videoData = json.loads(open_url(apiRequest).lstrip("QZOutputJson=").rstrip(";"))
             for episodeDate in videoData["results"]:
                 # skip previews
                 if (episodeDate["fields"]["category_map"][1] == "正片"):

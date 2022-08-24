@@ -1,8 +1,7 @@
 import json
-import urllib.request
 import logging
 import re
-from ..common import Episode
+from ..common import Episode, open_url
 
 # language: kr
 # backdrop: 1280*720
@@ -12,7 +11,7 @@ def wavve_extractor(url):
     programid = re.search(r'programid=(.*?)[\&$]', str(url)).group(1)
     apiRequest = f"https://apis.wavve.com/fz/vod/programs-contents/{programid}?limit=50&offset=0&orderby=old&apikey=E5F3E0D30947AA5440556471321BB6D9&credential=none&device=pc&drm=wm&partner=pooq&pooqzone=none&region=kor&targetage=all"
     logging.info(f"API request url: {apiRequest}")
-    sourceData = json.loads(urllib.request.urlopen(apiRequest).read().decode('utf-8-sig'))
+    sourceData = json.loads(open_url(apiRequest))
     episodes = {}
     episode_number = 1
     for episode in sourceData["cell_toplist"]["celllist"]:

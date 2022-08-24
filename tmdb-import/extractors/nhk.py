@@ -1,8 +1,7 @@
 import json
-import urllib.request
 from urllib.parse import urlparse
 import logging
-from ..common import Episode
+from ..common import Episode, open_url
 
 # ex: https://www.nhk.jp/p/comecome/ts/8PMRWK3MGZ
 def nhk_extractor(url):
@@ -17,7 +16,7 @@ def nhk_extractor(url):
     episodes = {}
     episodeNumber = 1
     while True:
-        soureData = json.loads(urllib.request.urlopen(nextURL).read().decode('utf-8-sig'))
+        soureData = json.loads(open_url(nextURL))
         for episode in soureData["result"]:
             episode_number = episodeNumber
             episode_name = episode["name"]

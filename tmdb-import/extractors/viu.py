@@ -1,8 +1,7 @@
 import json
-import urllib.request
 from urllib.parse import urlparse
 import logging
-from ..common import Episode
+from ..common import Episode, open_url
 from datetime import datetime
 
 # language: zh-CN
@@ -17,7 +16,7 @@ def viu_extractor(url):
     product_id =  urlPath.rsplit('/', 1)[-1]
     apiRequest = f"https://www.viu.com/ott/sg/index.php?area_id=2&language_flag_id=2&r=vod/ajax-detail&platform_flag_label=web&product_id={product_id}"
     logging.info(f"API request url: {apiRequest}")
-    soureData = json.loads(urllib.request.urlopen(apiRequest).read().decode('utf-8-sig'))
+    soureData = json.loads(open_url(apiRequest))
     series = soureData["data"]["series"]
     season_number = 1
     season_name = series["name"]
@@ -27,7 +26,7 @@ def viu_extractor(url):
     for episode in series["product"][::-1]:
         apiRequest = f"https://www.viu.com/ott/sg/index.php?area_id=2&language_flag_id=2&r=vod/ajax-detail&platform_flag_label=web&product_id={episode['product_id']}"
         logging.info(f"API request url: {apiRequest}")
-        soureData = json.loads(urllib.request.urlopen(apiRequest).read().decode('utf-8-sig'))
+        soureData = json.loads(open_url(apiRequest))
         current_product = soureData["data"]["current_product"]
         episode_number = current_product["number"]
         episode_name = current_product["synopsis"]

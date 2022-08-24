@@ -2,8 +2,7 @@ import json
 import urllib.request
 from urllib.parse import urlparse
 import logging
-from ..common import Episode
-from ..common import ini_webdriver
+from ..common import Episode, ini_webdriver, open_url
 
 # ex: https://fod.fujitv.co.jp/title/4v97/
 def fod_extractor(url):
@@ -20,8 +19,8 @@ def fod_extractor(url):
     userAgent = driver.execute_script("return navigator.userAgent")
     driver.close()
 
-    req = urllib.request.Request(f"https://i.fod.fujitv.co.jp/apps/api/lineup/detail/?lu_id={seriesID}&is_premium=false&dv_type=web", headers={'x-authorization': f'Bearer {token}', 'User-Agent' : f'{userAgent}'})
-    soureData = json.loads(urllib.request.urlopen(req).read().decode('utf-8-sig'))
+    apiRequest = urllib.request.Request(f"https://i.fod.fujitv.co.jp/apps/api/lineup/detail/?lu_id={seriesID}&is_premium=false&dv_type=web", headers={'x-authorization': f'Bearer {token}', 'User-Agent' : f'{userAgent}'})
+    soureData = json.loads(open_url(apiRequest))
     
     episodes = {}
     episodeNumber = 1
