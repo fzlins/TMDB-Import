@@ -21,7 +21,12 @@ def iqiyi_extractor(url):
         episode_number = episode["order"]
         episode_name = episode["subtitle"]
         episode_air_date = datetime.fromtimestamp(episode["publishTime"]/1000).date()
-        episode_runtime = episode["duration"].split(':')[0]
+        duration = episode["duration"].split(':')
+        episode_runtime = ""
+        if len(duration) == 3:
+            episode_runtime = str(int(duration[0]) * 60 + int(duration[1]))
+        elif len(duration) == 2:
+            episode_runtime = duration[0] 
         episode_overview = episode["description"]
         episode_backdrop = episode["imageUrl"]
 

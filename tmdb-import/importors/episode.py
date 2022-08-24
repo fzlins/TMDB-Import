@@ -8,36 +8,25 @@ from dateutil import parser
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium import webdriver
-import csv
 import logging
+from ..common import *
 
-def import_spisode(tmdb_id, season_number):
+def import_spisode(tmdb_id, season_number, language):
     tmdb_username = ""
     tmdb_password = ""
     forced_upload = False
     thumbs_up = False
 
     # "zh-CN", "ja-JP", "en-US"
-    language = "zh-CN"
 
     currentData = {}
-    importData = {}
+    importData = read_csv("import.csv")
 
-    with open('import.csv', newline='', encoding='utf-8-sig') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            importData[row['episode_number'].strip()] = row
+    if language == "":
+        print("Missing language parameter.")
+        return 
 
-    options = webdriver.EdgeOptions()
-
-    # load preview selenium user data
-    options.add_argument("user-data-dir=" + os.getcwd() + "\\Selenium")
-    options.add_argument('--disable-gpu')
-    options.add_argument('log-level=3')
-    options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 1})
-
-    driver = webdriver.Edge(options=options)
+    driver = ini_webdriver(headless=False, save_user_profile=True, images=True)
 
     # login
     try:
@@ -52,7 +41,7 @@ def import_spisode(tmdb_id, season_number):
             driver.find_element(By.ID, value="login_button").click()
         else:
             # manual login
-            WebDriverWait(driver, timeout=60).until(lambda d: d.find_element(By.CSS_SELECTOR, value="li[class='user']"))
+            WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(By.CSS_SELECTOR, value="li[class='user']"))
     except:
         print('User is logged')
 
@@ -115,7 +104,7 @@ def import_spisode(tmdb_id, season_number):
             WebDriverWait(driver, 60).until_not(EC.presence_of_element_located((By.CSS_SELECTOR, "a[class='k-button k-button-icontext k-primary k-grid-update']")))
             time.sleep(1)
             driver.find_element(By.CSS_SELECTOR, value="a[class='k-button k-button-icontext k-grid-add']").click()
-            episoideID = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element(By.ID, value="episode_number_numeric_text_box_field").get_attribute("value"))
+            episoideID = WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(By.ID, value="episode_number_numeric_text_box_field").get_attribute("value"))
             time.sleep(1)
             if (int(episoideID) != int(episoideNumber)):
                 episodeNumberField = driver.find_element(By.ID, value="episode_number_numeric_text_box_field")
@@ -138,7 +127,6 @@ def import_spisode(tmdb_id, season_number):
                 airdate = driver.find_element(By.ID, value="air_date_date_picker_field")
                 airdate.clear()
                 if createList[episoideNumber]['air_date'].lower() != "null":
-                    print(createList[episoideNumber]['air_date'])
                     airdate.send_keys(createList[episoideNumber]['air_date'])
 
             driver.find_element(By.CSS_SELECTOR, value="a[class='k-button k-button-icontext k-primary k-grid-update']").click()
@@ -151,7 +139,7 @@ def import_spisode(tmdb_id, season_number):
         # update name
         if updateList[episoideNumber].__contains__("name"):
             nameInputID = f"{language}_name".replace('-', '_')
-            nameInput = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element(By.ID, value=nameInputID))
+            nameInput = WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(By.ID, value=nameInputID))
             if nameInput.get_attribute("disabled") != "true":
                 nameInput.clear()
                 if updateList[episoideNumber]["name"] != "null":
@@ -190,8 +178,7 @@ def import_spisode(tmdb_id, season_number):
             time.sleep(1)
 
     # Processing backdrop images
-    from pathlib import Path
-    image_folder = Path.joinpath(Path(__file__).absolute().parent.parent.parent, "Image")
+    image_folder = os.path.join(os.getcwd(), "Image")
     if not os.path.exists(image_folder):
         os.makedirs(image_folder)
     else:
@@ -214,12 +201,10 @@ def import_spisode(tmdb_id, season_number):
                 # download backdrop
                 urlData = urlparse(importData[episoideNumber]['backdrop'])
                 fileName = f"{tmdb_id}_{season_number}_{episoideNumber}.jpg"
-                image_path = Path.joinpath(image_folder, fileName)
+                image_path = os.path.join(image_folder, fileName)
                 if urlData.query.__contains__('imageWidth') and urlData.query.__contains__('imageHeight'):
-                    backdrop_url = importData[episoideNumber]['backdrop'].split('?')[
-                        0]
-                    new_backdrop_url = backdrop_url.replace(
-                        "imageWidth", "0").replace("imageHeight", "0")
+                    backdrop_url = importData[episoideNumber]['backdrop'].split('?')[0]
+                    new_backdrop_url = backdrop_url.replace("imageWidth", "0").replace("imageHeight", "0")
                     try:
                         urllib.request.urlretrieve(new_backdrop_url, image_path)
                     except:
@@ -292,19 +277,6 @@ def import_spisode(tmdb_id, season_number):
                 time.sleep(10)
 
                 # thumbs up upload backdrop
-                if (thumbs_up):
-                    driver.get(f"https://www.themoviedb.org/tv/{tmdb_id}/season/{season_number}/episode/{episoideNumber}/images/backdrops?image_language=xx")
-                    
-                    user_link = driver.find_element(By.CSS_SELECTOR, value="class='rounded logged_in'").get_attribute("href")
-
-                    backdrop_id = ""
-                    for card_compact in driver.find_elements(By.CSS_SELECTOR, value="li[class='card compact']"):
-                        if card_compact.find_element(By.CSS_SELECTOR, value=f"a[href='{user_link}']") and card_compact.get_attribute("id") > backdrop_id:
-                            backdrop_id = card_compact.get_attribute("id")
-
-                    if backdrop_id != "":
-                        driver.find_element(By.CSS_SELECTOR, value=f"a[id='{backdrop_id}'][class='thumbs_up']").click()
-
             except Exception as e:
                 logging.error(
                     f"Download/upload backdrop error for: {importData[episoideNumber]['backdrop']}.", exc_info=e)
