@@ -7,10 +7,13 @@ def extract_from_url(url, language="zh-CN"):
     domain = urlData.netloc
     
     episodes = {}
-    if domain.endswith(".bilibili.com"):
+    if domain.endswith("anidb.net"):
+        from .extractors import anidb
+        episodes = anidb.anidb_extractor(url)
+    elif domain.endswith(".bilibili.com"):
         from .extractors import bilibili
         episodes = bilibili.bilibili_extractor(url)
-    if domain.endswith(".cctv.com"):
+    elif domain.endswith(".cctv.com"):
         from .extractors import cctv
         episodes = cctv.cctv_extractor(url)
     elif domain.endswith(".disneyplus.com"):
@@ -55,6 +58,9 @@ def extract_from_url(url, language="zh-CN"):
     elif domain.endswith(".youku.com"):
         from .extractors import youku
         episodes = youku.youku_extractor(url)
+    else:
+        logging.info(f"Do not support {domain}")
+        return
 
     if len(episodes) > 0:
         create_csv("import.csv", episodes)
