@@ -3,6 +3,19 @@ import os
 config = configparser.ConfigParser()
 config.read('config.ini')
 
+import logging
+
+def setup_custom_logger(name):
+    formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
+
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.INFO)
+    logger.addHandler(handler)
+    return logger
+
 class Person:
     def __init__(self, *args):
         self.id = None
@@ -92,6 +105,9 @@ def read_csv(filename):
     return importData
 
 def ini_webdriver(headless=True, save_user_profile = False, images = False):
+    from selenium.webdriver.remote.remote_connection import LOGGER
+    LOGGER.setLevel(logging.WARNING)
+
     from selenium import webdriver
     browser = config.get("DEFAULT","browser", fallback="edge")
     if browser.lower() == "chrome":
@@ -102,7 +118,6 @@ def ini_webdriver(headless=True, save_user_profile = False, images = False):
             user_date_dir = os.path.join(os.getcwd(), "Selenium")
             options.add_argument("user-data-dir=" + user_date_dir)
         options.add_argument('--disable-gpu')
-        options.add_argument('log-level=3')
         options.add_argument("--autoplay-policy=no-user-gesture-required")
         if images:
             options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 1})
@@ -118,7 +133,6 @@ def ini_webdriver(headless=True, save_user_profile = False, images = False):
             user_date_dir = os.path.join(os.getcwd(), "Selenium")
             options.add_argument("user-data-dir=" + user_date_dir)
         options.add_argument('--disable-gpu')
-        options.add_argument('log-level=3')
         options.add_argument("--autoplay-policy=no-user-gesture-required")
         if images:
             options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 1})

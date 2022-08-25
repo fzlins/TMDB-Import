@@ -11,12 +11,12 @@ def cctv_extractor(url):
     guid = re.search(r'guid_Ad_VideoCode(.*?);', str(webPage)).group(1)
     guid = guid.replace('=', "").strip().strip('\"')
     apiRequest = f"https://api.cntv.cn/video/videoinfoByGuid?serviceId=cctv4k&guid={guid}&t=jsonp&cb=Callback"
-    logging.info(f"API request url: {apiRequest}")
+    logging.debug(f"API request url: {apiRequest}")
     webPage = open_url(apiRequest)
     albumId = re.search(r'\"album_ids\":(.*?),', str(webPage)).group(1)
     albumId = albumId.strip('\"')
     apiRequest = f"https://api.cntv.cn/NewVideo/getVideoListByAlbumIdNew?id={albumId}&serviceId=cctv4k&p=1&n=100&sort=asc&mode=0&pub=2&cb="
-    logging.info(f"API request url: {apiRequest}")
+    logging.debug(f"API request url: {apiRequest}")
     soureData = json.loads(open_url(apiRequest))
     episodes = {}
     episodeNumber = 1

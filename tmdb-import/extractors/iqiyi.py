@@ -13,8 +13,21 @@ def iqiyi_extractor(url):
         albumId = re.search(r'movlibalbumaid=\"(.*?)\"', str(webPage)).group(1)
     else:
         albumId = re.search(r'\"albumId\":(.*?),', str(webPage)).group(1)
+    logging.info(f"album_id: {albumId}")
+    apiRequest = f"https://pcw-api.iqiyi.com/album/album/baseinfo/{albumId}"
+    logging.debug(f"API request: {apiRequest}")
+    soureData = json.loads(open_url(apiRequest))
+    album_url = soureData["data"]["url"]
+    logging.info(f"album_url: {album_url}")
+    name = soureData["data"]["name"]
+    logging.info(f"name: {name}")
+    cover = soureData["data"]["imageUrl"]
+    logging.info(f"Image: {cover}")
+    description = soureData["data"]["description"]
+    logging.info(f"description: {description}")
+
     apiRequest = f"https://pcw-api.iqiyi.com/albums/album/avlistinfo?aid={albumId}&page=1&size=999&callback="
-    logging.info(f"API request url: {apiRequest}")
+    logging.debug(f"API request url: {apiRequest}")
     soureData = json.loads(open_url(apiRequest))
     episodes = {}
     for episode in soureData["data"]["epsodelist"]:

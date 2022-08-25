@@ -20,7 +20,7 @@ def viki_extractor(url, language="en-US"):
     episodes = {}
     while True:
         apiRequest = f"https://api.viki.io/v4/containers/{containerID}/episodes.json?token=undefined&per_page=50&page={page}&direction=asc&sort=number&app=100000a"
-        logging.info(f"API request url: {apiRequest}")
+        logging.debug(f"API request url: {apiRequest}")
         soureData = json.loads(open_url(apiRequest))
         for episode in soureData["response"]:
             episode_number = episode["number"]

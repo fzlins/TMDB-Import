@@ -1,7 +1,7 @@
 # TMDB-Import
-脚本仅支持edge和Chrome。将浏览器更新的最新版本，再到Selenium官网下载对应的浏览器驱动版本，放到目录下。
+脚本仅支持edge和Chrome。将浏览器更新的最新版本，再到Selenium官网下载对应浏览器版本的驱动，解压后将exe文件放到目录下。
 下载地址：https://www.selenium.dev/documentation/webdriver/getting_started/install_drivers/  
-Edge为默认允许脚本的浏览器，如要使用Chrome允许脚本，在config.ini文件中，将browser的值改为chrome。
+Edge为默认的脚本浏览器。如果想使用Chrome运行脚本，在config.ini文件中，将browser的值改为chrome。
 
 # Required packages
 ```

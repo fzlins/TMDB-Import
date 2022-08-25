@@ -8,7 +8,7 @@ def qq_extractor(url):
     logging.info("qq_extractor is called")
     cid = re.search(r'/cover/(.*?)/', url).group(1)
     apiRequest = f"https://access.video.qq.com/fcgi/PlayVidListReq?raw=1&vappid=17174171&vsecret=a06edbd9da3f08db096edab821b3acf3c27ee46e6d57c2fa&page_size=100&type=4&cid={cid}"
-    logging.info(f"API request url: {apiRequest}")
+    logging.debug(f"API request url: {apiRequest}")
     soureData = json.loads(open_url(apiRequest))
     
     episodes = {}
@@ -24,7 +24,7 @@ def qq_extractor(url):
 
         if count_episode % page_size == 0 or count_episode == total_vid:
             apiRequest = f"https://union.video.qq.com/fcgi-bin/data?otype=json&tid=682&appid=20001238&appkey=6c03bbe9658448a4&idlist={idlist}&callback="
-            logging.info(f"API request url: {apiRequest}")
+            logging.debug(f"API request url: {apiRequest}")
             videoData = json.loads(open_url(apiRequest).lstrip("QZOutputJson=").rstrip(";"))
             for episodeDate in videoData["results"]:
                 # skip previews

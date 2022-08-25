@@ -21,7 +21,7 @@ def mgtv_extractor(url):
     
     apiRequest = f"https://pcweb.api.mgtv.com/episode/list?_support=10000000&version=5.5.35&collection_id={collection_id}&page=0&size=50&&callback="
     #apiRequest = f"https://pcweb.api.mgtv.com/episode/list?_support=10000000&version=5.5.35&video_id={videoID}&page=0&size=50&&callback="
-    logging.info(f"API request url: {apiRequest}")
+    logging.debug(f"API request url: {apiRequest}")
     soureData = json.loads(open_url(apiRequest))
     episodes = {}
     for episode in soureData["data"]["list"]:

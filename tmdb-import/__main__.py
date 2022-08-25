@@ -6,7 +6,9 @@ import sys
 from .version import script_name, __version__
 from .extractor import *
 from .importor import *
-from .common import *
+from .common import setup_custom_logger
+
+setup_custom_logger('root')
 
 _options = [
     'help',
@@ -19,6 +21,7 @@ _short_options = 'hVf'
 _help = f"Usage: {script_name} [OPTION]... [URL]..."
 
 def main(**kwargs):
+    logging.debug(f'Welcome to {script_name}')
     opts = {}
     args = {}
     try:

@@ -16,7 +16,7 @@ def disneyplus_extractor(url, language="zh-CN"):
     urlPath = urlData.path.strip('/')
     seriesID = urlPath.rsplit("/", 1)[-1]
     apiRequest = f"https://disney.content.edge.bamgrid.com/svc/content/DmcSeriesBundle/version/5.1/region/SG/audience/false/maturity/1850/language/{language}/encodedSeriesId/{seriesID}"
-    logging.info(f"API request url: {apiRequest}")
+    logging.debug(f"API request url: {apiRequest}")
     soureData = json.loads(open_url(apiRequest))
     episodes = {}
     for episode in soureData["data"]["DmcSeriesBundle"]["episodes"]["videos"]:

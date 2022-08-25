@@ -13,12 +13,12 @@ def bilibili_extractor(url):
 
     mediaID = ''.join(filter(str.isdigit, urlPath))
     apiRequest = f"https://api.bilibili.com/pgc/review/user?media_id={mediaID}"
-    logging.info(f"API request url: {apiRequest}")
+    logging.debug(f"API request url: {apiRequest}")
     mediaData = json.loads(open_url(apiRequest))
     
     seasonID = mediaData["result"]["media"]["season_id"]
     apiRequest = f"https://api.bilibili.com/pgc/view/web/season?season_id={seasonID}"
-    logging.info(f"API request url: {apiRequest}")
+    logging.debug(f"API request url: {apiRequest}")
     soureData = json.loads(open_url(apiRequest))
     episodes = {}
     for episode in soureData["result"]["episodes"]:

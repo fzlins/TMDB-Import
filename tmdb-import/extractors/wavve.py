@@ -10,7 +10,7 @@ def wavve_extractor(url):
     logging.info("wavve_extractor is called")
     programid = re.search(r'programid=(.*?)[\&$]', str(url)).group(1)
     apiRequest = f"https://apis.wavve.com/fz/vod/programs-contents/{programid}?limit=50&offset=0&orderby=old&apikey=E5F3E0D30947AA5440556471321BB6D9&credential=none&device=pc&drm=wm&partner=pooq&pooqzone=none&region=kor&targetage=all"
-    logging.info(f"API request url: {apiRequest}")
+    logging.debug(f"API request url: {apiRequest}")
     sourceData = json.loads(open_url(apiRequest))
     episodes = {}
     episode_number = 1

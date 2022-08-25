@@ -9,7 +9,7 @@ def youku_extractor(url):
     episodeID =  re.search(r'id_(.*?)\.html', url).group(1).rstrip("==")
     apiRequest = f"https://api.youku.com/videos/show.json?video_id={episodeID}&ext=show&client_id=3d01f04416cbe807"
     # https://list.youku.com/show/module?id={showid}&tab=showInfo&callback=jQuery
-    logging.info(f"API request url: {apiRequest}")
+    logging.debug(f"API request url: {apiRequest}")
     videoData = json.loads(open_url(apiRequest))
     showID = videoData["show"]["id"]
     page = 1
@@ -18,7 +18,7 @@ def youku_extractor(url):
     episodes =  {}
     while True:
         apiRequest = f"https://openapi.youku.com/v2/shows/videos.json?show_id={showID}&show_videotype=%E6%AD%A3%E7%89%87&page={page}&count=30&client_id=3d01f04416cbe807"
-        logging.info(f"API request url: {apiRequest}")
+        logging.debug(f"API request url: {apiRequest}")
         showData = json.loads(open_url(apiRequest))
         if total == 0:
             total = int(showData["total"])
@@ -27,7 +27,7 @@ def youku_extractor(url):
             episodeID = episode["id"].strip("==")
             try:
                 apiRequest = f"https://api.youku.com/videos/show.json?video_id={episodeID}&client_id=3d01f04416cbe807"
-                logging.info(f"API request url: {apiRequest}")
+                logging.debug(f"API request url: {apiRequest}")
                 videoData = json.loads(open_url(apiRequest))
 
                 episode_number = episodeNumber

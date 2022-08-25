@@ -10,7 +10,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 import logging
 from ..common import *
-logging.basicConfig(filename='tmdb-import.log', level=logging.INFO)
 
 def import_spisode(tmdb_id, season_number, language):
     tmdb_username = ""
@@ -200,6 +199,7 @@ def import_spisode(tmdb_id, season_number, language):
                 # download backdrop
                 urlData = urlparse(importData[episoideNumber]['backdrop'])
                 fileName = f"{tmdb_id}_{season_number}_{episoideNumber}.jpg"
+                logging.info(f"{fileName} is downloading...")
                 image_path = os.path.join(image_folder, fileName)
                 if urlData.query.__contains__('imageWidth') and urlData.query.__contains__('imageHeight'):
                     backdrop_url = importData[episoideNumber]['backdrop'].split('?')[0]
@@ -212,6 +212,7 @@ def import_spisode(tmdb_id, season_number, language):
                         imageHeight = urlQuery["imageHeight"][0]
                         logging.info(f"Download backdrop with 0*0 failed, try to use default pixel: {imageWidth}*{imageHeight}")
                         new_backdrop_url = backdrop_url.replace("imageWidth", imageWidth).replace("imageHeight", imageHeight)
+                        print(new_backdrop_url)
                         urllib.request.urlretrieve(new_backdrop_url, image_path)
                 else:
                     urllib.request.urlretrieve(importData[episoideNumber]['backdrop'], image_path)
@@ -231,15 +232,15 @@ def import_spisode(tmdb_id, season_number, language):
                 try:
                     
                     tempImage = bordercrop.crop(image_path, 1, round(image.size[1]*0.99), 100)
-                    logging.info(tempImage.size[1])
                     if (tempImage.size[0] < image.size[0] or tempImage.size[1] < image.size[1]):
                         logging.info(f"Original backdrop size: {image.size[0]} * {image.size[1]}")
+                        logging.info(f"Cropped backdrop size: {tempImage.size[0]} * {tempImage.size[1]}")
                         image = tempImage
                 except Exception as err:
                     logging.error(err)
 
                 image_widith, image_heigh = image.size
-                logging.info(f"Backdrop size: {image_widith} * {image_heigh}")
+                logging.debug(f"Backdrop size: {image_widith} * {image_heigh}")
                 aspectRatio = round(image_widith/image_heigh, 2)
                 if aspectRatio == 1.78 and (image_widith >= 1280 and image_heigh >= 720) and (image_widith <= 3840 and image_heigh <= 2106):
                     # valid image siez
@@ -262,9 +263,12 @@ def import_spisode(tmdb_id, season_number, language):
                 else:
                     logging.info(
                         "Skip: unable to use fit function to meet TMDB requirments")
-                    continue
-
+                    continue                
                 image.close()
+
+                # review backdrop
+                driver.get(image_path)
+                time.sleep(3)
 
                 # upload backdrop
                 driver.get(f"https://www.themoviedb.org/tv/{tmdb_id}/season/{season_number}/episode/{episoideNumber}/images/backdrops")
@@ -273,8 +277,8 @@ def import_spisode(tmdb_id, season_number, language):
 
                 driver.find_element(By.CSS_SELECTOR, value="span[class='glyphicons_v2 circle-empty-plus']").click()
                 time.sleep(1)
-                driver.find_element(By.CSS_SELECTOR, value="input[id='upload_files']").send_keys(str(image_path))
-                time.sleep(10)
+                driver.find_element(By.CSS_SELECTOR, value="input[id='upload_files']").send_keys(image_path)
+                WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(By.CSS_SELECTOR, value="span[class='k-file-validation-message k-text-success']"))
 
                 # thumbs up upload backdrop
             except Exception as e:
