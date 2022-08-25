@@ -10,9 +10,11 @@ def setup_custom_logger(name):
 
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
-    
     logger = logging.getLogger(name)
-    logger.setLevel(logging.INFO)
+    if config.get("DEFAULT","logging_level", fallback="INFO").lower() == "debug": 
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
     logger.addHandler(handler)
     return logger
 

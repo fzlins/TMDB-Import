@@ -12,6 +12,21 @@ def youku_extractor(url):
     logging.debug(f"API request url: {apiRequest}")
     videoData = json.loads(open_url(apiRequest))
     showID = videoData["show"]["id"]
+    logging.info(f"show id: {showID}")
+    apiRequest = f"https://openapi.youku.com/v2/shows/show.json?show_id={showID}&&client_id=3d01f04416cbe807"
+    logging.debug(f"API request url: {apiRequest}")
+    show_data = json.loads(open_url(apiRequest))
+    season_link = show_data["link"]
+    logging.info(f"show link: {season_link}")
+    season_name = show_data["name"]
+    logging.info(f"name: {season_name}")
+    season_poster = show_data["poster_large"]
+    logging.info(f"poster url: {season_poster}")
+    season_backdrop = show_data["thumbnail_large"]
+    logging.info(f"backdrop url: {season_backdrop}")
+    season_description = show_data["description"]
+    logging.info(f"description url: {season_description}")
+    
     page = 1
     episodeNumber = 1
     total = 0
