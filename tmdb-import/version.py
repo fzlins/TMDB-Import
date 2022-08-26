@@ -1,2 +1,2 @@
 script_name = 'tmdb-import'
-__version__ = '0.0.0020'
+__version__ = '0.0.0021'

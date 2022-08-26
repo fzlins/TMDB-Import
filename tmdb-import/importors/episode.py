@@ -11,13 +11,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 import logging
 from ..common import *
 
+import configparser
+config = configparser.ConfigParser()
+config.read('config.ini')
+
 def import_spisode(tmdb_id, season_number, language):
-    tmdb_username = ""
-    tmdb_password = ""
-    forced_upload = False
-
-    # "zh-CN", "ja-JP", "en-US"
-
     currentData = {}
     importData = read_csv("import.csv")
 
@@ -27,22 +25,28 @@ def import_spisode(tmdb_id, season_number, language):
 
     driver = ini_webdriver(headless=False, save_user_profile=True, images=True)
 
-    # login
-    try:
-        driver.get("https://www.themoviedb.org/login")
-        username = driver.find_element(By.ID, value="username")
-        password = driver.find_element(By.ID, value="password")
-        if tmdb_username != "" and tmdb_password != "":
-            # automatic login
-            username.send_keys(tmdb_username)
-            password.send_keys(tmdb_password)
+    driver.get("https://www.themoviedb.org/login")
+    
+    if len(driver.find_elements(By.CSS_SELECTOR, value="li[class='user']")) == 0:
+        # login
+        try:
+            
+            username = driver.find_element(By.ID, value="username")
+            password = driver.find_element(By.ID, value="password")
+            tmdb_username = config.get("DEFAULT","tmdb_username", fallback="").strip()
+            tmdb_password = config.get("DEFAULT","tmdb_password", fallback="").strip()
+            if tmdb_username != "" and tmdb_password != "":
+                # automatic login
+                username.send_keys(tmdb_username)
+                password.send_keys(tmdb_password)
 
-            driver.find_element(By.ID, value="login_button").click()
-        else:
-            # manual login
-            WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(By.CSS_SELECTOR, value="li[class='user']"))
-    except:
-        print('User is logged')
+                driver.find_element(By.ID, value="login_button").click()
+            else:
+                # manual login
+                WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(By.CSS_SELECTOR, value="li[class='user']"))
+        except Exception as err:
+            logging.error("Falied to login to TMDB", exc_info= err)
+            exit()
 
     # Get season data from tmdb
     driver.get(f"https://www.themoviedb.org/tv/{tmdb_id}/season/{season_number}/edit?active_nav_item=episodes&language={language}")
@@ -79,6 +83,11 @@ def import_spisode(tmdb_id, season_number, language):
                 if currentData[episodeNumber]["air_date"].lower() == importData[episodeNumber]["air_date"].lower():
                     pass
                 if currentData[episodeNumber]["air_date"].lower() == 'null' or importData[episodeNumber]["air_date"].lower() == 'null' or parser.parse(importData[episodeNumber]["air_date"]) != parser.parse(currentData[episodeNumber]["air_date"]):
+                    if int(episodeNumber) == 1:
+                        choice = input("First episode air time does not match, entry 'y' to continue. Others will exit:")
+                        if choice.strip().lower() != "y":
+                            exit()
+
                     updateEpisodeData["air_date"] = importData[episodeNumber]["air_date"]
                     updateEpisode = True
 
@@ -189,7 +198,8 @@ def import_spisode(tmdb_id, season_number, language):
             imagePath = os.path.join(image_folder, imageName)
             os.remove(imagePath)
 
-    if not forced_upload:
+    backdrop_forced_upload = config.getboolean("DEFAULT","backdrop_forced_upload", fallback=False)
+    if not backdrop_forced_upload:
         driver.get(f"https://www.themoviedb.org/tv/{tmdb_id}/season/{season_number}")
         time.sleep(3)
         for episoideNumber in importData:
@@ -277,7 +287,7 @@ def import_spisode(tmdb_id, season_number, language):
 
                 # upload backdrop
                 driver.get(f"https://www.themoviedb.org/tv/{tmdb_id}/season/{season_number}/episode/{episoideNumber}/images/backdrops")
-                if len(driver.find_elements(By.CSS_SELECTOR, value="ul[id='image_menu']")) != 0 and not forced_upload:
+                if len(driver.find_elements(By.CSS_SELECTOR, value="ul[id='image_menu']")) != 0 and not backdrop_forced_upload:
                     continue
 
                 driver.find_element(By.CSS_SELECTOR, value="span[class='glyphicons_v2 circle-empty-plus']").click()

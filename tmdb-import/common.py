@@ -112,6 +112,7 @@ def ini_webdriver(headless=True, save_user_profile = False, images = False):
 
     from selenium import webdriver
     browser = config.get("DEFAULT","browser", fallback="edge")
+    save_user_profile = config.getboolean("DEFAULT","save_user_profile", fallback=save_user_profile)
     if browser.lower() == "chrome":
         options = webdriver.Chrome()
         if headless:

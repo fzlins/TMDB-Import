@@ -1,4 +1,3 @@
-from time import sleep
 from ..common import ini_webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
