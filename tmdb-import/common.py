@@ -121,6 +121,7 @@ def ini_webdriver(headless=True, save_user_profile = False, images = False):
             options.add_argument("user-data-dir=" + user_date_dir)
         options.add_argument('--disable-gpu')
         options.add_argument("--autoplay-policy=no-user-gesture-required")
+        options.add_experimental_option("excludeSwitches", ["enable-logging"])
         if images:
             options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 1})
         else:
@@ -136,6 +137,7 @@ def ini_webdriver(headless=True, save_user_profile = False, images = False):
             options.add_argument("user-data-dir=" + user_date_dir)
         options.add_argument('--disable-gpu')
         options.add_argument("--autoplay-policy=no-user-gesture-required")
+        options.add_experimental_option("excludeSwitches", ["enable-logging"])
         if images:
             options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 1})
         else:

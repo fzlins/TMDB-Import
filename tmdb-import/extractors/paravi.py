@@ -1,8 +1,10 @@
 import logging
 import re
+import time
 from selenium.webdriver.common.by import By
 from ..common import Episode
 from ..common import ini_webdriver
+from selenium.webdriver.support.ui import WebDriverWait
 
 # paravi ex: https://www.paravi.jp/title/64465
 def paravi_extractor(url):
@@ -10,17 +12,15 @@ def paravi_extractor(url):
 
     driver = ini_webdriver()
     driver.get(url)
-    driver.find_element(By.CSS_SELECTOR, value="i[class='fa-angle_down']").click()
-    #WebDriverWait(driver, timeout=60).until(lambda d: d.find_element(By.CSS_SELECTOR, value="i[class='fa-angle_down']")).click()
-    source_data = driver.find_elements(By.CSS_SELECTOR, value="div[class='card episode-card']")
-    #source_data = WebDriverWait(driver, timeout=60).until(lambda d: d.find_elements(By.CSS_SELECTOR, value="div[class='card episode-card']"))
-    driver.close()
-
+    WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(By.CSS_SELECTOR, value="i[class='fa-angle_down']")).click()
+    source_data = WebDriverWait(driver, timeout=30).until(lambda d: d.find_elements(By.CSS_SELECTOR, value="div[class='card episode-card']"))
     episode_number = 1
     episodes = {}
     for episode in source_data:
         episode_number = episode_number
-        episode_name = episode.find_element(By.CSS_SELECTOR, value="h2[class='title'] p").text.split(" ", 1)[1]
+        episode_name = episode.find_element(By.CSS_SELECTOR, value="h2[class='title'] p").text.lstrip(f"#{episode_number} ")
+        if episode_name.__contains__("episode"):
+            episode_name = ""
         episode_air_date = ""
         episode_runtime = episode.find_element(By.CSS_SELECTOR, value="span[class='duration']").text
         episode_overview = episode.find_element(By.CSS_SELECTOR, value="div[class='synopsis']").text
@@ -29,4 +29,5 @@ def paravi_extractor(url):
         
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
         episode_number = episode_number + 1
+    driver.close()
     return episodes

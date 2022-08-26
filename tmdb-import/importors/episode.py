@@ -48,6 +48,11 @@ def import_spisode(tmdb_id, season_number, language):
     driver.get(f"https://www.themoviedb.org/tv/{tmdb_id}/season/{season_number}/edit?active_nav_item=episodes&language={language}")
 
     try:
+        WebDriverWait(driver, timeout=1).until(lambda d: d.find_element(By.CSS_SELECTOR, value="button[class='k-button k-primary pad_top background_color light_blue translate']")).click()
+    except:
+        pass
+
+    try:
         # There are no episodes added to this season.
         WebDriverWait(driver, timeout=3).until(lambda d: d.find_element(By.CLASS_NAME, value="k-grid-norecords"))
     except:
