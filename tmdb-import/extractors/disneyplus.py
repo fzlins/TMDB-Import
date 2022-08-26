@@ -8,7 +8,7 @@ def disneyplus_extractor(url, language="zh-CN"):
     logging.info("disneyplus_extractor is called")
 
     if language == "zh-CN":
-        language == "zh-Hans"
+        language = "zh-Hans"
     else: # default "zh-Hans"
         language = "zh-Hans"
 
@@ -18,6 +18,18 @@ def disneyplus_extractor(url, language="zh-CN"):
     apiRequest = f"https://disney.content.edge.bamgrid.com/svc/content/DmcSeriesBundle/version/5.1/region/SG/audience/false/maturity/1850/language/{language}/encodedSeriesId/{seriesID}"
     logging.debug(f"API request url: {apiRequest}")
     soureData = json.loads(open_url(apiRequest))
+
+    season_name = soureData["data"]["DmcSeriesBundle"]["series"]["text"]["title"]["full"]["series"]["default"]["content"]
+    logging.info(f"name: {season_name}")
+    season_overview = soureData["data"]["DmcSeriesBundle"]["series"]["text"]["description"]["full"]["series"]["default"]["content"]
+    logging.info(f"overview: {season_overview}")
+    season_poster = soureData["data"]["DmcSeriesBundle"]["series"]["image"]["tile"]["0.71"]["series"]["default"]["url"]
+    logging.info(f"overview: {season_poster}")
+    season_backdrop = soureData["data"]["DmcSeriesBundle"]["series"]["image"]["tile"]["1.78"]["series"]["default"]["url"]
+    logging.info(f"season_backdrop: {season_backdrop}")
+    season_logo = soureData["data"]["DmcSeriesBundle"]["series"]["image"]["title_treatment_centered"]["1.78"]["series"]["default"]["url"]
+    logging.info(f"season_backdrop: {season_logo}")
+
     episodes = {}
     for episode in soureData["data"]["DmcSeriesBundle"]["episodes"]["videos"]:
         episode_number = episode["episodeSequenceNumber"]
