@@ -5,8 +5,7 @@ from selenium import webdriver
 import time
 
 # https://www.themoviedb.org/tv/136891/season/1/episode/1/images/backdrops?language=xx
-
-
+# Not working
 def backdrop_thumbs_up(url, driver = None):
     if driver==None:
         driver = ini_webdriver(headless=False, save_user_profile=True, images=True)

@@ -3,21 +3,6 @@ import os
 config = configparser.ConfigParser()
 config.read('config.ini')
 
-import logging
-
-def setup_custom_logger(name):
-    formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
-
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
-    logger = logging.getLogger(name)
-    if config.get("DEFAULT","logging_level", fallback="INFO").lower() == "debug": 
-        logger.setLevel(logging.DEBUG)
-    else:
-        logger.setLevel(logging.INFO)
-    logger.addHandler(handler)
-    return logger
-
 class Person:
     def __init__(self, *args):
         self.id = None
@@ -107,9 +92,6 @@ def read_csv(filename):
     return importData
 
 def ini_webdriver(headless=True, save_user_profile = False, images = False):
-    from selenium.webdriver.remote.remote_connection import LOGGER
-    LOGGER.setLevel(logging.WARNING)
-
     from selenium import webdriver
     browser = config.get("DEFAULT","browser", fallback="edge")
     save_user_profile = config.getboolean("DEFAULT","save_user_profile", fallback=save_user_profile)

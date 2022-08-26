@@ -6,17 +6,16 @@ import sys
 from .version import script_name, __version__
 from .extractor import *
 from .importor import *
-from .common import setup_custom_logger
+from .util.log import setup_custom_logger
 
 setup_custom_logger('root')
 
 _options = [
     'help',
     'version',
-    'force',
 ]
 
-_short_options = 'hVf'
+_short_options = 'hV'
 
 _help = f"Usage: {script_name} [OPTION]... [URL]..."
 
