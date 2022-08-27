@@ -1,4 +1,3 @@
-from concurrent.futures import process
 import os
 import time
 from urllib.parse import urlparse, parse_qs
@@ -8,7 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 import logging
-from ..processors.image import process_backdrop
+from ..processors.image import process_image, TYPE_BACKDROP
 from ..common import *
 
 import configparser
@@ -233,7 +232,7 @@ def import_spisode(tmdb_id, season_number, language):
                     urllib.request.urlretrieve(importData[episoideNumber]['backdrop'], image_path)
 
                 # Fit backdrop aspect ratio
-                if not process_backdrop(image_path):
+                if not process_image(image_path, TYPE_BACKDROP):
                     logging.info("Skip: unable to use fit function to meet TMDB requirments")
                     continue  
                 

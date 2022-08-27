@@ -4,8 +4,6 @@ import logging
 import os
 import sys
 from .version import script_name, __version__
-from .extractor import *
-from .importor import *
 from .util.log import setup_custom_logger
 
 setup_custom_logger('root')
@@ -44,11 +42,16 @@ def main(**kwargs):
                 print("    python:   {}".format(sys.version.split('\n')[0]))
         
     if args:
-        url = args[0]
-        if url.__contains__("www.themoviedb.org"):
-            import_from_url(url)
+        
+        if args[0].lower() in ("backdrop", "poster"):
+            from .processor import process_image_from_url
+            process_image_from_url(args[0].lower(), args[1])
+        elif args[0].__contains__("www.themoviedb.org"):
+            from .importor import import_from_url
+            import_from_url(args[0])
         else:
-            extract_from_url(url)
+            from .extractor import extract_from_url
+            extract_from_url(args[0])
 
 if __name__ == '__main__':
     main()

@@ -21,6 +21,16 @@ python -m tmdb-import "https://www.themoviedb.org/tv/{tv_id}/season/{season_numb
 # ex: -m tmdb-import "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
 ```
 - 导入目录下的import.csv文件里的数据到TMDB。上传背景图时，自动切除黑边和适配TMDB所要求的1.78比例。第一次运行需要在登陆界面手动登陆（或者在代码中填写实现自动登陆），forced_upload（值为True时，在允许在TMDB已有背景图片的情况下继续上传）
+```
+python -m tmdb-import backdrop "https://www.***.com/image.html"
+```
+- 裁剪出适配TMDB的背景图
+```
+```
+python -m tmdb-import poster "https://www.***.com/image.html"
+```
+- 裁剪出适配TMDB的海报图片
+```
 
 # 测试环境
 Window11、Edge、Python3和Vistual Studio Code。
