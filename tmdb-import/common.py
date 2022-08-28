@@ -129,7 +129,8 @@ def ini_webdriver(headless=True, save_user_profile = False, images = False):
         driver = webdriver.Edge(options=options)
     return driver
 
-def open_url(url):
-    encoding = config.get("DEFAULT","encoding", fallback="utf-8-sig")
+def open_url(url, encoding = ""):
+    if encoding == "":
+        encoding = config.get("DEFAULT","encoding", fallback="utf-8-sig")
     import urllib.request
-    return urllib.request.urlopen(url, timeout=30).read().decode(encoding)
+    return urllib.request.urlopen(url, timeout=30).read().decode(encoding, "ignore")
