@@ -2,6 +2,8 @@ import urllib.request
 import os
 import logging
 from .processors.image import process_image
+import urllib.parse
+import shutil
 def process_image_from_url(type, url):
     image_folder = os.path.join(os.getcwd(), "Image")
     if not os.path.exists(image_folder):
@@ -13,5 +15,9 @@ def process_image_from_url(type, url):
     fileName = f"{type}.jpg"
     logging.info(f"{fileName} is downloading...")
     image_path = os.path.join(image_folder, fileName)
-    urllib.request.urlretrieve(url, image_path)
+
+    if urllib.parse.urlparse(url).netloc != "":
+        urllib.request.urlretrieve(url, image_path)
+    else:
+        shutil.copyfile(url, image_path)
     process_image(image_path, type)
