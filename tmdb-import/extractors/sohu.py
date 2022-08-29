@@ -1,7 +1,6 @@
 import json
 import logging
 import re
-from datetime import datetime
 from ..common import Episode, open_url
 
 # language: zh

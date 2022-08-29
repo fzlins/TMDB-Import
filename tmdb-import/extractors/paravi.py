@@ -1,6 +1,5 @@
 import logging
 import re
-import time
 from selenium.webdriver.common.by import By
 from ..common import Episode
 from ..common import ini_webdriver

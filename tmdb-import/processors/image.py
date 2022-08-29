@@ -1,9 +1,11 @@
 from PIL import Image, ImageOps
 import logging
 import bordercrop
+import re
 
 TYPE_BACKDROP = "backdrop"
 TYPE_POSTER = "poster"
+TYPE_FITSIZE = "fitsize"
 
 def convert_to_jpg(image_path):
     image = Image.open(image_path)
@@ -29,11 +31,16 @@ def crop_black_border(image_path):
         logging.error(err)
     image.close()
 
-def fit_aspect_ratio(image_path, type):   
+def fit_aspect_ratio(image_path, type, fit_width, fit_height):   
     image = Image.open(image_path)
     image_widith, image_heigh = image.size
     logging.debug(f"Image size: {image_widith} * {image_heigh}")
-    if type == TYPE_BACKDROP:
+    if type == TYPE_FITSIZE:
+        re_size = (fit_width, fit_height)
+        logging.info(f"Resize backdrop to {re_size[0]}*{re_size[1]}")
+        image = ImageOps.fit(image=image, size=re_size, method=Image.Resampling.LANCZOS, bleed=0.0, centering=(0.5, 0.5))
+        image.save(image_path, format="JPEG", quality=85)
+    elif type == TYPE_BACKDROP:
         aspectRatio = round(image_widith/image_heigh, 2)
         if aspectRatio == 1.78 and (image_widith >= 1280 and image_heigh >= 720) and (image_widith <= 3840 and image_heigh <= 2106):
             # valid image siez
@@ -84,7 +91,7 @@ def fit_aspect_ratio(image_path, type):
     image.close()
     return True
 
-def process_image(image_path, type):
+def process_image(image_path, type, fit_width = -1, fit_height = -1):
     # Convert other format to jpg
     convert_to_jpg(image_path)
     
@@ -92,7 +99,7 @@ def process_image(image_path, type):
     crop_black_border(image_path)
     
     # Fit backdrop aspect ratio
-    return fit_aspect_ratio(image_path, type)
+    return fit_aspect_ratio(image_path, type, fit_width, fit_height)
 
 '''
 from ..common import ini_webdriver

@@ -3,8 +3,7 @@ import os
 import logging
 from .processors.image import process_image
 import urllib.parse
-import shutil
-def process_image_from_url(type, url):
+def process_image_from_url(type, url, fit_width = -1, fit_height = -1):
     image_folder = os.path.join(os.getcwd(), "Image")
     if not os.path.exists(image_folder):
         os.makedirs(image_folder)
@@ -16,8 +15,14 @@ def process_image_from_url(type, url):
     logging.info(f"{fileName} is downloading...")
     image_path = os.path.join(image_folder, fileName)
 
-    if urllib.parse.urlparse(url).netloc != "":
-        urllib.request.urlretrieve(url, image_path)
+    urlData = urllib.parse.urlparse(url)
+    print()
+    if urlData.netloc != "":
+        if urlData.scheme == "":
+            url = "https://" + url
     else:
-        shutil.copyfile(url, image_path)
-    process_image(image_path, type)
+        if not urlData.scheme.startswith("file"):
+            url = "file:///" + url
+    print(url)
+    urllib.request.urlretrieve(url, image_path)
+    process_image(image_path, type, fit_width, fit_height)
