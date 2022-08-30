@@ -29,7 +29,11 @@ def myvideo_extractor(url):
     for episode in source_data:
         videoTitle = episode.find_element(By.CLASS_NAME, value="videoTitle")
         episode_url = videoTitle.get_attribute('href')
+
         title = videoTitle.text
+        if title.startswith("精華片段") or title.startswith("獨家專訪"):
+            continue
+
         episode_number = episode_number
         episode_name = ""
         if title.__contains__('【'):
@@ -47,4 +51,4 @@ def myvideo_extractor(url):
     return episodes
 
 def get_large_image(url):
-    return url.split('_', 1)[0] + ".jpg"
+    return url.split('_', 1)[0] + '.' + url.rsplit('.', 1)[-1]

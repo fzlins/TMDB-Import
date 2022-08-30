@@ -16,13 +16,11 @@ def process_image_from_url(type, url, fit_width = -1, fit_height = -1):
     image_path = os.path.join(image_folder, fileName)
 
     urlData = urllib.parse.urlparse(url)
-    print()
     if urlData.netloc != "":
         if urlData.scheme == "":
             url = "https://" + url
     else:
         if not urlData.scheme.startswith("file"):
             url = "file:///" + url
-    print(url)
     urllib.request.urlretrieve(url, image_path)
     process_image(image_path, type, fit_width, fit_height)
