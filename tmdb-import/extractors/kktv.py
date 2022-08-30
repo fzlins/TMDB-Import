@@ -15,7 +15,7 @@ def kktv_extractor(url):
     urlPath = urlData.path.strip('/')
 
     title = urlPath.rsplit('/', 1)[-1]
-    apiRequest = f"https://api.kktv.me//api.kktv.me/v3/titles/{title}"
+    apiRequest = f"https://api.kktv.me/v3/titles/{title}"
     logging.debug(f"API request url: {apiRequest}")
     soureData = json.loads(open_url(apiRequest))
 
@@ -27,7 +27,7 @@ def kktv_extractor(url):
     season_overview = soureData["data"]["summary"]
     logging.info(f"overview: {season_overview}")
     season_poster = get_large_image(soureData["data"]["cover"])
-    logging.info(f"overview: {season_poster}")
+    logging.info(f"poster: {season_poster}")
     season_backdrop = soureData["data"]["stills"]
     for backdrop in season_backdrop:
         backdrop = get_large_image(backdrop)
