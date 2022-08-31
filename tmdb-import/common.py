@@ -96,38 +96,41 @@ def ini_webdriver(headless=True, save_user_profile = False, images = False):
     browser = config.get("DEFAULT","browser", fallback="edge")
     save_user_profile = config.getboolean("DEFAULT","save_user_profile", fallback=save_user_profile)
     if browser.lower() == "chrome":
-        options = webdriver.Chrome()
-        if headless:
-            options.add_argument('--headless')
-        if save_user_profile:
-            user_date_dir = os.path.join(os.getcwd(), "Selenium")
-            options.add_argument("user-data-dir=" + user_date_dir)
-        options.add_argument('--disable-gpu')
-        options.add_argument("--autoplay-policy=no-user-gesture-required")
-        options.add_experimental_option("excludeSwitches", ["enable-logging"])
-        if images:
-            options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 1})
-        else:
-            options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2})
-
-        driver = webdriver.Chrome(options=options)
+        options = webdriver.ChromeOptions()
     else:
         options = webdriver.EdgeOptions()
-        if headless:
-            options.add_argument('--headless')
-        if save_user_profile:
-            user_date_dir = os.path.join(os.getcwd(), "Selenium")
-            options.add_argument("user-data-dir=" + user_date_dir)
-        options.add_argument('--disable-gpu')
-        options.add_argument("--autoplay-policy=no-user-gesture-required")
-        options.add_experimental_option("excludeSwitches", ["enable-logging"])
-        if images:
-            options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 1})
-        else:
-            options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2})
 
+    if headless:
+        options.add_argument('--headless')
+    if save_user_profile:
+        user_date_dir = os.path.join(os.getcwd(), "Selenium")
+        options.add_argument("user-data-dir=" + user_date_dir)
+    options.add_argument('--disable-gpu')
+    options.add_argument("--autoplay-policy=no-user-gesture-required")
+    options.add_experimental_option("excludeSwitches", ["enable-logging"])
+    if images:
+        options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 1})
+    else:
+        options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2})
+
+    if browser.lower() == "chrome":
+        driver = webdriver.Chrome(options=options)
+    else:
         driver = webdriver.Edge(options=options)
     return driver
+    if headless:
+        options.add_argument('--headless')
+    if save_user_profile:
+        user_date_dir = os.path.join(os.getcwd(), "Selenium")
+        options.add_argument("user-data-dir=" + user_date_dir)
+    options.add_argument('--disable-gpu')
+    options.add_argument("--autoplay-policy=no-user-gesture-required")
+    options.add_experimental_option("excludeSwitches", ["enable-logging"])
+    if images:
+        options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 1})
+    else:
+        options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2})
+    return options
 
 def open_url(url, encoding = ""):
     if encoding == "":
