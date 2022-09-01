@@ -9,15 +9,15 @@ def netflix_extractor(url):
 
     driver = ini_webdriver()
     driver.get(url)
-    source_data = driver.find_elements(By.CSS_SELECTOR, value="div[data-uia='episode']")
+    source_data = driver.find_elements(By.CLASS_NAME, value="episode")
     episodes = {}
     episode_number = 1
     for episode in source_data:
         episode_number = episode_number
-        episode_name = episode.find_element(By.CSS_SELECTOR, value="h3[data-uia='episode-title']").text.lstrip(str(episode_number)).lstrip('.。')
+        episode_name = episode.find_element(By.CLASS_NAME, value="episode-title").text.lstrip(str(episode_number)).lstrip('.。')
         episode_air_date = ""
-        episode_runtime = ''.join(filter(str.isdigit, episode.find_element(By.CSS_SELECTOR, value="span[data-uia='episode-runtime']").text))
-        episode_overview = episode.find_element(By.CSS_SELECTOR, value="p[data-uia='episode-synopsis']").get_attribute('innerText')
+        episode_runtime = ''.join(filter(str.isdigit, episode.find_element(By.CLASS_NAME, value="episode-runtime").text))
+        episode_overview = episode.find_element(By.CLASS_NAME, value="epsiode-synopsis").get_attribute('innerText')
         episode_backdrop = ""
         
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
