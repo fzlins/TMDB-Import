@@ -13,7 +13,6 @@ def nhk_extractor(url):
     urlPath = urlData.path.strip('/')
     if urlPath.startswith("archives"):
         urlQuery = parse_qs(urlData.query)
-        print(urlQuery["das_id"][0].split('_', 1)[0])
         das_id = urlQuery["das_id"][0].split('_', 1)[0]
         apiRequest = f"https://www.nhk.or.jp/archives/chro_data/das_rel/{das_id[0:7]}/{das_id}_00000.json"
         logging.debug(f"API request url: {apiRequest}")

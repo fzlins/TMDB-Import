@@ -55,6 +55,9 @@ def extract_from_url(url, language="zh-CN"):
     elif domain.endswith(".sohu.com"):
         from .extractors import sohu
         episodes = sohu.sohu_extractor(url)
+    elif domain.endswith("thetvdb.com"):
+        from .extractors import tvdb
+        episodes = tvdb.tvdb_extractor(url)
     elif domain.endswith(".viki.com"):
         from .extractors import viki
         episodes = viki.viki_extractor(url)

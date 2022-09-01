@@ -116,7 +116,7 @@ def import_spisode(tmdb_id, season_number, language):
             WebDriverWait(driver, 60).until_not(EC.presence_of_element_located((By.CSS_SELECTOR, "a[class='k-button k-button-icontext k-primary k-grid-update']")))
             time.sleep(1)
             driver.find_element(By.CSS_SELECTOR, value="a[class='k-button k-button-icontext k-grid-add']").click()
-            episoideID = WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(By.ID, value="episode_number_numeric_text_box_field").get_attribute("value"))
+            episoideID = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element(By.ID, value="episode_number_numeric_text_box_field").get_attribute("value"))
             time.sleep(1)
             if (int(episoideID) != int(episoideNumber)):
                 episodeNumberField = driver.find_element(By.ID, value="episode_number_numeric_text_box_field")
