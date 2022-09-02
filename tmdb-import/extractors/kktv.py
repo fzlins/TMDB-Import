@@ -21,9 +21,14 @@ def kktv_extractor(url):
 
     season_name = soureData["data"]["title"]
     logging.info(f"name: {season_name}")
-    season_name_aliases = soureData["data"]["title_aliases"]
-    for alias in season_name_aliases:
-        logging.info(f"alias: {alias}")
+
+    try:
+        season_name_aliases = soureData["data"]["title_aliases"]
+        for alias in season_name_aliases:
+            logging.info(f"alias: {alias}")
+    except:
+        pass
+    
     season_overview = soureData["data"]["summary"]
     logging.info(f"overview: {season_overview}")
     season_poster = get_large_image(soureData["data"]["cover"])

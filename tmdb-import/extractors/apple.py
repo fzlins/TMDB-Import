@@ -14,6 +14,9 @@ def apple_extractor(url):
     if country == "jp":
         location = "ja-JP"
         sf = "143462"
+    elif country == "kr":
+        location = "ko-KR"
+        sf= "143466"
     else:
         location = "cmn_Hans"
         sf = "143464"
@@ -34,8 +37,11 @@ def apple_extractor(url):
     logging.info(f"backdrop: {season_backdrop}")
     season_backdrop = get_larger_image(soureData["data"]["content"]["images"]["posterArt"])
     logging.info(f"backdrop: {season_backdrop}")
-    season_logo = get_larger_image(soureData["data"]["content"]["images"]["contentLogo"])
-    logging.info(f"logo: {season_logo}")
+    try:
+        season_logo = get_larger_image(soureData["data"]["content"]["images"]["contentLogo"])
+        logging.info(f"logo: {season_logo}")
+    except:
+        pass
 
     apiRequest = f"https://tv.apple.com/api/uts/v3/shows/{show_id}/episodes?caller=web&sf={sf}&v=58&pfm=web&locale={location}&nextToken=0:99&includeSeasonSummary=false&selectedSeasonEpisodesOnly=true"
     logging.debug(f"API request url: {apiRequest}")
