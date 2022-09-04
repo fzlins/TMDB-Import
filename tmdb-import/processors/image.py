@@ -20,8 +20,8 @@ def convert_to_jpg(image_path):
 
 def crop_black_border(image_path):
     try:
-        image = Image.open(image_path)         
-        tempImage = bordercrop.crop(image_path, 5, round(min(image.size[0], image.size[1])*0.99), 100)
+        image = Image.open(image_path)       
+        tempImage = bordercrop.crop(image_path, 5, round(min(image.size[0], image.size[1])*0.99), 50)
         if (tempImage.size[0] < image.size[0] or tempImage.size[1] < image.size[1]):
             logging.info(f"Original image size: {image.size[0]} * {image.size[1]}")
             logging.info(f"Cropped black border and new image size: {tempImage.size[0]} * {tempImage.size[1]}")

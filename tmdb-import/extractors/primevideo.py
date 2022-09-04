@@ -24,12 +24,13 @@ def primevideo_extractor(url):
     for episode in driver.find_elements(By.CSS_SELECTOR, value="li[id*='av-ep-episodes-']"):
         episode_number = episodeNumber
         episode_name = episode.find_elements(By.CSS_SELECTOR, value="span[dir='auto']")[0].text.split(' ', 1)[1]
-        if episode_name.__contains__('「') and episode_name.__contains__('」') :
+        if episode_name.__contains__('「') and episode_name.endswith('」') :
             episode_name = re.search(r'「(.*?)」', episode_name).group(1)
+        episode_name = episode_name.lstrip(f"第{episode_number}話 ")
         episode_air_date = re.findall(r'<div>(.*?)</div>', episode.get_attribute('innerHTML'))[0]
         episode_runtime = re.findall(r'<div>(.*?)</div>', episode.get_attribute('innerHTML'))[1]
         episode_overview = episode.find_element(By.CSS_SELECTOR, value="div[data-automation-id*='synopsis'] div[dir='auto']").get_attribute('innerText').split('(C)')[0].split('(Ｃ)')[0]
-        episode_backdrop =  "" #re.search(r'src=\"(.*?)\"', episode.find_element(By.CSS_SELECTOR, value="noscript").get_attribute('innerText')).group(1)
+        episode_backdrop = re.search(r'src=\"(.*?)\"', episode.find_element(By.CSS_SELECTOR, value="noscript").get_attribute('innerText')).group(1)
         
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
         episodeNumber = episodeNumber + 1
