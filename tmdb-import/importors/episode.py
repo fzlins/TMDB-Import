@@ -9,6 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 import logging
 from ..processors.image import process_image, TYPE_BACKDROP
 from ..common import *
+import re
 
 import configparser
 config = configparser.ConfigParser()
@@ -74,6 +75,17 @@ def import_spisode(tmdb_id, season_number, language):
     updateList = {}
     # Diff
     for episodeNumber in importData:
+        
+        numbers = re.findall(r'\d+', "episodeNumber")
+        if len(numbers) == 2:
+            if int(numbers[0]) != int(season_number):
+                continue
+            episode_number = numbers[1]
+        else:
+            episode_number = episodeNumber
+
+        if episodeNumber.startswith('s'):
+            episodeNumber
         if (currentData.__contains__(episodeNumber)):
             # generate update list
             updateEpisode = False
@@ -105,10 +117,10 @@ def import_spisode(tmdb_id, season_number, language):
                     updateEpisode = True
 
             if updateEpisode:
-                updateList[episodeNumber] = updateEpisodeData
+                updateList[episode_number] = updateEpisodeData
         else:
             # generate create list
-            createList[episodeNumber] = importData[episodeNumber]
+            createList[episode_number] = importData[episodeNumber]
 
     # create episodes
     if len(createList) > 0:

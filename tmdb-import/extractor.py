@@ -10,6 +10,9 @@ def extract_from_url(url, language="zh-CN"):
     if domain.endswith("anidb.net"):
         from .extractors import anidb
         episodes = anidb.anidb_extractor(url)
+    elif domain.endswith("tv-asahi.co.jp"):
+        from .extractors import asahi
+        episodes = asahi.asahi_extractor(url)
     elif domain.endswith("tv.apple.com"):
         from .extractors import apple
         episodes = apple.apple_extractor(url)

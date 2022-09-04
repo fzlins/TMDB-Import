@@ -31,8 +31,11 @@ def apple_extractor(url):
     logging.info(f"name: {season_name}")
     season_overview = soureData["data"]["content"]["description"]
     logging.info(f"overview: {season_overview}")
-    season_poster = get_larger_image(soureData["data"]["content"]["images"]["contentImageTall"])
-    logging.info(f"poster: {season_poster}")
+    try:
+        season_poster = get_larger_image(soureData["data"]["content"]["images"]["contentImageTall"])
+        logging.info(f"poster: {season_poster}")
+    except:
+        pass
     season_backdrop = get_larger_image(soureData["data"]["content"]["images"]["contentImage"])
     logging.info(f"backdrop: {season_backdrop}")
     season_backdrop = get_larger_image(soureData["data"]["content"]["images"]["posterArt"])

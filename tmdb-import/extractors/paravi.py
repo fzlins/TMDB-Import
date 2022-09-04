@@ -27,8 +27,12 @@ def paravi_extractor(url):
     for episode in source_data:
         episode_number = episode_number
         episode_name = episode.find_element(By.CSS_SELECTOR, value="h2[class='title'] p").text.lstrip(f"#{episode_number} ")
+
         if episode_name.__contains__("episode"):
             episode_name = ""
+        elif episode_name.__contains__("予告"):
+            continue
+
         episode_air_date = ""
         episode_runtime = episode.find_element(By.CSS_SELECTOR, value="span[class='duration']").text
         episode_overview = episode.find_element(By.CSS_SELECTOR, value="div[class='synopsis']").text
