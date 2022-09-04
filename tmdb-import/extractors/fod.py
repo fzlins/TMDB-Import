@@ -21,6 +21,13 @@ def fod_extractor(url):
 
     apiRequest = urllib.request.Request(f"https://i.fod.fujitv.co.jp/apps/api/lineup/detail/?lu_id={seriesID}&is_premium=false&dv_type=web", headers={'x-authorization': f'Bearer {token}', 'User-Agent' : f'{userAgent}'})
     soureData = json.loads(open_url(apiRequest))
+
+    season_name = soureData["detail"]["lu_title"]
+    logging.info(f"name: {season_name}")
+    season_overview = soureData["detail"]["description"]
+    logging.info(f"overview: {season_overview}")
+    season_backdrop = f'https://i.fod.fujitv.co.jp/img/program/{seriesID}/{seriesID}_a.jpg'
+    logging.info(f"backdrop: {season_backdrop}")
     
     episodes = {}
     episodeNumber = 1

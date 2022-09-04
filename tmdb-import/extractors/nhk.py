@@ -3,6 +3,7 @@ from urllib.parse import urlparse, parse_qs
 import logging
 from ..common import Episode, open_url
 from datetime import datetime
+import re
 
 # ex: https://www.nhk.jp/p/comecome/ts/8PMRWK3MGZ
 #     https://www2.nhk.or.jp/archives/tv60bin/detail/index.cgi?das_id=D0009010034_00000#
@@ -28,7 +29,7 @@ def nhk_extractor(url):
                 episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
                 episode_number = episode_number + 1
     else:
-        seriesID = urlPath.rsplit('/', 1)[-1]
+        seriesID = urlPath.split('/')[3]
         nextURL = f"https://api.nhk.jp/r6/l/tvepisode/ts/{seriesID}.json?offset=0&size=100&order=asc"
         logging.debug(f"API request: {nextURL}")
         episodes = {}
@@ -38,6 +39,8 @@ def nhk_extractor(url):
             for episode in soureData["result"]:
                 episode_number = episodeNumber
                 episode_name = episode["name"]
+                if episode_name.__contains__('「') and episode_name.__contains__('」') :
+                    episode_name = re.search(r'「(.*?)」', episode_name).group(1)
                 episode_air_date = episode["releasedEvent"]["startDate"].split('T')[0]
                 episode_runtime = ""
                 episode_overview = episode["description"]
