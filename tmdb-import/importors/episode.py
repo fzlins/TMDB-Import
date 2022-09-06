@@ -76,7 +76,7 @@ def import_spisode(tmdb_id, season_number, language):
     # Diff
     for episodeNumber in importData:
         
-        numbers = re.findall(r'\d+', "episodeNumber")
+        numbers = re.findall(r'\d+', episodeNumber)
         if len(numbers) == 2:
             if int(numbers[0]) != int(season_number):
                 continue
