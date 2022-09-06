@@ -31,7 +31,7 @@ def myvideo_extractor(url):
         episode_url = videoTitle.get_attribute('href')
 
         title = videoTitle.text
-        if title.startswith("精華片段") or title.startswith("獨家專訪"):
+        if not title.__contains__(f'第{episode_number}集'):
             continue
 
         episode_number = episode_number
