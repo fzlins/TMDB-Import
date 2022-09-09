@@ -23,7 +23,7 @@ def nhk_extractor(url):
         for episode in soureData["itemlist"]:
                 episode_name = episode["title2"]
                 episode_air_date = datetime.strptime(episode["airdate1"], '%Y%m%d').date()
-                episode_runtime = ""
+                episode_runtime = round((datetime.strptime(f"{episode['airdate2']}{episode['airtime2']}", '%Y%m%d%H%M%S') - datetime.strptime(f"{episode['airdate1']}{episode['airtime1']}", '%Y%m%d%H%M%S')).total_seconds()/60.0)
                 episode_overview = episode["content"]
                 if episode_name.__contains__("「") and episode_name.__contains__("」"):
                     episode_name = episode_name.split('「', 1)[1].replace("」", "")
