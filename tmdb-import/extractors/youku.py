@@ -6,12 +6,15 @@ from ..common import Episode, open_url
 # ex: https://v.youku.com/v_show/id_XNDAzNzE0Mzc2MA==.html
 def youku_extractor(url):
     logging.info("youku_extractor is called")
-    episodeID =  re.search(r'id_(.*?)\.html', url).group(1).rstrip("==")
-    apiRequest = f"https://api.youku.com/videos/show.json?video_id={episodeID}&ext=show&client_id=3d01f04416cbe807"
-    # https://list.youku.com/show/module?id={showid}&tab=showInfo&callback=jQuery
-    logging.debug(f"API request url: {apiRequest}")
-    videoData = json.loads(open_url(apiRequest))
-    showID = videoData["show"]["id"]
+    if url.__contains__("/show_page/"):
+        showID = re.search(r'id_(.*?)\.html', url).group(1).rstrip("==")
+    else:
+        episodeID =  re.search(r'id_(.*?)\.html', url).group(1).rstrip("==")
+        apiRequest = f"https://api.youku.com/videos/show.json?video_id={episodeID}&ext=show&client_id=3d01f04416cbe807"
+        # https://list.youku.com/show/module?id={showid}&tab=showInfo&callback=jQuery
+        logging.debug(f"API request url: {apiRequest}")
+        videoData = json.loads(open_url(apiRequest))
+        showID = videoData["show"]["id"]
     logging.info(f"show id: {showID}")
     apiRequest = f"https://openapi.youku.com/v2/shows/show.json?show_id={showID}&&client_id=3d01f04416cbe807"
     logging.debug(f"API request url: {apiRequest}")
