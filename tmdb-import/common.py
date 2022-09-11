@@ -125,10 +125,3 @@ def open_url(url, encoding = ""):
         encoding = config.get("DEFAULT","encoding", fallback="utf-8-sig")
     import urllib.request
     return urllib.request.urlopen(url, timeout=30).read().decode(encoding, "ignore")
-
-def convert_runtime(runtime):
-    numbers = re.findall(r'\d+', runtime)
-    if len(numbers) > 1:
-        return int(numbers[0])*60+ int(numbers[1])
-    else:
-        return int(numbers[0])

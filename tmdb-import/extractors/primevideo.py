@@ -32,14 +32,23 @@ def primevideo_extractor(url):
         elif episode_name.startswith('#'):
             episode_name.removeprefix(f'#{episode_number}').lstrip()
         elif episode_name.startswith('第'):
-            episode_name = episode_name.removeprefix(f"第{episode_number}話").lstrip()
+            if episode_name.__contains__('話'):
+                episode_name = episode_name.split('話', 1)[1].strip()
+            elif episode_name.__contains__('回'):
+                episode_name = episode_name.split('回', 1)[1].strip()
 
         episode_air_date = re.findall(r'<div>(.*?)</div>', episode.get_attribute('innerHTML'))[0]
         if episode_air_date.__contains__('年'):
             episode_air_date = episode_air_date.replace('年', '-').replace('月', '-').replace('日', '')
+
         episode_runtime = re.findall(r'<div>(.*?)</div>', episode.get_attribute('innerHTML'))[1]
-        from ..common import convert_runtime
-        episode_runtime = convert_runtime(episode_runtime)
+        runtime = re.findall(r'\d+', episode_runtime)
+        if len(runtime) > 1:
+            episode_runtime = int(runtime[0])*60 + int(runtime[1])
+        elif episode_runtime.__contains__("時間") or episode_runtime.__contains__("小时") or episode_runtime.__contains__("h"):
+            episode_runtime = int(runtime[0])*60
+        else:
+            episode_runtime = int(runtime[0])
 
         episode_overview = episode.find_element(By.CSS_SELECTOR, value="div[data-automation-id*='synopsis'] div[dir='auto']").get_attribute('innerText')
         episode_overview = re.split(r'\([CＣｃ]\)', episode_overview, 1)[0]
