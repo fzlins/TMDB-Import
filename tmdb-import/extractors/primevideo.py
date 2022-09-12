@@ -19,10 +19,8 @@ def primevideo_extractor(url):
 
     # episodes = WebDriverWait(driver, timeout=60).until(lambda d: d.find_elements(By.CSS_SELECTOR, value="li[id*='av-ep-episodes-']"))
     episodes = {}
-    episodeNumber = 1
+    episode_number = 1
     for episode in driver.find_elements(By.CSS_SELECTOR, value="li[id*='av-ep-episodes-']"):
-        episode_number = episodeNumber
-
         episode_name = episode.find_elements(By.CSS_SELECTOR, value="span[dir='auto']")[0].text.strip()
         episode_name = episode_name.removeprefix(f"{episode_number}.").strip()
         if episode_name.__contains__('「') and episode_name.__contains__('」') :
@@ -30,7 +28,7 @@ def primevideo_extractor(url):
         elif episode_name.__contains__('｢') and episode_name.__contains__('｣') :
             episode_name = episode_name.split('｢', 1)[1].replace("｣", "")
         elif episode_name.startswith('#'):
-            episode_name.removeprefix(f'#{episode_number}').lstrip()
+            episode_name = episode_name.removeprefix(f'#{episode_number}').lstrip()
         elif episode_name.startswith('第'):
             if episode_name.__contains__('話'):
                 episode_name = episode_name.split('話', 1)[1].strip()
@@ -51,14 +49,16 @@ def primevideo_extractor(url):
             episode_runtime = int(runtime[0])
 
         episode_overview = episode.find_element(By.CSS_SELECTOR, value="div[data-automation-id*='synopsis'] div[dir='auto']").get_attribute('innerText')
-        episode_overview = re.split(r'\([CＣｃ]\)', episode_overview, 1)[0]
+        if episode_overview.__contains__("※"):
+            episode_overview = episode_overview.rsplit('※', 1)[0]
+        episode_overview = re.split(r'[（\(][CＣｃ][）\)]', episode_overview, 1)[0]
         while episode_overview.__contains__('[') and episode_overview.endswith(']'):
             episode_overview = episode_overview.rsplit('[', 1)[0]
 
         episode_backdrop = re.search(r'src=\"(.*?)\"', episode.find_element(By.CSS_SELECTOR, value="noscript").get_attribute('innerText')).group(1)
         
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
-        episodeNumber = episodeNumber + 1
+        episode_number = episode_number + 1
 
     driver.close()
     return episodes
