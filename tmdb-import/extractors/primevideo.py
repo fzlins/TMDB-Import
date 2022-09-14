@@ -51,7 +51,7 @@ def primevideo_extractor(url):
         episode_overview = episode.find_element(By.CSS_SELECTOR, value="div[data-automation-id*='synopsis'] div[dir='auto']").get_attribute('innerText')
         if episode_overview.__contains__("※"):
             episode_overview = episode_overview.rsplit('※', 1)[0]
-        episode_overview = re.split(r'[（\(][CＣｃ][）\)]', episode_overview, 1)[0]
+        episode_overview = re.split(r'[（\(][CＣｃc][）\)]', episode_overview, 1)[0]
         while episode_overview.__contains__('[') and episode_overview.endswith(']'):
             episode_overview = episode_overview.rsplit('[', 1)[0]
 

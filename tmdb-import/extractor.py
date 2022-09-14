@@ -70,6 +70,9 @@ def extract_from_url(url, language="zh-CN"):
     elif domain.endswith(".wavve.com"):
         from .extractors import wavve
         episodes = wavve.wavve_extractor(url)
+    elif domain.__contains__(".yahoo."):
+        from .extractors import yahoo
+        episodes = yahoo.yahoo_extractor(url)
     elif domain.endswith(".youku.com"):
         from .extractors import youku
         episodes = youku.youku_extractor(url)
