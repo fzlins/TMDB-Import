@@ -45,7 +45,7 @@ def main(**kwargs):
     if args:
         if args[0].lower() in ("backdrop", "poster"):
             from .processor import process_image_from_url
-            process_image_from_url(args[0].lower(), args[1])
+            process_image_from_url(args[0].lower(), args[1], crop_back= False)
         elif args[0].lower() == "fitsize":
             print(args[1])
             fitsize = re.split('_|-|\*', args[1])

@@ -37,15 +37,15 @@ def fit_aspect_ratio(image_path, type, fit_width, fit_height):
     logging.debug(f"Image size: {image_widith} * {image_heigh}")
     if type == TYPE_FITSIZE:
         re_size = (fit_width, fit_height)
-        logging.info(f"Resize backdrop to {re_size[0]}*{re_size[1]}")
+        logging.info(f"Resize from {image_widith}*{image_heigh} to {re_size[0]}*{re_size[1]}")
         image = ImageOps.fit(image=image, size=re_size, method=Image.Resampling.LANCZOS, bleed=0.0, centering=(0.5, 0.5))
         image.save(image_path, format="JPEG", quality=85)
     elif type == TYPE_BACKDROP:
         aspectRatio = round(image_widith/image_heigh, 2)
-        if aspectRatio == 1.78 and (image_widith >= 1280 and image_heigh >= 720) and (image_widith <= 3840 and image_heigh <= 2106):
+        if aspectRatio == 1.78 and (image_widith >= 1280 and image_heigh >= 720) and (image_widith <= 3840 and image_heigh <= 2160):
             # valid image siez
             pass
-        elif aspectRatio == 1.33 and (image_widith >= 960 and image_heigh >= 720) and (image_widith <= 2808 and image_heigh <= 2106):
+        elif aspectRatio == 1.33 and (image_widith >= 960 and image_heigh >= 720) and (image_widith <= 2880 and image_heigh <= 2160):
             # valid image siez
             pass
         elif (aspectRatio >= 1.6 or aspectRatio <= 1.9) and (image_widith >= 960 and image_heigh >= 540):
@@ -57,11 +57,11 @@ def fit_aspect_ratio(image_path, type, fit_width, fit_height):
                 re_size = (3840, 2160)
             else:
                 if aspectRatio < 1.78:
-                    re_size = (image_widith, round(image_widith / 1.78))
+                    re_size = (image_widith, round(image_widith / 1.7778))
                 else:
-                    re_size = (round(image_heigh * 1.78), image_heigh)
+                    re_size = (round(image_heigh * 1.7778), image_heigh)
 
-            logging.info(f"Resize backdrop to {re_size[0]}*{re_size[1]}")
+            logging.info(f"Resize backdrop from {image_widith}*{image_heigh} to {re_size[0]}*{re_size[1]}")
             image = ImageOps.fit(image=image, size=re_size, method=Image.Resampling.LANCZOS, bleed=0.0, centering=(0.5, 0.5))
             image.save(image_path, format="JPEG", quality=85)
         elif (aspectRatio >= 1.30 or aspectRatio <= 1.36) and (image_widith >= 720 and image_heigh >= 540):
@@ -69,15 +69,15 @@ def fit_aspect_ratio(image_path, type, fit_width, fit_height):
             re_size = (960, 720)
             if image_widith < 1280 or image_heigh < 720:
                 pass
-            elif image_widith > 3840 and image_heigh > 2160:
+            elif image_widith > 2808 and image_heigh > 2160:
                 re_size = (2808, 2160)
             else:
                 if aspectRatio < 1.78:
-                    re_size = (image_widith, round(image_widith / 1.33))
+                    re_size = (image_widith, round(image_widith / 1.3333))
                 else:
-                    re_size = (round(image_heigh * 1.33), image_heigh)
+                    re_size = (round(image_heigh * 1.3333), image_heigh)
 
-            logging.info(f"Resize backdrop to {re_size[0]}*{re_size[1]}")
+            logging.info(f"Resize backdrop from {image_widith}*{image_heigh} to {re_size[0]}*{re_size[1]}")
             image = ImageOps.fit(image=image, size=re_size, method=Image.Resampling.LANCZOS, bleed=0.0, centering=(0.5, 0.5))
             image.save(image_path, format="JPEG", quality=85)
         else:
@@ -99,7 +99,7 @@ def fit_aspect_ratio(image_path, type, fit_width, fit_height):
                     re_size = (round(image_heigh/1.5), image_heigh)
                 else:
                     re_size = (image_widith, round(image_widith * 1.5))
-            logging.info(f"Resize poster to {re_size[0]}*{re_size[1]}")
+            logging.info(f"Resize poster from {image_widith}*{image_heigh} to to {re_size[0]}*{re_size[1]}")
             image = ImageOps.fit(image=image, size=re_size, method=Image.Resampling.LANCZOS, bleed=0.0, centering=(0.5, 0.5))
             image.save(image_path, format="JPEG", quality=85)
         else:
@@ -109,12 +109,13 @@ def fit_aspect_ratio(image_path, type, fit_width, fit_height):
     image.close()
     return True
 
-def process_image(image_path, type, fit_width = -1, fit_height = -1):
+def process_image(image_path, type, fit_width = -1, fit_height = -1, crop_back = True):
     # Convert other format to jpg
     convert_to_jpg(image_path)
     
     # Crop black border
-    crop_black_border(image_path)
+    if crop_back:
+        crop_black_border(image_path)
     
     # Fit backdrop aspect ratio
     return fit_aspect_ratio(image_path, type, fit_width, fit_height)

@@ -27,7 +27,7 @@ def nhk_extractor(url):
                 episode_overview = episode["content"]
                 if episode_name.__contains__("「") and episode_name.__contains__("」"):
                     episode_name = episode_name.split('「', 1)[1].replace("」", "")
-                elif episode_overview.__contains__("「") and episode_overview.__contains__("」"):
+                elif episode_overview.__contains__("「") and episode_overview.__contains__("」") and episode_overview.__contains__(","):
                     episode_name = episode_overview.split(',')[1].replace("「", "").replace("」", "")
                 episode_backdrop = ""
                 episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
