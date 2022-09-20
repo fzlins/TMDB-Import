@@ -5,6 +5,7 @@ from ..common import Episode, open_url
 from datetime import datetime
 
 # ex: https://tv.apple.com/sg/show/surfside-girls/umc.cmc.4371g2xacdr0wfs071dm3q30x?ctx_brand=tvs.sbd.4000&l=ZHS
+# ex: https://tv.apple.com/us/movie/three-thousand-years-of-longing/umc.cmc.2ya70jyatuz8iuzr05vt5t8ve
 def apple_extractor(url):
     logging.info("apple_extractor is called")
     urlData = urlparse(url)
@@ -17,52 +18,97 @@ def apple_extractor(url):
     elif country == "kr":
         location = "ko-KR"
         sf= "143466"
+    elif country == "us":
+        location = "en-US"
+        sf = "143441"
     else:
         location = "cmn_Hans"
         sf = "143464"
 
-    show_id = urlPath.rsplit('/', 1)[-1]
+    guid = urlPath.rsplit('/', 1)[-1]
+    if urlPath.__contains__("/shows/"):
+        apiRequest = f"https://tv.apple.com/api/uts/v3/shows/{guid}?caller=web&sf={sf}&v=58&pfm=web&locale={location}"
+        logging.debug(f"API request url: {apiRequest}")
+        soureData = json.loads(open_url(apiRequest))
 
-    apiRequest = f"https://tv.apple.com/api/uts/v3/shows/{show_id}?caller=web&sf={sf}&v=58&pfm=web&locale={location}"
-    logging.debug(f"API request url: {apiRequest}")
-    soureData = json.loads(open_url(apiRequest))
-
-    season_name = soureData["data"]["content"]["title"]
-    logging.info(f"name: {season_name}")
-    season_overview = soureData["data"]["content"]["description"]
-    logging.info(f"overview: {season_overview}")
-    try:
-        season_poster = get_larger_image(soureData["data"]["content"]["images"]["contentImageTall"])
-        logging.info(f"poster: {season_poster}")
-    except:
-        pass
-    season_backdrop = get_larger_image(soureData["data"]["content"]["images"]["contentImage"])
-    logging.info(f"backdrop: {season_backdrop}")
-    season_backdrop = get_larger_image(soureData["data"]["content"]["images"]["posterArt"])
-    logging.info(f"backdrop: {season_backdrop}")
-    try:
-        season_logo = get_larger_image(soureData["data"]["content"]["images"]["contentLogo"])
-        logging.info(f"logo: {season_logo}")
-    except:
-        pass
-
-    apiRequest = f"https://tv.apple.com/api/uts/v3/shows/{show_id}/episodes?caller=web&sf={sf}&v=58&pfm=web&locale={location}&nextToken=0:99&includeSeasonSummary=false&selectedSeasonEpisodesOnly=true"
-    logging.debug(f"API request url: {apiRequest}")
-    soureData = json.loads(open_url(apiRequest))
-    episodes = {}
-    for episode in soureData["data"]["episodes"]:
-        episode_number = episode["episodeNumber"]
-        episode_name = episode["title"]
-        episode_air_date = datetime.fromtimestamp(episode["releaseDate"]/1000).date()
-        episode_runtime = round(episode["duration"]/60)
+        season_name = soureData["data"]["content"]["title"]
+        logging.info(f"name: {season_name}")
+        season_overview = soureData["data"]["content"]["description"]
+        logging.info(f"overview: {season_overview}")
         try:
-            episode_overview = episode["description"]
+            season_poster = get_larger_image(soureData["data"]["content"]["images"]["contentImageTall"])
+            logging.info(f"poster: {season_poster}")
         except:
-            episode_overview = ""
-        episode_backdrop = get_larger_image(episode["images"]["posterArt"])
-        episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
+            pass
+        try:
+            season_backdrop = get_larger_image(soureData["data"]["content"]["images"]["contentImage"])
+            logging.info(f"backdrop: {season_backdrop}")
+        except:
+            pass
+        try:
+            season_backdrop = get_larger_image(soureData["data"]["content"]["images"]["posterArt"])
+            logging.info(f"backdrop: {season_backdrop}")
+        except:
+            pass
+        try:
+            season_logo = get_larger_image(soureData["data"]["content"]["images"]["contentLogo"])
+            logging.info(f"logo: {season_logo}")
+        except:
+            pass
 
-    return episodes
+        apiRequest = f"https://tv.apple.com/api/uts/v3/shows/{guid}/episodes?caller=web&sf={sf}&v=58&pfm=web&locale={location}&nextToken=0:99&includeSeasonSummary=false&selectedSeasonEpisodesOnly=true"
+        logging.debug(f"API request url: {apiRequest}")
+        soureData = json.loads(open_url(apiRequest))
+        episodes = {}
+        for episode in soureData["data"]["episodes"]:
+            episode_number = episode["episodeNumber"]
+            episode_name = episode["title"]
+            episode_air_date = datetime.fromtimestamp(episode["releaseDate"]/1000).date()
+            episode_runtime = round(episode["duration"]/60)
+            try:
+                episode_overview = episode["description"]
+            except:
+                episode_overview = ""
+            episode_backdrop = get_larger_image(episode["images"]["posterArt"])
+            episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
+
+        return episodes
+    elif urlPath.__contains__("/movie/"):
+        apiRequest = f"https://tv.apple.com/api/uts/v3/movies/{guid}?caller=web&sf={sf}&v=58&pfm=web&locale={location}"
+        logging.debug(f"API request url: {apiRequest}")
+        soureData = json.loads(open_url(apiRequest))
+        movie_name = soureData["data"]["content"]["title"]
+        logging.info(f"name: {movie_name}")
+        movie_overview = soureData["data"]["content"]["description"]
+        logging.info(f"overview: {movie_overview}")
+        try:
+            movie_poster = get_larger_image(soureData["data"]["content"]["images"]["contentImageTall"])
+            logging.info(f"poster: {movie_poster}")
+        except:
+            pass
+        try:
+            movie_backdrop = get_larger_image(soureData["data"]["content"]["images"]["contentImage"])
+            logging.info(f"backdrop: {movie_backdrop}")
+        except:
+            pass
+        try:
+            movie_backdrop = get_larger_image(soureData["data"]["content"]["images"]["posterArt"])
+            logging.info(f"backdrop: {movie_backdrop}")
+        except:
+            pass
+        try:
+            movie_logo = get_larger_image(soureData["data"]["content"]["images"]["contentLogo"])
+            logging.info(f"logo: {movie_logo}")
+        except:
+            pass
+
+        movie_runtime = round(soureData["data"]["content"]["duration"]/60)
+        logging.info(f"runtime: {movie_runtime}")
+
+        movie_air_date = datetime.fromtimestamp(soureData["data"]["content"]["releaseDate"]/1000).date()
+        logging.info(f"runtime: {movie_air_date}")
+
+    return {}
 
 def get_larger_image(image):
     image_heght = image["height"]

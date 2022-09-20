@@ -6,6 +6,8 @@ from dateutil import parser
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
 import logging
 from ..processors.image import process_image, TYPE_BACKDROP
 from ..common import *
@@ -131,9 +133,11 @@ def import_spisode(tmdb_id, season_number, language):
             episoideID = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element(By.ID, value="episode_number_numeric_text_box_field").get_attribute("value"))
             time.sleep(1)
             if (int(episoideID) != int(episoideNumber)):
-                episodeNumberField = driver.find_element(By.ID, value="episode_number_numeric_text_box_field")
-                episodeNumberField.clear()
-                episodeNumberField.send_keys(episoideNumber)
+                episodeNumberField = driver.find_element(By.CSS_SELECTOR, value="input[role='spinbutton']")
+                episodeNumberField.send_keys(Keys.CONTROL + "a")
+                actions = ActionChains(driver)
+                actions.send_keys(episoideNumber)
+                actions.perform()
 
             episoideName = driver.find_element(By.ID, value=f"{language}_name_text_input_field")
             if (createList[episoideNumber].__contains__("name") and len(createList[episoideNumber]['name']) > 0):
