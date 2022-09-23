@@ -73,21 +73,21 @@ def import_spisode(tmdb_id, season_number, language):
             currentData[episode_number]["air_date"] = all_columns[3].text.strip()
             currentData[episode_number]["runtime"] = all_columns[4].text.strip()
 
+    # S1E1
+    temp = {}
+    for episodeNumber in importData:
+        numbers = re.findall(r'\d+', episodeNumber)
+        if len(numbers) == 2:
+            if int(numbers[0]) == int(season_number):
+                temp[numbers[1]] = importData[episodeNumber]
+
+    if len(temp) > 0:
+        importData = temp
+
     createList = {}
     updateList = {}
     # Diff
     for episodeNumber in importData:
-        
-        numbers = re.findall(r'\d+', episodeNumber)
-        if len(numbers) == 2:
-            if int(numbers[0]) != int(season_number):
-                continue
-            episode_number = numbers[1]
-        else:
-            episode_number = episodeNumber
-
-        if episodeNumber.startswith('s'):
-            episodeNumber
         if (currentData.__contains__(episodeNumber)):
             # generate update list
             updateEpisode = False
@@ -119,10 +119,10 @@ def import_spisode(tmdb_id, season_number, language):
                     updateEpisode = True
 
             if updateEpisode:
-                updateList[episode_number] = updateEpisodeData
+                updateList[episodeNumber] = updateEpisodeData
         else:
             # generate create list
-            createList[episode_number] = importData[episodeNumber]
+            createList[episodeNumber] = importData[episodeNumber]
 
     # create episodes
     if len(createList) > 0:

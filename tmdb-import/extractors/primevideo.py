@@ -19,9 +19,9 @@ def primevideo_extractor(url):
 
     # episodes = WebDriverWait(driver, timeout=60).until(lambda d: d.find_elements(By.CSS_SELECTOR, value="li[id*='av-ep-episodes-']"))
     episodes = {}
-    episode_number = 1
     for episode in driver.find_elements(By.CSS_SELECTOR, value="li[id*='av-ep-episodes-']"):
         episode_name = episode.find_elements(By.CSS_SELECTOR, value="span[dir='auto']")[0].text.strip()
+        episode_number = episode_name.split('.', 1)[0]
         episode_name = episode_name.removeprefix(f"{episode_number}.").strip()
         if episode_name.__contains__('「') and episode_name.__contains__('」') :
             episode_name = episode_name.split('「', 1)[1].replace("」", "")
@@ -58,7 +58,6 @@ def primevideo_extractor(url):
         episode_backdrop = re.search(r'src=\"(.*?)\"', episode.find_element(By.CSS_SELECTOR, value="noscript").get_attribute('innerText')).group(1)
         
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
-        episode_number = episode_number + 1
 
     driver.close()
     return episodes
