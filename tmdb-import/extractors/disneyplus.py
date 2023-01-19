@@ -32,6 +32,7 @@ def disneyplus_extractor(url, language="zh-CN"):
     season_logo = soureData["data"]["DmcSeriesBundle"]["series"]["image"]["title_treatment_centered"]["1.78"]["series"]["default"]["url"]
     logging.info(f"season_backdrop: {season_logo}")
 
+    episodes = {}
     for season in soureData["data"]["DmcSeriesBundle"]["seasons"]["seasons"]:
         season_number = season["seasonSequenceNumber"]
         hits = season["episodes_meta"]["hits"]
@@ -40,7 +41,6 @@ def disneyplus_extractor(url, language="zh-CN"):
         logging.debug(f"API request url: {apiRequest}")
         soureData = json.loads(open_url(apiRequest))
 
-        episodes = {}
         for episode in soureData["data"]["DmcEpisodes"]["videos"]:
             episode_number = f"S{season_number}E{episode['episodeSequenceNumber']}"
             episode_name = episode["text"]["title"]["full"]["program"]["default"]["content"]
