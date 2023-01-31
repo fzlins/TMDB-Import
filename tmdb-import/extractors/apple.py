@@ -26,8 +26,8 @@ def apple_extractor(url):
         sf = "143464"
 
     guid = urlPath.rsplit('/', 1)[-1]
-    if urlPath.__contains__("/shows/"):
-        apiRequest = f"https://tv.apple.com/api/uts/v3/shows/{guid}?caller=web&sf={sf}&v=58&pfm=web&locale={location}"
+    if urlPath.__contains__("/shows/") or urlPath.__contains__("/show/"):
+        apiRequest = f"https://tv.apple.com/api/uts/v3/shows/{guid}?caller=web&sf={sf}&v=58&pfm=web&locale={location}&utsk=AAAAAAAAA"
         logging.debug(f"API request url: {apiRequest}")
         soureData = json.loads(open_url(apiRequest))
 
@@ -56,12 +56,12 @@ def apple_extractor(url):
         except:
             pass
 
-        apiRequest = f"https://tv.apple.com/api/uts/v3/shows/{guid}/episodes?caller=web&sf={sf}&v=58&pfm=web&locale={location}&nextToken=0:99&includeSeasonSummary=false&selectedSeasonEpisodesOnly=true"
+        apiRequest = f"https://tv.apple.com/api/uts/v3/shows/{guid}/episodes?caller=web&sf={sf}&v=58&pfm=web&locale={location}&nextToken=0:999&includeSeasonSummary=false&selectedSeasonEpisodesOnly=true&utsk=AAAAAAAAA"
         logging.debug(f"API request url: {apiRequest}")
         soureData = json.loads(open_url(apiRequest))
         episodes = {}
         for episode in soureData["data"]["episodes"]:
-            episode_number = episode["episodeNumber"]
+            episode_number = f"S{episode['seasonNumber']}E{episode['episodeNumber']}"
             episode_name = episode["title"]
             episode_air_date = datetime.fromtimestamp(episode["releaseDate"]/1000).date()
             episode_runtime = round(episode["duration"]/60)
@@ -74,7 +74,7 @@ def apple_extractor(url):
 
         return episodes
     elif urlPath.__contains__("/movie/"):
-        apiRequest = f"https://tv.apple.com/api/uts/v3/movies/{guid}?caller=web&sf={sf}&v=58&pfm=web&locale={location}"
+        apiRequest = f"https://tv.apple.com/api/uts/v3/movies/{guid}?caller=web&sf={sf}&v=58&pfm=web&locale={location}&utsk=AAAAAAAAA"
         logging.debug(f"API request url: {apiRequest}")
         soureData = json.loads(open_url(apiRequest))
         movie_name = soureData["data"]["content"]["title"]
