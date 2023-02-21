@@ -13,7 +13,7 @@ def fod_extractor(url):
 
     seriesID = urlPath.rsplit('/', 1)[-1]
 
-    driver = ini_webdriver()
+    driver = ini_webdriver(headless=False)
     driver.get(url)
     token = driver.get_cookie("CT")["value"]
     userAgent = driver.execute_script("return navigator.userAgent")
