@@ -34,6 +34,8 @@ def fod_extractor(url):
     for episode in soureData["episodes"]:
         episode_number = episodeNumber
         episode_name = episode["ep_title"]
+        if episode_name.startswith('#'):
+            episode_name = episode_name.removeprefix(f'#{episode_number}').lstrip()
         episode_air_date = ""
         episode_runtime = episode["duration"]
         episode_overview = episode["ep_description"].split("\u000d\u000a\u000d\u000a")[0]
