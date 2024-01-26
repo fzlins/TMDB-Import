@@ -18,6 +18,9 @@ def apple_extractor(url):
     elif country == "kr":
         location = "ko-KR"
         sf= "143466"
+    elif country == "gb":
+        location = "en-GB"
+        sf = "143444"
     elif country == "us":
         location = "en-US"
         sf = "143441"
