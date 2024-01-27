@@ -15,7 +15,7 @@ import re
 
 import configparser
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read('config.ini', encoding='utf-8-sig')
 
 def import_spisode(tmdb_id, season_number, language):
     currentData = {}

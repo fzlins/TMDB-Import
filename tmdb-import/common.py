@@ -2,7 +2,7 @@ import configparser
 import os
 import re
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read('config.ini', encoding='utf-8-sig')
 
 class Person:
     def __init__(self, *args):
