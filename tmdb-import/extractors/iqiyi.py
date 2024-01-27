@@ -12,8 +12,7 @@ def iqiyi_extractor(url):
     if url.__contains__("iqiyi.com/lib/m_"):
         albumId = re.search(r'movlibalbumaid=\"(.*?)\"', str(webPage)).group(1)
     else:
-        albumId = re.search(r'\"albumId\":(.*?),', str(webPage)).group(1)
-        albumId = albumId[:-1] + "1"
+        albumId = re.search(r'\"albumId\":(.*?),\"channelId', str(webPage)).group(1)
     logging.info(f"album_id: {albumId}")
     apiRequest = f"https://pcw-api.iqiyi.com/album/album/baseinfo/{albumId}"
     logging.debug(f"API request: {apiRequest}")
