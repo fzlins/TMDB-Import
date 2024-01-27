@@ -34,7 +34,7 @@ def iqiyi_extractor(url):
     for episode in soureData["data"]["epsodelist"]:
         episode_number = episode["order"]
         episode_name = episode["subtitle"]
-        episode_air_date = datetime.fromtimestamp(episode["publishTime"]/1000).date()
+        episode_air_date = datetime.fromtimestamp(episode["issueTime"]/1000).date()
         duration = episode["duration"].split(':')
         episode_runtime = ""
         if len(duration) == 3:
