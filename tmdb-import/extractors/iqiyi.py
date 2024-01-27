@@ -2,7 +2,6 @@ import json
 import logging
 import re
 from datetime import datetime
-import pytz
 from ..common import Episode, open_url
 
 # language: zh
@@ -35,7 +34,7 @@ def iqiyi_extractor(url):
     for episode in soureData["data"]["epsodelist"]:
         episode_number = episode["order"]
         episode_name = episode["subtitle"]
-        episode_air_date = datetime.fromtimestamp(episode["issueTime"]/1000, pytz.timezone("ETC/GMT-8")).date()
+        episode_air_date = episode["period"]
         duration = episode["duration"].split(':')
         episode_runtime = ""
         if len(duration) == 3:
