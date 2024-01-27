@@ -2,6 +2,7 @@ import json
 import logging
 import re
 from datetime import datetime
+import pytz
 from ..common import Episode, open_url
 
 # language: zh
@@ -34,7 +35,7 @@ def iqiyi_extractor(url):
     for episode in soureData["data"]["epsodelist"]:
         episode_number = episode["order"]
         episode_name = episode["subtitle"]
-        episode_air_date = datetime.fromtimestamp(episode["issueTime"]/1000).date()
+        episode_air_date = datetime.fromtimestamp(episode["issueTime"]/1000, pytz.timezone("ETC/GMT-8")).date()
         duration = episode["duration"].split(':')
         episode_runtime = ""
         if len(duration) == 3:
@@ -53,7 +54,7 @@ def iqiyi_extractor(url):
                 if int(size[0]) > int(pixel[0]):
                     pixel = size
         if pixel != ("0", "0"):
-            episode_backdrop = episode_backdrop.rsplit(".", 1)[0] + f"_imageWidth_imageHeight.jpg?imageWidth={pixel[0]}&imageHeight={pixel[1]}"
+            episode_backdrop = episode_backdrop.rsplit(".", 1)[0] + f"_{pixel[0]}_{pixel[1]}.jpg"
 
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
 
