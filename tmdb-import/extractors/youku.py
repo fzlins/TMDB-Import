@@ -10,13 +10,13 @@ def youku_extractor(url):
         showID = re.search(r'id_(.*?)\.html', url).group(1).rstrip("==")
     else:
         episodeID =  re.search(r'id_(.*?)\.html', url).group(1).rstrip("==")
-        apiRequest = f"https://api.youku.com/videos/show.json?video_id={episodeID}&ext=show&client_id=3d01f04416cbe807"
+        apiRequest = f"https://api.youku.com/videos/show.json?video_id={episodeID}&ext=show&client_id=0dec1b5a3cb570c1"
         # https://list.youku.com/show/module?id={showid}&tab=showInfo&callback=jQuery
         logging.debug(f"API request url: {apiRequest}")
         videoData = json.loads(open_url(apiRequest))
         showID = videoData["show"]["id"]
     logging.info(f"show id: {showID}")
-    apiRequest = f"https://openapi.youku.com/v2/shows/show.json?show_id={showID}&&client_id=3d01f04416cbe807"
+    apiRequest = f"https://openapi.youku.com/v2/shows/show.json?show_id={showID}&client_id=0dec1b5a3cb570c1"
     logging.debug(f"API request url: {apiRequest}")
     show_data = json.loads(open_url(apiRequest))
     season_link = show_data["link"]
@@ -35,7 +35,7 @@ def youku_extractor(url):
     total = 0
     episodes =  {}
     while True:
-        apiRequest = f"https://openapi.youku.com/v2/shows/videos.json?show_id={showID}&show_videotype=%E6%AD%A3%E7%89%87&page={page}&count=30&client_id=3d01f04416cbe807"
+        apiRequest = f"https://openapi.youku.com/v2/shows/videos.json?show_id={showID}&show_videotype=%E6%AD%A3%E7%89%87&page={page}&count=30&client_id=0dec1b5a3cb570c1"
         logging.debug(f"API request url: {apiRequest}")
         showData = json.loads(open_url(apiRequest))
         if total == 0:
@@ -44,7 +44,7 @@ def youku_extractor(url):
         for episode in showData["videos"]:
             episodeID = episode["id"].strip("==")
             try:
-                apiRequest = f"https://api.youku.com/videos/show.json?video_id={episodeID}&client_id=3d01f04416cbe807"
+                apiRequest = f"https://api.youku.com/videos/show.json?video_id={episodeID}&client_id=0dec1b5a3cb570c1"
                 logging.debug(f"API request url: {apiRequest}")
                 videoData = json.loads(open_url(apiRequest))
 
