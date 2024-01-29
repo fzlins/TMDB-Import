@@ -50,7 +50,10 @@ def youku_extractor(url):
                 videoData = json.loads(open_url(apiRequest))
 
                 episode_number = episodeNumber
-                episode_name = episode["rc_title"]
+                if episode["rc_title"]:
+                    episode_name = episode["rc_title"]
+                else:  
+                    episode_name = videoData["title"]
                 episode_air_date = videoData["published"].split(" ")[0]
                 episode_runtime = round(float(videoData["duration"])/60)
                 episode_overview = videoData["description"]
