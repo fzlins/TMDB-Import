@@ -34,7 +34,7 @@ def mgtv_extractor(url):
                 episode_air_date = episode["ts"].split(' ')[0]
                 episode_runtime = episode["time"].split(':')[0]
                 episode_overview = ""
-                episode_backdrop = "" #episode["img"].rsplit('_', 1)[0]
+                episode_backdrop = episode["img"].rsplit('_', 1)[0]
                 episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
         if soureData["data"]["total_page"] == soureData["data"]["current_page"]:
             break

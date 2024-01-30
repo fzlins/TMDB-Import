@@ -48,7 +48,7 @@ def fit_aspect_ratio(image_path, type, fit_width, fit_height):
         elif aspectRatio == 1.33 and (image_widith >= 960 and image_heigh >= 720) and (image_widith <= 2880 and image_heigh <= 2160):
             # valid image siez
             pass
-        elif (aspectRatio >= 1.6 or aspectRatio <= 1.9) and (image_widith >= 960 and image_heigh >= 540):
+        elif (aspectRatio >= 1.6 or aspectRatio <= 1.9) and (image_widith >= 860 and image_heigh >= 484):
             # resize image to fit valid size
             re_size = (1280, 720)
             if image_widith < 1280 or image_heigh < 720:
