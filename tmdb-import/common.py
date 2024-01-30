@@ -123,5 +123,8 @@ def ini_webdriver(headless=True, save_user_profile = False, images = False):
 def open_url(url, encoding = ""):
     if encoding == "":
         encoding = config.get("DEFAULT","encoding", fallback="utf-8-sig")
-    import urllib.request
-    return urllib.request.urlopen(url, timeout=30).read().decode(encoding, "ignore")
+    from urllib.request import Request, urlopen
+    req = Request(url)
+    userAgernt = "Mozilla/5.0 (Windows NT 6.3;Win64;x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36"
+    req.add_header('User-Agent', userAgernt)
+    return urlopen(req, timeout=30).read().decode(encoding, "ignore")
