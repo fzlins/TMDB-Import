@@ -34,13 +34,13 @@ def extract_from_url(url, language="zh-CN"):
     elif domain.endswith(".ixigua.com"):
         from .extractors import ixigua
         episodes = ixigua.ixigua_extractor(url)
-    elif domain.endswith(".kktv.me"):
+    elif domain.endswith("kktv.me"):
         from .extractors import kktv
         episodes = kktv.kktv_extractor(url)
     elif domain.endswith(".mgtv.com"):
         from .extractors import mgtv
         episodes = mgtv.mgtv_extractor(url)
-    elif domain.endswith(".myvideo.net.tw"):
+    elif domain.endswith("myvideo.net.tw"):
         from .extractors import myvideo
         episodes = myvideo.myvideo_extractor(url)
     elif url.__contains__("www.netflix.com"):
