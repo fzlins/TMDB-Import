@@ -87,7 +87,8 @@ def import_spisode(tmdb_id, season_number, language):
     createList = {}
     updateList = {}
     # Diff
-    airDateOverwrite = True
+    airDateOverwrite = False
+    overviewOverwrite = False
     for episodeNumber in importData:
         if (currentData.__contains__(episodeNumber)):
             # generate update list
@@ -97,24 +98,43 @@ def import_spisode(tmdb_id, season_number, language):
                 if currentData[episodeNumber]["air_date"].lower() == importData[episodeNumber]["air_date"].lower():
                     pass
                 if currentData[episodeNumber]["air_date"].lower() == '' or currentData[episodeNumber]["air_date"].lower() == 'null' or importData[episodeNumber]["air_date"].lower() == 'null' or parser.parse(importData[episodeNumber]["air_date"]) != parser.parse(currentData[episodeNumber]["air_date"]):
-                    if int(episodeNumber) == 1:
-                        choice = input("First episode air time does not match, enter 'y' to overwrite. enter 'n' to skip overwriting. Others will exit:")
-                        key = choice.strip().lower()
-                        if key == "n":
-                            airDateOverwrite = False
-                        elif key != "y":
-                            exit()
                     if (airDateOverwrite):
                         updateEpisodeData["air_date"] = importData[episodeNumber]["air_date"]
                         updateEpisode = True
+                    else:
+                        choice = input("Episode air time does not match, enter 'w' to overwrite it, enter 'y' to always overwrite next time and enter 'n' to always skip overwriting next time. Others will be skipped:")
+                        key = choice.strip().lower()
+                        if key == "n":
+                            airDateOverwrite = False
+                        if key == "y":
+                            airDateOverwrite = True
+                            updateEpisodeData["air_date"] = importData[episodeNumber]["air_date"]
+                            updateEpisode = True
+                        elif key == "o":
+                            updateEpisodeData["air_date"] = importData[episodeNumber]["air_date"]
+                            updateEpisode = True
 
             if importData[episodeNumber].__contains__("name") and len(importData[episodeNumber]["name"]) > 0 and importData[episodeNumber]["name"] != currentData[episodeNumber]["name"]:
                 updateEpisodeData["name"] = importData[episodeNumber]["name"]
                 updateEpisode = True
 
-            if importData[episodeNumber].__contains__("overview") and len(importData[episodeNumber]["overview"]) > len(currentData[episodeNumber]["overview"]) + 2:
-                updateEpisodeData["overview"] = importData[episodeNumber]["overview"]
-                updateEpisode = True
+            if importData[episodeNumber].__contains__("overview") and len(importData[episodeNumber]["overview"]) > 0:
+                if len(importData[episodeNumber]["overview"]) > len(currentData[episodeNumber]["overview"]) + 2:
+                    if (overviewOverwrite):
+                        updateEpisodeData["overview"] = importData[episodeNumber]["overview"]
+                        updateEpisode = True
+                    else:
+                        choice = input("Episode overview is short, enter 'w' to overwrite it, enter 'y' to always overwrite next time and enter 'n' to always skip overwriting next time. Others will be skipped:")
+                        key = choice.strip().lower()
+                        if key == "n":
+                            overviewOverwrite = False
+                        elif key == "y":
+                            overviewOverwrite = True
+                            updateEpisodeData["overview"] = importData[episodeNumber]["overview"]
+                            updateEpisode = True
+                        elif key == "o":
+                            updateEpisodeData["overview"] = importData[episodeNumber]["overview"]
+                            updateEpisode = True             
 
             if importData[episodeNumber].__contains__("runtime"):
                 importData[episodeNumber]["runtime"] = ''.join(filter(str.isdigit, importData[episodeNumber]["runtime"]))
