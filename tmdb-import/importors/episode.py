@@ -87,8 +87,8 @@ def import_spisode(tmdb_id, season_number, language):
     createList = {}
     updateList = {}
     # Diff
-    airDateOverwrite = False
-    overviewOverwrite = False
+    airDateOverwrite = None
+    overviewOverwrite = None
     for episodeNumber in importData:
         if (currentData.__contains__(episodeNumber)):
             # generate update list
@@ -101,7 +101,7 @@ def import_spisode(tmdb_id, season_number, language):
                     if (airDateOverwrite):
                         updateEpisodeData["air_date"] = importData[episodeNumber]["air_date"]
                         updateEpisode = True
-                    else:
+                    elif airDateOverwrite is None:
                         choice = input("Episode air time does not match, enter 'w' to overwrite it, enter 'y' to always overwrite next time and enter 'n' to always skip overwriting next time. Others will be skipped:")
                         key = choice.strip().lower()
                         if key == "n":
@@ -123,7 +123,7 @@ def import_spisode(tmdb_id, season_number, language):
                     if (overviewOverwrite):
                         updateEpisodeData["overview"] = importData[episodeNumber]["overview"]
                         updateEpisode = True
-                    else:
+                    elif overviewOverwrite is None:
                         choice = input("Episode overview is short, enter 'w' to overwrite it, enter 'y' to always overwrite next time and enter 'n' to always skip overwriting next time. Others will be skipped:")
                         key = choice.strip().lower()
                         if key == "n":
