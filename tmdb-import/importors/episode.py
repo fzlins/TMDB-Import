@@ -119,7 +119,7 @@ def import_spisode(tmdb_id, season_number, language):
                 updateEpisode = True
 
             if importData[episodeNumber].__contains__("overview") and len(importData[episodeNumber]["overview"]) > 0:
-                if len(importData[episodeNumber]["overview"]) > len(currentData[episodeNumber]["overview"]) + 2:
+                if len(importData[episodeNumber]["overview"]) < len(currentData[episodeNumber]["overview"]) + 2:
                     if (overviewOverwrite):
                         updateEpisodeData["overview"] = importData[episodeNumber]["overview"]
                         updateEpisode = True
@@ -134,7 +134,10 @@ def import_spisode(tmdb_id, season_number, language):
                             updateEpisode = True
                         elif key == "o":
                             updateEpisodeData["overview"] = importData[episodeNumber]["overview"]
-                            updateEpisode = True             
+                            updateEpisode = True
+                else:
+                    updateEpisodeData["overview"] = importData[episodeNumber]["overview"]
+                    updateEpisode = True
 
             if importData[episodeNumber].__contains__("runtime"):
                 importData[episodeNumber]["runtime"] = ''.join(filter(str.isdigit, importData[episodeNumber]["runtime"]))
