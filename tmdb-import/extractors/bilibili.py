@@ -30,6 +30,9 @@ def bilibili_extractor(url):
     episodes = {}
     episode_number = 1
     for episode in soureData["result"]["episodes"]:
+        if episode["badge"] == "预告":
+            continue
+
         if episode["title"].__contains__("（上）") or episode["title"].__contains__("（下）"):
             episode_name = episode["title"] + " " + episode["long_title"]
         else:
