@@ -40,7 +40,7 @@ def iqiyi_extractor(url):
             episode_runtime = str(int(duration[0]) * 60 + int(duration[1]))
         elif len(duration) == 2:
             episode_runtime = duration[0] 
-        episode_overview = episode["description"]
+        episode_overview = episode["description"].strip().replace("。\n", "。\p").replace("！\n", "！\p").replace("？\n", "？\p").replace("…\n", "…\p").replace("”\n", "”\p").replace("\n", "").replace("\p", "\n")
         episode_backdrop = episode["imageUrl"]
 
         pixel = ("0", "0")
