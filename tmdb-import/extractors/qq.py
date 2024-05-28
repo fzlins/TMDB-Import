@@ -34,7 +34,7 @@ def qq_extractor(url):
                     episode_air_date = episodeDate["fields"]["video_checkup_time"].split(" ")[0]
                     episode_runtime = round(int(episodeDate["fields"]["duration"])/60)
                     episode_overview = ""
-                    episode_backdrop = episodeDate["fields"]["pic160x90"].rsplit("/", 1)[0]
+                    episode_backdrop = "" #episodeDate["fields"]["pic160x90"].rsplit("/", 1)[0]
                     episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
 
         count_episode = count_episode + 1
