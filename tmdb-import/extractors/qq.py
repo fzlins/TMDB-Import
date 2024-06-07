@@ -36,7 +36,7 @@ def qq_extractor(url):
                     apiRequest = f"https://node.video.qq.com/x/api/float_vinfo2?vid={vid}"
                     logging.debug(f"API request url: {apiRequest}")
                     episode_name = json.loads(open_url(apiRequest))["c"]["second_title"]
-                    time.sleep(2)
+                    time.sleep(0.5)
                     episode_air_date = episodeDate["fields"]["video_checkup_time"].split(" ")[0]
                     episode_runtime = round(int(episodeDate["fields"]["duration"])/60)
                     episode_overview = ""
