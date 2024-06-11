@@ -46,7 +46,7 @@ def extract_from_url(url, language="zh-CN"):
     elif domain.__contains__(".mytvsuper."):
         from .extractors import mytvsuper
         episodes = mytvsuper.mytvsuper_extractor(url)
-    elif url.__contains__("www.netflix.com"):
+    elif url.__contains__(".netflix."):
         from .extractors import netflix
         episodes = netflix.netflix_extractor(url)
     elif domain.endswith(".nhk.jp") or domain.endswith(".nhk.or.jp"):
