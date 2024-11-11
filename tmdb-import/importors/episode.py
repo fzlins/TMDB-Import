@@ -291,7 +291,7 @@ def import_spisode(tmdb_id, season_number, language):
                 driver.find_element(By.CSS_SELECTOR, value="span[class='glyphicons_v2 circle-empty-plus']").click()
                 time.sleep(1)
                 driver.find_element(By.CSS_SELECTOR, value="input[id='upload_files']").send_keys(image_path)
-                WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(By.CSS_SELECTOR, value="span[class='k-file-validation-message k-text-success']"))
+                WebDriverWait(driver, timeout=30).until(lambda d: "successfully" in d.find_element(By.CSS_SELECTOR, value="span[class='k-file-validation-message']").text)
 
                 # thumbs up upload backdrop
             except Exception as e:
