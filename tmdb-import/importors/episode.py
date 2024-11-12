@@ -285,7 +285,7 @@ def import_spisode(tmdb_id, season_number, language):
 
                 # upload backdrop
                 driver.get(f"https://www.themoviedb.org/tv/{tmdb_id}/season/{season_number}/episode/{episoideNumber}/images/backdrops")
-                if len(driver.find_elements(By.CSS_SELECTOR, value="li[id='no_results']")) == 1 and not backdrop_forced_upload:
+                if len(driver.find_elements(By.CSS_SELECTOR, value="li[id='no_results']")) != 1 and not backdrop_forced_upload:
                     continue
 
                 driver.find_element(By.CSS_SELECTOR, value="span[class='glyphicons_v2 circle-empty-plus']").click()
