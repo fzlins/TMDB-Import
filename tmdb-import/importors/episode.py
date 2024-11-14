@@ -154,9 +154,9 @@ def import_spisode(tmdb_id, season_number, language):
     # create episodes
     if len(createList) > 0:
         for episoideNumber in createList:
-            WebDriverWait(driver, 60).until_not(EC.presence_of_element_located((By.CSS_SELECTOR, "a[class='k-button k-button-icontext k-primary k-grid-update']")))
+            WebDriverWait(driver, 60).until_not(EC.presence_of_element_located((By.CSS_SELECTOR, "button[class='k-button k-button-icontext k-primary k-grid-update']")))
             time.sleep(1)
-            driver.find_element(By.CSS_SELECTOR, value="a[class='k-button k-button-icontext k-grid-add']").click()
+            driver.find_element(By.CSS_SELECTOR, value="button[class*='k-button'][class*='k-grid-add']").click()
             episoideID = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element(By.ID, value="episode_number_numeric_text_box_field").get_attribute("value"))
             time.sleep(1)
             if (int(episoideID) != int(episoideNumber)):
@@ -184,7 +184,7 @@ def import_spisode(tmdb_id, season_number, language):
                 if createList[episoideNumber]['air_date'].lower() != "null":
                     airdate.send_keys(createList[episoideNumber]['air_date'])
 
-            driver.find_element(By.CSS_SELECTOR, value="a[class='k-button k-button-icontext k-primary k-grid-update']").click()
+            driver.find_element(By.CSS_SELECTOR, value="button[ref-update-button]").click()
 
     # update episoides
     for episoideNumber in updateList:
