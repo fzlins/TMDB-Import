@@ -66,7 +66,7 @@ def import_spisode(tmdb_id, season_number, language):
             lambda d: d.find_element(By.CLASS_NAME, value="k-master-row"))
         for k_master_row in driver.find_elements(By.CLASS_NAME, value="k-master-row"):
             all_columns = k_master_row.find_elements(By.TAG_NAME, "td")
-            episode_number = all_columns[0].text.strip()
+            episode_number = re.sub("[^\d\.]", "", all_columns[0].text) 
             currentData[episode_number] = {}
             currentData[episode_number]["name"] = all_columns[1].text.strip()
             currentData[episode_number]["overview"] = all_columns[2].text.strip()
