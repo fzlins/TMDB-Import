@@ -2,6 +2,7 @@ import json
 import logging
 import re
 from ..common import Episode, open_url
+from urllib.parse import urlparse, parse_qs
 
 # ex: https://v.youku.com/v_show/id_XNDAzNzE0Mzc2MA==.html
 # ex: https://v.youku.com/video?vid=XNTk3MzA5NzgzMg==
