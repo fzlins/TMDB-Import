@@ -1,5 +1,5 @@
 import os
-import time
+import time, random
 from urllib.parse import urlparse, parse_qs
 import urllib.request
 from dateutil import parser
@@ -155,10 +155,10 @@ def import_spisode(tmdb_id, season_number, language):
     if len(createList) > 0:
         for episoideNumber in createList:
             WebDriverWait(driver, 60).until_not(EC.presence_of_element_located((By.CSS_SELECTOR, "button[class='k-button k-button-icontext k-primary k-grid-update']")))
-            time.sleep(1)
+            time.sleep(random.uniform(1, 2))
             driver.find_element(By.CSS_SELECTOR, value="button[class*='k-button'][class*='k-grid-add']").click()
             episoideID = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element(By.ID, value="episode_number_numeric_text_box_field").get_attribute("value"))
-            time.sleep(1)
+            time.sleep(random.uniform(1, 2))
             if (int(episoideID) != int(episoideNumber)):
                 episodeNumberField = driver.find_element(By.CSS_SELECTOR, value="input[role='spinbutton']")
                 episodeNumberField.send_keys(Keys.CONTROL + "a")
@@ -229,7 +229,7 @@ def import_spisode(tmdb_id, season_number, language):
 
         if save_submit:
             driver.find_element(By.ID, value="submit").click()
-            time.sleep(1)
+            time.sleep(random.uniform(1, 2))
 
     # Processing backdrop images
     image_folder = os.path.join(os.getcwd(), "Image")
@@ -289,7 +289,7 @@ def import_spisode(tmdb_id, season_number, language):
                     continue
 
                 driver.find_element(By.CSS_SELECTOR, value="span[class='glyphicons_v2 circle-empty-plus']").click()
-                time.sleep(1)
+                time.sleep(random.uniform(1, 2))
                 driver.find_element(By.CSS_SELECTOR, value="input[id='upload_files']").send_keys(image_path)
                 WebDriverWait(driver, timeout=30).until(lambda d: "successfully" in d.find_element(By.CSS_SELECTOR, value="span[class='k-file-validation-message']").text)
 
