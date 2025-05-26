@@ -70,10 +70,30 @@ def remove_duplicate_backdrop(import_data):
         
     return import_data
 
+def filter_by_name(import_data, filter_words):
+    if not filter_words:
+        return import_data
+    
+    filtered_data = {}
+    filter_list = [word.strip() for word in filter_words.split(',')]
+    
+    for episode_number, episode in import_data.items():
+        should_keep = True
+        for word in filter_list:
+            if word and word in episode.name:
+                should_keep = False
+                break
+        if should_keep:
+            filtered_data[episode_number] = episode
+    
+    return filtered_data
+
 def create_csv(filename, import_data = {}):
     encoding = config.get("DEFAULT","encoding", fallback="utf-8-sig")
+    filter_words = config.get("DEFAULT", "filter_words", fallback="")
     import_data = remove_duplicate_overview(import_data)
     import_data = remove_duplicate_backdrop(import_data)
+    import_data = filter_by_name(import_data, filter_words)
     import csv
     with open(filename, "w", newline='', encoding=encoding) as csvfile:
         writer = csv.writer(csvfile)
