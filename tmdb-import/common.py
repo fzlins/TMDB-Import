@@ -94,6 +94,16 @@ def create_csv(filename, import_data = {}):
     import_data = remove_duplicate_overview(import_data)
     import_data = remove_duplicate_backdrop(import_data)
     import_data = filter_by_name(import_data, filter_words)
+    
+    # Renumber episodes sequentially
+    renumbered_data = {}
+    episode_count = 1
+    for original_episode_number, episode in import_data.items():
+        episode.episode_number = str(episode_count)
+        renumbered_data[episode.episode_number] = episode
+        episode_count += 1
+    import_data = renumbered_data
+
     import csv
     with open(filename, "w", newline='', encoding=encoding) as csvfile:
         writer = csv.writer(csvfile)
