@@ -82,14 +82,14 @@ def filter_by_name(import_data, filter_words):
         if not episode.name:
             filtered_data[episode_number] = episode
             continue
-            
+
         for word in filter_list:
             if word and word in episode.name:
                 should_keep = False
                 break
         if should_keep:
             filtered_data[episode_number] = episode
-    
+
     return filtered_data
 
 def create_csv(filename, import_data = {}):
