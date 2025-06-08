@@ -5,9 +5,14 @@ import time
 from ..common import Episode, open_url
 
 # ex: https://v.qq.com/x/cover/mzc00200t0fg7k8/o0043eaefxx.html?ptag=douban.tv
+# ex: https://v.qq.com/x/cover/mzc00200t0fg7k8.html
 def qq_extractor(url):
     logging.info("qq_extractor is called")
-    cid = re.search(r'/cover/(.*?)/', url).group(1)
+    cid_match = re.search(r'/cover/([^/.]+)', url)
+    if cid_match:
+        cid = cid_match.group(1)
+    else:
+        raise ValueError("Could not extract cid from the URL")
     apiRequest = f"https://data.video.qq.com/fcgi-bin/data?otype=json&tid=431&idlist={cid}&appid=10001005&appkey=0d1a9ddd94de871b"
     logging.debug(f"API request url: {apiRequest}")
     soureData = json.loads(open_url(apiRequest).lstrip("QZOutputJson=").rstrip(";"))
