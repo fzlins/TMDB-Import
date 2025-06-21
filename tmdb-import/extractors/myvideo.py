@@ -12,16 +12,19 @@ def myvideo_extractor(url):
     driver = ini_webdriver()
     driver.get(url)
 
-    season_name = driver.find_element(By.CSS_SELECTOR, value="div[class='title'] h2").text
-    logging.info(f"name: {season_name}")
-    season_overview = driver.find_element(By.CSS_SELECTOR, value="p[class='describe']").text
-    logging.info(f"overview: {season_overview}")
-    #season_poster = get_large_image(season_poster)
-    #logging.info(f"poster: {season_poster}")
-    season_backdrops = driver.find_elements(By.CSS_SELECTOR, value="figure[class='movieStillsItem'] picture img")
-    for backdrop in season_backdrops:
-        season_backdrop = get_large_image(backdrop.get_attribute("src"))
-        logging.info(f"backdrop: {season_backdrop}")
+    try:
+        season_name = driver.find_element(By.CSS_SELECTOR, value="div[class='title'] h2").text
+        logging.info(f"name: {season_name}")
+        season_overview = driver.find_element(By.CSS_SELECTOR, value="p[class='describe']").text
+        logging.info(f"overview: {season_overview}")
+        #season_poster = get_large_image(season_poster)
+        #logging.info(f"poster: {season_poster}")
+        season_backdrops = driver.find_elements(By.CSS_SELECTOR, value="figure[class='movieStillsItem'] picture img")
+        for backdrop in season_backdrops:
+            season_backdrop = get_large_image(backdrop.get_attribute("src"))
+            logging.info(f"backdrop: {season_backdrop}")
+    except Exception as e:
+        logging.warning(f"Could not extract season-level information: {e}")
 
     source_data = driver.find_elements(By.CSS_SELECTOR, value="figure[class='episodeItemArea movieItemArea ']")
     episodes = {}
@@ -41,7 +44,8 @@ def myvideo_extractor(url):
             episode_name = re.search(r'【(.*?)】', title).group(1)
         episode_air_date = ""
         episode_runtime = ""
-        episode_overview = ""
+        episode_overview_element = episode.find_element(By.CSS_SELECTOR, value="span[class='episodeIntro movieIntro'] blockquote")
+        episode_overview = episode_overview_element.text if episode_overview_element else ""
         episode_backdrop = episode.find_element(By.CSS_SELECTOR, value="img[class='episodePhoto moviePhoto']").get_attribute('src')
         episode_backdrop = get_large_image(episode_backdrop)
         
