@@ -1,6 +1,7 @@
 # ignore directory
 Selenium/
 Image/
+.kiro/
 
 # ignore file
 *.csv
