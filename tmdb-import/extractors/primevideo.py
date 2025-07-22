@@ -1,7 +1,6 @@
 import logging
 from ..common import Episode
-from ..common import ini_webdriver
-from selenium.webdriver.common.by import By
+from ..common import ini_playwright_page, cleanup_playwright_page
 from datetime import datetime, timedelta
 import re
 
@@ -9,19 +8,23 @@ import re
 def primevideo_extractor(url):
     logging.info("primevideo_extractor is called")
 
-    driver = ini_webdriver(headless=False)
-    driver.get(url)
+    page = ini_playwright_page(headless=False)
+    page.goto(url)
     try:
-        epExpander = driver.find_element(By.CSS_SELECTOR, value="a[data-automation-id='ep-expander']")
-        # epExpander = WebDriverWait(driver, timeout=60).until(lambda d: d.find_element(By.CSS_SELECTOR, value="a[data-automation-id='ep-expander']"))
-        driver.get(epExpander.get_attribute("href"))
+        epExpander = page.locator("a[data-automation-id='ep-expander']")
+        epExpander_href = epExpander.get_attribute("href")
+        page.goto(epExpander_href)
     except:
         pass
 
-    # episodes = WebDriverWait(driver, timeout=60).until(lambda d: d.find_elements(By.CSS_SELECTOR, value="li[id*='av-ep-episodes-']"))
+    # Wait for episodes to load and get all episode elements
+    page.wait_for_selector("li[id*='av-ep-episodes-']", timeout=60000)
     episodes = {}
-    for episode in driver.find_elements(By.CSS_SELECTOR, value="li[id*='av-ep-episodes-']"):
-        episode_name = episode.find_elements(By.CSS_SELECTOR, value="span[dir='auto']")[0].text.strip()
+    episode_elements = page.locator("li[id*='av-ep-episodes-']").all()
+    
+    for episode in episode_elements:
+        episode_name_elements = episode.locator("span[dir='auto']").all()
+        episode_name = episode_name_elements[0].text_content().strip()
         episode_number = episode_name.split('.', 1)[0]
         episode_name = episode_name.removeprefix(f"{episode_number}.").strip()
         if episode_name.__contains__('「') and episode_name.__contains__('」') :
@@ -54,7 +57,7 @@ def primevideo_extractor(url):
         else:
             episode_runtime = int(runtime[0])
 
-        episode_overview = episode.find_element(By.CSS_SELECTOR, value="div[data-automation-id*='synopsis'] div[dir='auto']").get_attribute('innerText')
+        episode_overview = episode.locator("div[data-automation-id*='synopsis'] div[dir='auto']").get_attribute('innerText')
         if episode_overview.__contains__("※"):
             episode_overview = episode_overview.rsplit('※', 1)[0]
         elif episode_overview.__contains__("©"):
@@ -64,9 +67,9 @@ def primevideo_extractor(url):
         while episode_overview.__contains__('[') and episode_overview.endswith(']'):
             episode_overview = episode_overview.rsplit('[', 1)[0]
 
-        episode_backdrop = re.search(r'src=\"(.*?)\"', episode.find_element(By.CSS_SELECTOR, value="noscript").get_attribute('innerText')).group(1)
+        episode_backdrop = re.search(r'src=\"(.*?)\"', episode.locator("noscript").get_attribute('innerText')).group(1)
         
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
 
-    driver.close()
+    cleanup_playwright_page(page)
     return episodes

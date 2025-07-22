@@ -1,15 +1,20 @@
 # TMDB-Import
-脚本仅支持edge和Chrome。将浏览器更新的最新版本，再到Selenium官网下载对应浏览器版本的驱动，解压后将exe文件放到目录下。
-下载地址：https://www.selenium.dev/documentation/webdriver/getting_started/install_drivers/  
-Edge为默认的脚本浏览器。如果想使用Chrome运行脚本，在config.ini文件中，将browser的值改为chrome。
+脚本使用Playwright自动化框架，仅支持Chrome/Chromium浏览器。Playwright会自动下载和管理浏览器，无需手动安装驱动程序。
 
 # Required packages
 ```
-pip install selenium
+pip install playwright
 pip install python-dateutil
 pip install Pillow
 pip install bordercrop
 ```
+
+安装Playwright浏览器：
+```
+playwright install chromium
+```
+
+**注意：** 从Selenium迁移到Playwright后，浏览器用户数据目录从 `Selenium/` 更改为 `Browser/`。如果需要保留登录状态和浏览器数据，请手动将重要数据从旧目录复制到新目录。
 
 # 说明
 ```
@@ -35,7 +40,7 @@ python -m tmdb-import fitsize width*heigh "https://www.***.com/image.jpg"
 - 按给出的长宽裁剪图片
 
 # 测试环境
-Window11、Edge、Python3和Vistual Studio Code。
+Windows 11、Chrome/Chromium、Python 3和Visual Studio Code。
 
 # 已支持
 | 网站 | 标题 | 剧情介绍 | 时长 | 发布时间 | 背景图 | 默认语言 |

@@ -2,7 +2,7 @@ import json
 import urllib.request
 from urllib.parse import urlparse
 import logging
-from ..common import Episode, ini_webdriver, open_url
+from ..common import Episode, ini_playwright_page, cleanup_playwright_page, open_url
 
 # ex: https://fod.fujitv.co.jp/title/4v97/
 def fod_extractor(url):
@@ -13,11 +13,21 @@ def fod_extractor(url):
 
     seriesID = urlPath.rsplit('/', 1)[-1]
 
-    driver = ini_webdriver(headless=False)
-    driver.get(url)
-    token = driver.get_cookie("CT")["value"]
-    userAgent = driver.execute_script("return navigator.userAgent")
-    driver.close()
+    page = ini_playwright_page(headless=False)
+    page.goto(url)
+    
+    # Get cookies from context
+    cookies = page.context.cookies()
+    ct_cookie = next((cookie for cookie in cookies if cookie['name'] == 'CT'), None)
+    if not ct_cookie:
+        cleanup_playwright_page(page)
+        raise ValueError("CT cookie not found")
+    token = ct_cookie['value']
+    
+    # Get user agent using page.evaluate()
+    userAgent = page.evaluate("() => navigator.userAgent")
+    
+    cleanup_playwright_page(page)
 
     apiRequest = urllib.request.Request(f"https://i.fod.fujitv.co.jp/apps/api/lineup/detail/?lu_id={seriesID}&is_premium=false&dv_type=web", headers={'x-authorization': f'Bearer {token}', 'User-Agent' : f'{userAgent}'})
     soureData = json.loads(open_url(apiRequest))
