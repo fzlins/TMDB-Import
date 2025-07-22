@@ -1,37 +1,45 @@
 import logging
 import re
-from selenium.webdriver.common.by import By
 from ..common import Episode
-from ..common import ini_webdriver
-from selenium.webdriver.support.ui import WebDriverWait
+from ..common import ini_playwright_page, cleanup_playwright_page
 
 # ixigua ex: https://www.ixigua.com/7144949347581428232
 def ixigua_extractor(url):
     logging.info("ixigua_extractor is called")
 
-    driver = ini_webdriver(headless= False)
-    driver.get(url)
+    page = ini_playwright_page(headless=False)
     
-    WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(By.CLASS_NAME, value="ProgramGuide__title-span"))
-    season_name = driver.find_element(By.CLASS_NAME, value="ProgramGuide__title-span").text
-    logging.info(f"name: {season_name}")
-    WebDriverWait(driver, timeout=30).until(lambda d: d.find_element(By.CSS_SELECTOR, value="meta[name='description']"))
-    season_overview = driver.find_element(By.CSS_SELECTOR, value="meta[name='description']").text
-    logging.info(f"overview: {season_overview}")
-
-    source_data = WebDriverWait(driver, timeout=30).until(lambda d: d.find_elements(By.CSS_SELECTOR, value="div[class*='richPlayCard dark']"))
-    episode_number = 1
-    episodes = {}
-    for episode in source_data:
-        episode_number = episode_number
-        episode_name = episode.find_element(By.CSS_SELECTOR, value="div[class='title']").text
-
-        episode_air_date = ""
-        episode_runtime = ""
-        episode_overview = ""
-        episode_backdrop = episode.find_element(By.TAG_NAME, value="img").get_attribute('src')
+    try:
+        page.goto(url)
         
-        episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
-        episode_number = episode_number + 1
-    driver.close()
+        # Wait for and extract season name
+        page.wait_for_selector(".ProgramGuide__title-span", timeout=30000)
+        season_name = page.locator(".ProgramGuide__title-span").text_content()
+        logging.info(f"name: {season_name}")
+        
+        # Wait for and extract season overview from meta tag
+        page.wait_for_selector("meta[name='description']", timeout=30000)
+        season_overview = page.locator("meta[name='description']").get_attribute("content")
+        logging.info(f"overview: {season_overview}")
+
+        # Wait for and extract episode data
+        page.wait_for_selector("div[class*='richPlayCard dark']", timeout=30000)
+        source_data = page.locator("div[class*='richPlayCard dark']").all()
+        
+        episode_number = 1
+        episodes = {}
+        for episode in source_data:
+            episode_name = episode.locator("div[class='title']").text_content()
+
+            episode_air_date = ""
+            episode_runtime = ""
+            episode_overview = ""
+            episode_backdrop = episode.locator("img").get_attribute('src')
+            
+            episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
+            episode_number = episode_number + 1
+            
+    finally:
+        cleanup_playwright_page(page)
+        
     return episodes

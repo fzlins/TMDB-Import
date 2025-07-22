@@ -126,35 +126,104 @@ def read_csv(filename):
         csvfile.close()
     return importData
 
-def ini_webdriver(headless=True, save_user_profile = False, images = False):
-    from selenium import webdriver
-    browser = config.get("DEFAULT","browser", fallback="edge")
-    save_user_profile = config.getboolean("DEFAULT","save_user_profile", fallback=save_user_profile)
-    if browser.lower() == "chrome":
-        options = webdriver.ChromeOptions()
-    else:
-        options = webdriver.EdgeOptions()
-
-    if headless:
-        options.add_argument('--headless')
+def ini_playwright_page(headless=True, save_user_profile=False, images=False):
+    """
+    Initialize a Playwright browser page with Chrome/Chromium.
+    
+    Args:
+        headless (bool): Run browser in headless mode
+        save_user_profile (bool): Use persistent browser context with user data
+        images (bool): Enable/disable image loading
+    
+    Returns:
+        playwright.sync_api.Page: Playwright page object
+    """
+    from playwright.sync_api import sync_playwright
+    
+    # Get configuration values
+    save_user_profile = config.getboolean("DEFAULT", "save_user_profile", fallback=save_user_profile)
+    
+    # Initialize Playwright
+    playwright = sync_playwright().start()
+    
+    # Common launch arguments
+    common_args = [
+        '--disable-gpu',
+        '--autoplay-policy=no-user-gesture-required',
+        '--disable-blink-features=AutomationControlled',
+        '--no-first-run',
+        '--disable-default-apps'
+    ]
+    
+    # Create browser context
     if save_user_profile:
-        user_date_dir = os.path.join(os.getcwd(), "Selenium")
-        options.add_argument("user-data-dir=" + user_date_dir)
-    options.add_argument('--disable-gpu')
-    options.add_argument("--autoplay-policy=no-user-gesture-required")
-    options.add_experimental_option("excludeSwitches", ["enable-automation", "enable-logging"])
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    if images:
-        options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 1})
+        user_data_dir = os.path.join(os.getcwd(), "Browser")
+        # Create directory if it doesn't exist
+        os.makedirs(user_data_dir, exist_ok=True)
+        
+        # Launch with persistent context
+        context = playwright.chromium.launch_persistent_context(
+            user_data_dir=user_data_dir,
+            headless=headless,
+            args=common_args,
+            timeout=60000  # Increase timeout for persistent context
+        )
+        browser = None  # No separate browser object when using persistent context
     else:
-        options.add_experimental_option("prefs", {"profile.managed_default_content_settings.images": 2})
+        # Launch regular browser
+        browser = playwright.chromium.launch(
+            headless=headless,
+            args=common_args
+        )
+        context = browser.new_context()
+    
+    # Block images if requested
+    if not images:
+        context.route("**/*.{png,jpg,jpeg,gif,webp,svg,ico}", lambda route: route.abort())
+    
+    # Create new page
+    page = context.new_page()
+    
+    # Hide webdriver property to avoid detection
+    page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+    
+    # Store references for cleanup
+    page._playwright_context = context
+    page._playwright_browser = browser
+    page._playwright_instance = playwright
+    page._is_persistent = save_user_profile
+    
+    return page
 
-    if browser.lower() == "chrome":
-        driver = webdriver.Chrome(options=options)
-    else:
-        driver = webdriver.Edge(options=options)
-    driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-    return driver
+def cleanup_playwright_page(page):
+    """
+    Properly cleanup Playwright page, context, browser and instance.
+    
+    Args:
+        page: Playwright page object with attached cleanup references
+    """
+    try:
+        # Close page first
+        if hasattr(page, 'close') and not page.is_closed():
+            page.close()
+            
+        # Close context
+        if hasattr(page, '_playwright_context') and page._playwright_context:
+            page._playwright_context.close()
+            
+        # Close browser (only if not using persistent context)
+        if hasattr(page, '_playwright_browser') and page._playwright_browser:
+            if not getattr(page, '_is_persistent', False):
+                page._playwright_browser.close()
+                
+        # Stop Playwright instance
+        if hasattr(page, '_playwright_instance') and page._playwright_instance:
+            page._playwright_instance.stop()
+            
+    except Exception as e:
+        print(f"Warning: Error during Playwright cleanup: {e}")
+
+
 
 def open_url(url, encoding = ""):
     if encoding == "":

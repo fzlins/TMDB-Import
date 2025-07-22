@@ -1,44 +1,52 @@
 import logging
 from ..common import Episode
-from ..common import ini_webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
+from ..common import ini_playwright_page, cleanup_playwright_page
 
 # Ex: https://anidb.net/anime/2073
 def anidb_extractor(url):
     logging.info("anidb_extractor is called")
 
-    driver = ini_webdriver(headless=False, save_user_profile=True)
-    driver.get(url)
+    page = ini_playwright_page(headless=False, save_user_profile=True)
     
-    episodes = {}
-    episode_number = 1
-    for episode in WebDriverWait(driver, timeout=30).until(lambda d: d.find_elements(By.CSS_SELECTOR, value="tr[itemprop='episode']")):
-        all_columns = episode.find_elements(By.TAG_NAME,"td")
-        number = all_columns[1].text.strip()
-        if number.isnumeric():
-            while episode_number <= int(number):
-                if int(number) == episode_number:
-                    episode_name = all_columns[2].find_element(By.CSS_SELECTOR, value="label[itemprop='name']").text
-                    episode_air_date = all_columns[4].get_attribute('content')
-                    episode_runtime = all_columns[3].text
-                    episode_overview = ""
-                    episode_backdrop = ""
-                    episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
-                else:
-                    episode_name = ""
-                    episode_air_date = "null"
-                    episode_runtime = all_columns[3].text
-                    episode_overview = ""
-                    episode_backdrop = ""
-                    episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
-                    
-                episode_number = episode_number + 1
+    try:
+        page.goto(url)
+        
+        episodes = {}
+        episode_number = 1
+        
+        # Wait for episode elements to be present and get all episodes
+        page.wait_for_selector("tr[itemprop='episode']", timeout=30000)
+        episode_elements = page.locator("tr[itemprop='episode']").all()
+        
+        for episode in episode_elements:
+            all_columns = episode.locator("td").all()
+            number = all_columns[1].text_content().strip()
+            if number.isnumeric():
+                while episode_number <= int(number):
+                    if int(number) == episode_number:
+                        episode_name = all_columns[2].locator("label[itemprop='name']").text_content()
+                        episode_air_date = all_columns[4].get_attribute('content')
+                        episode_runtime = all_columns[3].text_content()
+                        episode_overview = ""
+                        episode_backdrop = ""
+                        episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
+                    else:
+                        episode_name = ""
+                        episode_air_date = "null"
+                        episode_runtime = all_columns[3].text_content()
+                        episode_overview = ""
+                        episode_backdrop = ""
+                        episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
+                        
+                    episode_number = episode_number + 1
 
-            # try:
-                # en
-                # summary = all_columns[2].find_element(By.CSS_SELECTOR, value="span[class='i_icon i_summary']").get_attribute('title')
-            # except:
-                # pass
+                # try:
+                    # en
+                    # summary = all_columns[2].locator("span[class='i_icon i_summary']").get_attribute('title')
+                # except:
+                    # pass
 
-    return episodes
+        return episodes
+    
+    finally:
+        cleanup_playwright_page(page)
