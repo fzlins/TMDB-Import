@@ -7,7 +7,7 @@ from ..common import ini_playwright_page, cleanup_playwright_page
 def paravi_extractor(url):
     logging.info("paravi_extractor is called")
 
-    page = ini_playwright_page(headless=False)
+    page = ini_playwright_page()
     try:
         page.goto(url)
         

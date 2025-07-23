@@ -6,7 +6,7 @@ from ..common import ini_playwright_page, cleanup_playwright_page
 def anidb_extractor(url):
     logging.info("anidb_extractor is called")
 
-    page = ini_playwright_page(headless=False, save_user_profile=True)
+    page = ini_playwright_page(save_user_profile=True)
     
     try:
         page.goto(url)

@@ -16,26 +16,59 @@ playwright install chromium
 
 **注意：** 从Selenium迁移到Playwright后，浏览器用户数据目录从 `Selenium/` 更改为 `Browser/`。如果需要保留登录状态和浏览器数据，请手动将重要数据从旧目录复制到新目录。
 
-# 说明
+# 使用说明
+
+## 命令行选项
+- `-h, --help`: 显示帮助信息
+- `-V, --version`: 显示版本信息  
+- `-d, --debug`: 启用调试日志（默认为INFO级别）
+- `--headless`: 以无头模式运行浏览器（默认为GUI模式）
+
+## 基本用法
+```
+python -m tmdb-import [选项] "URL"
+```
+
+## 浏览器模式说明
+- **GUI模式（默认）**: 浏览器窗口可见，适合调试和需要手动交互的场景
+- **无头模式（--headless）**: 浏览器在后台运行，不显示窗口，适合自动化脚本和服务器环境
+- 无头模式可以提高性能并减少资源占用，特别适合批量处理任务
+
+### 抓取剧集数据
 ```
 python -m tmdb-import "http://www.***.com/video.html"
+python -m tmdb-import -d "http://www.***.com/video.html"  # 启用调试日志
+python -m tmdb-import --headless "http://www.***.com/video.html"  # 无头模式运行
+python -m tmdb-import -d --headless "http://www.***.com/video.html"  # 调试+无头模式
 ```
 - 通过网页链接来抓取剧集数据，包括标题、剧情介绍、时长、发布时间（大多数为当前平台的时间）和背景图链接，并生成import.csv文件用于之后的导入。
+
+### 导入数据到TMDB
 ```
 python -m tmdb-import "https://www.themoviedb.org/tv/{tv_id}/season/{season_number}?language={language}"
-# ex: -m tmdb-import "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
+# 示例: python -m tmdb-import "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
+# 启用调试: python -m tmdb-import -d "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
+# 无头模式: python -m tmdb-import --headless "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
+# 组合选项: python -m tmdb-import -d --headless "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
 ```
 - 导入目录下的import.csv的数据到TMDB。上传背景图时，自动切除黑边和适配TMDB所要求的1.78比例。第一次运行需要在登陆界面手动登陆（或者在代码中填写实现自动登陆），forced_upload（值为True时，在允许在TMDB已有背景图片的情况下继续上传）
+
+### 图片处理
 ```
 python -m tmdb-import backdrop "https://www.***.com/image.jpg"
+python -m tmdb-import --headless backdrop "https://www.***.com/image.jpg"  # 无头模式处理背景图
 ```
 - 裁剪出适配TMDB的背景图
+
 ```
 python -m tmdb-import poster "https://www.***.com/image.jpg"
+python -m tmdb-import --headless poster "https://www.***.com/image.jpg"  # 无头模式处理海报
 ```
 - 裁剪出适配TMDB的海报图片
+
 ```
-python -m tmdb-import fitsize width*heigh "https://www.***.com/image.jpg"
+python -m tmdb-import fitsize width*height "https://www.***.com/image.jpg"
+python -m tmdb-import --headless fitsize 1920*1080 "https://www.***.com/image.jpg"  # 无头模式裁剪
 ```
 - 按给出的长宽裁剪图片
 

@@ -8,7 +8,7 @@ import re
 def primevideo_extractor(url):
     logging.info("primevideo_extractor is called")
 
-    page = ini_playwright_page(headless=False)
+    page = ini_playwright_page()
     page.goto(url)
     try:
         epExpander = page.locator("a[data-automation-id='ep-expander']")

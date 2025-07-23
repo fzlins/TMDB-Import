@@ -22,7 +22,7 @@ def import_spisode(tmdb_id, season_number, language):
 
     page = None
     try:
-        page = ini_playwright_page(headless=False, save_user_profile=True, images=True)
+        page = ini_playwright_page(save_user_profile=True, images=True)
     except (PlaywrightBrowserError, PlaywrightInstallationError) as e:
         logging.error(f"Failed to initialize browser for episode import: {e}")
         print(f"Error: {e}")

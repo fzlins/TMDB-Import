@@ -7,7 +7,7 @@ from datetime import datetime
 def tvdb_extractor(url):
     logging.info("tvdb_extractor is called")
 
-    page = ini_playwright_page(headless=False, save_user_profile=True)
+    page = ini_playwright_page(save_user_profile=True)
     
     try:
         page.goto(url)

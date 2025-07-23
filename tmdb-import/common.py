@@ -138,7 +138,7 @@ def read_csv(filename):
         csvfile.close()
     return importData
 
-def ini_playwright_page(headless=True, save_user_profile=False, images=False):
+def ini_playwright_page(headless=None, save_user_profile=False, images=False):
     """
     Initialize a Playwright browser page with Chrome/Chromium.
     
@@ -163,6 +163,11 @@ def ini_playwright_page(headless=True, save_user_profile=False, images=False):
     
     # Get configuration values
     save_user_profile = config.getboolean("DEFAULT", "save_user_profile", fallback=save_user_profile)
+    
+    # Check for command line headless mode override
+    if headless is None:
+        # Check environment variable set by command line option
+        headless = os.environ.get('TMDB_HEADLESS_MODE', 'False').lower() == 'true'
     
     playwright = None
     browser = None

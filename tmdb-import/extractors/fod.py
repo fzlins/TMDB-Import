@@ -13,7 +13,7 @@ def fod_extractor(url):
 
     seriesID = urlPath.rsplit('/', 1)[-1]
 
-    page = ini_playwright_page(headless=False)
+    page = ini_playwright_page()
     page.goto(url)
     
     # Get cookies from context
