@@ -1,8 +1,20 @@
 import configparser
 import os
-import re
 config = configparser.ConfigParser()
 config.read('config.ini', encoding='utf-8-sig')
+
+# Custom exceptions for Playwright operations
+class PlaywrightError(Exception):
+    """Base exception for Playwright-related errors"""
+    pass
+
+class PlaywrightBrowserError(PlaywrightError):
+    """Exception raised when browser operations fail"""
+    pass
+
+class PlaywrightInstallationError(PlaywrightError):
+    """Exception raised when Playwright installation is missing or incomplete"""
+    pass
 
 class Person:
     def __init__(self, *args):
@@ -137,63 +149,158 @@ def ini_playwright_page(headless=True, save_user_profile=False, images=False):
     
     Returns:
         playwright.sync_api.Page: Playwright page object
+        
+    Raises:
+        PlaywrightBrowserError: When browser initialization fails
+        PlaywrightInstallationError: When Playwright/Chrome is not properly installed
     """
-    from playwright.sync_api import sync_playwright
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError as e:
+        raise PlaywrightInstallationError(
+            "Playwright is not installed. Please install it using: pip install playwright && playwright install chromium"
+        ) from e
     
     # Get configuration values
     save_user_profile = config.getboolean("DEFAULT", "save_user_profile", fallback=save_user_profile)
     
-    # Initialize Playwright
-    playwright = sync_playwright().start()
+    playwright = None
+    browser = None
+    context = None
+    page = None
     
-    # Common launch arguments
-    common_args = [
-        '--disable-gpu',
-        '--autoplay-policy=no-user-gesture-required',
-        '--disable-blink-features=AutomationControlled',
-        '--no-first-run',
-        '--disable-default-apps'
-    ]
-    
-    # Create browser context
-    if save_user_profile:
-        user_data_dir = os.path.join(os.getcwd(), "Browser")
-        # Create directory if it doesn't exist
-        os.makedirs(user_data_dir, exist_ok=True)
+    try:
+        # Initialize Playwright
+        playwright = sync_playwright().start()
         
-        # Launch with persistent context
-        context = playwright.chromium.launch_persistent_context(
-            user_data_dir=user_data_dir,
-            headless=headless,
-            args=common_args,
-            timeout=60000  # Increase timeout for persistent context
-        )
-        browser = None  # No separate browser object when using persistent context
-    else:
-        # Launch regular browser
-        browser = playwright.chromium.launch(
-            headless=headless,
-            args=common_args
-        )
-        context = browser.new_context()
+        # Common launch arguments
+        common_args = [
+            '--disable-gpu',
+            '--autoplay-policy=no-user-gesture-required',
+            '--disable-blink-features=AutomationControlled',
+            '--no-first-run',
+            '--disable-default-apps'
+        ]
+        
+        # Create browser context
+        if save_user_profile:
+            user_data_dir = os.path.join(os.getcwd(), "Browser")
+            # Create directory if it doesn't exist
+            try:
+                os.makedirs(user_data_dir, exist_ok=True)
+            except OSError as e:
+                raise PlaywrightBrowserError(f"Failed to create user data directory: {e}") from e
+            
+            # Launch with persistent context
+            try:
+                context = playwright.chromium.launch_persistent_context(
+                    user_data_dir=user_data_dir,
+                    headless=headless,
+                    args=common_args,
+                    timeout=60000  # Increase timeout for persistent context
+                )
+                browser = None  # No separate browser object when using persistent context
+            except Exception as e:
+                raise PlaywrightBrowserError(
+                    "Failed to launch Chrome browser with persistent context. "
+                    "Please ensure Chrome/Chromium is installed and accessible. "
+                    f"Error: {e}"
+                ) from e
+        else:
+            # Launch regular browser
+            try:
+                browser = playwright.chromium.launch(
+                    headless=headless,
+                    args=common_args
+                )
+                context = browser.new_context()
+            except Exception as e:
+                raise PlaywrightBrowserError(
+                    "Failed to launch Chrome browser. "
+                    "Please ensure Chrome/Chromium is installed and accessible. "
+                    "You may need to run: playwright install chromium. "
+                    f"Error: {e}"
+                ) from e
+        
+        # Block images if requested
+        if not images:
+            try:
+                context.route("**/*.{png,jpg,jpeg,gif,webp,svg,ico}", lambda route: route.abort())
+            except Exception as e:
+                print(f"Warning: Failed to block images: {e}")
+        
+        # Create new page
+        try:
+            page = context.new_page()
+        except Exception as e:
+            raise PlaywrightBrowserError(f"Failed to create new page: {e}") from e
+        
+        # Hide webdriver property to avoid detection
+        try:
+            page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+        except Exception as e:
+            print(f"Warning: Failed to hide webdriver property: {e}")
+        
+        # Store references for cleanup
+        page._playwright_context = context
+        page._playwright_browser = browser
+        page._playwright_instance = playwright
+        page._is_persistent = save_user_profile
+        
+        return page
+        
+    except (PlaywrightBrowserError, PlaywrightInstallationError):
+        # Re-raise our custom exceptions
+        # Clean up any partially initialized resources
+        _emergency_cleanup(page, context, browser, playwright)
+        raise
+    except Exception as e:
+        # Clean up any partially initialized resources
+        _emergency_cleanup(page, context, browser, playwright)
+        raise PlaywrightBrowserError(
+            f"Unexpected error during browser initialization: {e}. "
+            "Please ensure Playwright and Chrome/Chromium are properly installed."
+        ) from e
+
+def _emergency_cleanup(page, context, browser, playwright):
+    """
+    Emergency cleanup function for partially initialized Playwright resources.
+    Used when initialization fails partway through.
     
-    # Block images if requested
-    if not images:
-        context.route("**/*.{png,jpg,jpeg,gif,webp,svg,ico}", lambda route: route.abort())
-    
-    # Create new page
-    page = context.new_page()
-    
-    # Hide webdriver property to avoid detection
-    page.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-    
-    # Store references for cleanup
-    page._playwright_context = context
-    page._playwright_browser = browser
-    page._playwright_instance = playwright
-    page._is_persistent = save_user_profile
-    
-    return page
+    Args:
+        page: Playwright page object (may be None)
+        context: Playwright context object (may be None)
+        browser: Playwright browser object (may be None)
+        playwright: Playwright instance (may be None)
+    """
+    try:
+        if page and hasattr(page, 'close'):
+            try:
+                if not page.is_closed():
+                    page.close()
+            except:
+                pass
+                
+        if context and hasattr(context, 'close'):
+            try:
+                context.close()
+            except:
+                pass
+                
+        if browser and hasattr(browser, 'close'):
+            try:
+                browser.close()
+            except:
+                pass
+                
+        if playwright and hasattr(playwright, 'stop'):
+            try:
+                playwright.stop()
+            except:
+                pass
+    except:
+        # Ignore all errors during emergency cleanup
+        pass
 
 def cleanup_playwright_page(page):
     """
@@ -201,29 +308,112 @@ def cleanup_playwright_page(page):
     
     Args:
         page: Playwright page object with attached cleanup references
+        
+    Raises:
+        PlaywrightError: If cleanup fails critically (non-recoverable errors)
     """
+    cleanup_errors = []
+    
     try:
         # Close page first
         if hasattr(page, 'close') and not page.is_closed():
-            page.close()
-            
+            try:
+                page.close()
+            except Exception as e:
+                cleanup_errors.append(f"Failed to close page: {e}")
+                
         # Close context
         if hasattr(page, '_playwright_context') and page._playwright_context:
-            page._playwright_context.close()
-            
+            try:
+                page._playwright_context.close()
+            except Exception as e:
+                cleanup_errors.append(f"Failed to close context: {e}")
+                
         # Close browser (only if not using persistent context)
         if hasattr(page, '_playwright_browser') and page._playwright_browser:
             if not getattr(page, '_is_persistent', False):
-                page._playwright_browser.close()
-                
+                try:
+                    page._playwright_browser.close()
+                except Exception as e:
+                    cleanup_errors.append(f"Failed to close browser: {e}")
+                    
         # Stop Playwright instance
         if hasattr(page, '_playwright_instance') and page._playwright_instance:
-            page._playwright_instance.stop()
-            
+            try:
+                page._playwright_instance.stop()
+            except Exception as e:
+                cleanup_errors.append(f"Failed to stop Playwright instance: {e}")
+                
     except Exception as e:
-        print(f"Warning: Error during Playwright cleanup: {e}")
+        cleanup_errors.append(f"Unexpected error during cleanup: {e}")
+    
+    # Log warnings for non-critical errors, but don't raise exceptions
+    # unless there are critical issues
+    if cleanup_errors:
+        for error in cleanup_errors:
+            print(f"Warning: {error}")
+        
+        # Only raise if there are too many errors (indicates serious problem)
+        if len(cleanup_errors) > 2:
+            raise PlaywrightError(f"Multiple cleanup failures: {'; '.join(cleanup_errors)}")
 
 
+
+def validate_playwright_installation():
+    """
+    Validate that Playwright is properly installed and Chrome/Chromium is available.
+    
+    Returns:
+        tuple: (is_valid, error_message)
+    """
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        return False, "Playwright is not installed. Please install it using: pip install playwright"
+    
+    try:
+        playwright = sync_playwright().start()
+        try:
+            # Try to launch browser to verify Chrome/Chromium is available
+            browser = playwright.chromium.launch(headless=True)
+            browser.close()
+            playwright.stop()
+            return True, "Playwright and Chrome/Chromium are properly installed"
+        except Exception as e:
+            playwright.stop()
+            return False, f"Chrome/Chromium is not available. Please run: playwright install chromium. Error: {e}"
+    except Exception as e:
+        return False, f"Failed to initialize Playwright: {e}"
+
+def safe_playwright_operation(operation_func, *args, **kwargs):
+    """
+    Safely execute a Playwright operation with proper error handling and cleanup.
+    
+    Args:
+        operation_func: Function to execute that uses Playwright
+        *args, **kwargs: Arguments to pass to the operation function
+        
+    Returns:
+        Result of the operation function
+        
+    Raises:
+        PlaywrightError: If the operation fails
+    """
+    page = None
+    try:
+        # Validate installation first
+        is_valid, error_msg = validate_playwright_installation()
+        if not is_valid:
+            raise PlaywrightInstallationError(error_msg)
+        
+        # Execute the operation
+        return operation_func(*args, **kwargs)
+        
+    except (PlaywrightError, PlaywrightBrowserError, PlaywrightInstallationError):
+        # Re-raise our custom exceptions
+        raise
+    except Exception as e:
+        raise PlaywrightError(f"Unexpected error during Playwright operation: {e}") from e
 
 def open_url(url, encoding = ""):
     if encoding == "":
