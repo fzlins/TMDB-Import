@@ -20,10 +20,24 @@ def import_spisode(tmdb_id, season_number, language):
         print("Missing language parameter.")
         return 
 
-    page = ini_playwright_page(headless=False, save_user_profile=True, images=True)
+    page = None
+    try:
+        page = ini_playwright_page(headless=False, save_user_profile=True, images=True)
+    except (PlaywrightBrowserError, PlaywrightInstallationError) as e:
+        logging.error(f"Failed to initialize browser for episode import: {e}")
+        print(f"Error: {e}")
+        return
+    except Exception as e:
+        logging.error(f"Unexpected error initializing browser: {e}")
+        print(f"Unexpected error: {e}")
+        return
 
     try:
-        page.goto("https://www.themoviedb.org/login")
+        # Navigate to TMDB login with error handling
+        try:
+            page.goto("https://www.themoviedb.org/login", timeout=30000)
+        except Exception as e:
+            raise PlaywrightError(f"Failed to navigate to TMDB login page: {e}") from e
         
         if len(page.locator("li[class='user']").all()) == 0:
             # login
@@ -252,7 +266,7 @@ def import_spisode(tmdb_id, season_number, language):
             time.sleep(3)
             for episoideNumber in importData:
                 if (importData[episoideNumber].__contains__("backdrop") and len(importData[episoideNumber]['backdrop']) > 0):
-                    css_selector = f"div[class='image'] a[episode='{episoideNumber}'][season='{season_number}'] img"
+                    css_selector = f"div[class='image'] a[data-episode-number='{episoideNumber}'][data-season-number='{season_number}'] img"
                     if len(page.locator(css_selector).all()) > 0:
                         importData[episoideNumber]['backdrop'] = ""
 
@@ -304,7 +318,17 @@ def import_spisode(tmdb_id, season_number, language):
                     logging.error(
                         f"Download/upload backdrop error for: {importData[episoideNumber]['backdrop']}.", exc_info=e)
 
+    except PlaywrightError as e:
+        logging.error(f"Playwright error during episode import: {e}")
+        print(f"Browser error: {e}")
+    except Exception as e:
+        logging.error(f"Unexpected error during episode import: {e}")
+        print(f"Unexpected error: {e}")
     finally:
-        cleanup_playwright_page(page)
+        if page:
+            try:
+                cleanup_playwright_page(page)
+            except Exception as e:
+                logging.error(f"Failed to cleanup episode import page: {e}")
     
     return
