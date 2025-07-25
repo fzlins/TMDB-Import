@@ -14,21 +14,21 @@ _options = [
     'headless',
 ]
 
-_short_options = 'Vdh'
+_short_options = 'hVd'
 
 _help = f"""Usage: {script_name} [OPTION]... [URL]...
 
 Options:
-      --help       Show this help message and exit
+  -h, --help       Show this help message and exit
   -V, --version    Show version information
   -d, --debug      Enable debug logging (default: INFO level)
-  -h, --headless   Run browser in headless mode (default: GUI mode)
+      --headless   Run browser in headless mode (default: GUI mode)
 
 Examples:
   {script_name} "http://www.example.com/video.html"
   {script_name} -d "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
-  {script_name} -h --debug backdrop "https://www.example.com/image.jpg"
-  {script_name} -dh "http://www.example.com/video.html"
+  {script_name} --headless --debug backdrop "https://www.example.com/image.jpg"
+  {script_name} -d --headless "http://www.example.com/video.html"
 """
 
 def main(**kwargs):
@@ -47,7 +47,7 @@ def main(**kwargs):
     for opt, arg in opts:
         if opt in ('-d', '--debug'):
             debug_mode = True
-        elif opt in ('-h', '--headless'):
+        elif opt in ('--headless',):
             headless_mode = True
     
     # Setup logger with debug mode
@@ -63,7 +63,7 @@ def main(**kwargs):
     else:
         conf = {}
         for opt, arg in opts:
-            if opt in ('--help',):
+            if opt in ('-h', '--help'):
                 # Display help.
                 print(_help)
             elif opt in ('-V', '--version'):
@@ -75,7 +75,7 @@ def main(**kwargs):
             elif opt in ('-d', '--debug'):
                 # Debug option already handled above
                 pass
-            elif opt in ('-h', '--headless'):
+            elif opt in ('--headless',):
                 # Headless option already handled above
                 pass
         
