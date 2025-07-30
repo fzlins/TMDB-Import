@@ -1,7 +1,10 @@
 # TMDB-Import
-脚本使用Playwright自动化框架，仅支持Chrome/Chromium浏览器。Playwright会自动下载和管理浏览器，无需手动安装驱动程序。
 
-# Required packages
+[![English](https://img.shields.io/badge/docs-English-blue)](./README.md) [![简体中文](https://img.shields.io/badge/docs-简体中文-yellow)](./docs/README.zh-CN.md)
+
+This script uses the Playwright automation framework and only supports Chrome/Chromium browsers. Playwright automatically downloads and manages browsers, eliminating the need for manual driver installation.
+
+# Required Packages
 ```
 pip install playwright
 pip install python-dateutil
@@ -9,74 +12,74 @@ pip install Pillow
 pip install bordercrop
 ```
 
-安装Playwright浏览器：
+Install Playwright browser:
 ```
 playwright install chromium
 ```
 
-# 使用说明
+# Usage
 
-## 命令行选项
-- `-h, --help`: 显示帮助信息
-- `-V, --version`: 显示版本信息  
-- `-d, --debug`: 启用调试日志（默认为INFO级别）
-- `--headless`: 以无头模式运行浏览器（默认为GUI模式）
+## Command Line Options
+- `-h, --help`: Show help information
+- `-V, --version`: Show version information  
+- `-d, --debug`: Enable debug logging (default is INFO level)
+- `--headless`: Run browser in headless mode (default is GUI mode)
 
-## 基本用法
+## Basic Usage
 ```
-python -m tmdb-import [选项] "URL"
+python -m tmdb-import [options] "URL"
 ```
 
-## 浏览器模式说明
-- **GUI模式（默认）**: 浏览器窗口可见，适合调试和需要手动交互的场景
-- **无头模式（--headless）**: 浏览器在后台运行，不显示窗口，适合自动化脚本和服务器环境
-- 无头模式可以提高性能并减少资源占用，特别适合批量处理任务
+## Browser Mode Description
+- **GUI Mode (default)**: Browser window is visible, suitable for debugging and scenarios requiring manual interaction
+- **Headless Mode (--headless)**: Browser runs in the background without displaying a window, suitable for automation scripts and server environments
+- Headless mode can improve performance and reduce resource usage, especially suitable for batch processing tasks
 
-### 抓取剧集数据
+### Extract Episode Data
 ```
 python -m tmdb-import "http://www.***.com/video.html"
-python -m tmdb-import -d "http://www.***.com/video.html"  # 启用调试日志
-python -m tmdb-import --headless "http://www.***.com/video.html"  # 无头模式运行
-python -m tmdb-import -d --headless "http://www.***.com/video.html"  # 调试+无头模式
+python -m tmdb-import -d "http://www.***.com/video.html"  # Enable debug logging
+python -m tmdb-import --headless "http://www.***.com/video.html"  # Run in headless mode
+python -m tmdb-import -d --headless "http://www.***.com/video.html"  # Debug + headless mode
 ```
-- 通过网页链接来抓取剧集数据，包括标题、剧情介绍、时长、发布时间（大多数为当前平台的时间）和背景图链接，并生成import.csv文件用于之后的导入。
+- Extract episode data through web links, including title, plot description, duration, release time (mostly current platform time), and background image links, and generate import.csv file for subsequent import.
 
-### 导入数据到TMDB
+### Import Data to TMDB
 ```
 python -m tmdb-import "https://www.themoviedb.org/tv/{tv_id}/season/{season_number}?language={language}"
-# 示例: python -m tmdb-import "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
-# 启用调试: python -m tmdb-import -d "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
-# 无头模式: python -m tmdb-import --headless "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
-# 组合选项: python -m tmdb-import -d --headless "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
+# Example: python -m tmdb-import "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
+# Enable debug: python -m tmdb-import -d "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
+# Headless mode: python -m tmdb-import --headless "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
+# Combined options: python -m tmdb-import -d --headless "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
 ```
-- 导入目录下的import.csv的数据到TMDB。上传背景图时，自动切除黑边和适配TMDB所要求的1.78比例。第一次运行需要在登陆界面手动登陆（或者在代码中填写实现自动登陆），forced_upload（值为True时，在允许在TMDB已有背景图片的情况下继续上传）
+- Import data from import.csv in the directory to TMDB. When uploading background images, automatically crop black borders and adapt to the 1.78 ratio required by TMDB. First run requires manual login at the login interface (or fill in code to implement automatic login), forced_upload (when set to True, allows continued upload when TMDB already has background images)
 
-### 图片处理
+### Image Processing
 ```
 python -m tmdb-import backdrop "https://www.***.com/image.jpg"
-python -m tmdb-import --headless backdrop "https://www.***.com/image.jpg"  # 无头模式处理背景图
+python -m tmdb-import --headless backdrop "https://www.***.com/image.jpg"  # Process backdrop in headless mode
 ```
-- 裁剪出适配TMDB的背景图
+- Crop backdrop images to fit TMDB requirements
 
 ```
 python -m tmdb-import poster "https://www.***.com/image.jpg"
-python -m tmdb-import --headless poster "https://www.***.com/image.jpg"  # 无头模式处理海报
+python -m tmdb-import --headless poster "https://www.***.com/image.jpg"  # Process poster in headless mode
 ```
-- 裁剪出适配TMDB的海报图片
+- Crop poster images to fit TMDB requirements
 
 ```
 python -m tmdb-import fitsize width*height "https://www.***.com/image.jpg"
-python -m tmdb-import --headless fitsize 1920*1080 "https://www.***.com/image.jpg"  # 无头模式裁剪
+python -m tmdb-import --headless fitsize 1920*1080 "https://www.***.com/image.jpg"  # Crop in headless mode
 ```
-- 按给出的长宽裁剪图片
+- Crop images according to specified width and height
 
-# 测试环境
-Windows 11、Chrome/Chromium、Python 3和Visual Studio Code。
+# Test Environment
+Windows 11, Chrome/Chromium, Python 3, and Visual Studio Code.
 
-# 已支持
-| 网站 | 标题 | 剧情介绍 | 时长 | 发布时间 | 背景图 | 默认语言 |
+# Supported Sites
+| Website | Title | Plot | Duration | Release Date | Backdrop | Default Language |
 | :-----| :----: | :----: | :----: | :----: | :----: | :----- |
-| anidb | &#10004; | x | &#10004; | &#10004; | x | 跟随网站 |
+| anidb | &#10004; | x | &#10004; | &#10004; | x | Follow site |
 | apple | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
 | asahi | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | ja-JP |
 | bilibili | &#10004; | x | &#10004; | &#10004; | &#10004; | zh-CN |
@@ -90,15 +93,15 @@ Windows 11、Chrome/Chromium、Python 3和Visual Studio Code。
 | mgtv | &#10004; | x | x | x | x | zh-TW |
 | mytvsuper | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-TW |
 | myvideo | &#10004; |  &#10004; | x | x | &#10004; | zh-TW |
-| netflix | &#10004; | &#10004; | x | &#10004; | x | 跟随网站 |
+| netflix | &#10004; | &#10004; | x | &#10004; | x | Follow site |
 | nhk | &#10004; | &#10004; | &#10004; | x | &#10004; | ja-JP |
 | paravi | &#10004; | &#10004; | x | &#10004; | &#10004; | ja-JP |
-| primevideo | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | 跟随网站 |
+| primevideo | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | Follow site |
 | qq | &#10004; | x | &#10004; | &#10004; | x | zh-CN |
 | sohu | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
-| tvdb | &#10004; | x | &#10004; | &#10004; | x | 跟随网站 |
+| tvdb | &#10004; | x | &#10004; | &#10004; | x | Follow site |
 | viki | x | &#10004; | &#10004; | x | &#10004; | en-US |
 | viu | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
-| yahoo | &#10004; | &#10004; | &#10004; | x | x | 跟随网站 |
+| yahoo | &#10004; | &#10004; | &#10004; | x | x | Follow site |
 | wavve | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | ko-KR |
 | youku | x | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
