@@ -14,8 +14,6 @@ pip install bordercrop
 playwright install chromium
 ```
 
-**注意：** 从Selenium迁移到Playwright后，浏览器用户数据目录从 `Selenium/` 更改为 `Browser/`。如果需要保留登录状态和浏览器数据，请手动将重要数据从旧目录复制到新目录。
-
 # 使用说明
 
 ## 命令行选项
