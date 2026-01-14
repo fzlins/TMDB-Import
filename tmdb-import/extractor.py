@@ -19,6 +19,9 @@ def extract_from_url(url, language="zh-CN"):
     elif domain.endswith(".bilibili.com"):
         from .extractors import bilibili
         episodes = bilibili.bilibili_extractor(url)
+    elif domain.endswith(".crunchyroll.com"):
+        from .extractors import crunchyroll
+        episodes = crunchyroll.crunchyroll_extractor(url)
     elif domain.endswith(".cctv.com"):
         from .extractors import cctv
         episodes = cctv.cctv_extractor(url)
