@@ -12,17 +12,23 @@ def crunchyroll_extractor(url):
     urlPath = urlData.path.strip('/')
     parts = urlPath.split('/')
     
-    if len(parts) >= 3 and parts[1] == 'series' and parts[0] in ['ar', 'de', 'en', 'es', 'fr', 'it', 'pt', 'ru']:
+    if len(parts) >= 3 and parts[1] == 'series':
         url_language = parts[0]
         series_id = parts[2]
     else:
         url_language = 'en'
         series_id = parts[-2]
     
-    locale = 'en-US' if url_language == 'en' else 'pt-BR' if url_language == 'pt' else 'ar-SA' if url_language == 'ar' else url_language + '-' + url_language.upper()
+    if '-' in url_language:
+        lang_parts = url_language.split('-')
+        locale = lang_parts[0] + '-' + lang_parts[1].upper()
+    else:
+        locale = url_language + '-' + url_language.upper()
 
     episodes = {}
     auth_token = None
+    max_retries = 30
+    retry_delay = 2000
 
     page = ini_playwright_page()
     try:
@@ -34,7 +40,20 @@ def crunchyroll_extractor(url):
 
         page.route('**/*', handle_route)
         page.goto(url)
-        page.wait_for_load_state("networkidle", timeout=30000)
+
+        for i in range(max_retries):
+            try:
+                page.wait_for_load_state("networkidle", timeout=5000)
+                if auth_token:
+                    break
+            except:
+                pass
+            
+            if auth_token:
+                break
+            
+            if i < max_retries - 1:
+                page.wait_for_timeout(retry_delay)
 
         if auth_token:
             apiRequest = f"https://www.crunchyroll.com/content/v2/cms/series/{series_id}/seasons?force_locale=&locale={locale}"
