@@ -1,7 +1,7 @@
 import json
 import logging
 import re
-from ..common import Episode, open_url
+from ..common import Episode, open_url, ini_playwright_page, cleanup_playwright_page
 from urllib.parse import urlparse, parse_qs
 
 # ex: https://v.youku.com/v_show/id_XNDAzNzE0Mzc2MA==.html
@@ -9,6 +9,8 @@ from urllib.parse import urlparse, parse_qs
 def youku_extractor(url):
     logging.info("youku_extractor is called")
     client_id = "0dec1b5a3cb570c1"
+    showID = None
+
     if "video?" in url:
         parsed_url = urlparse(url)
         qs = parse_qs(parsed_url.query)
@@ -21,7 +23,8 @@ def youku_extractor(url):
             apiRequest = f"https://api.youku.com/videos/show.json?video_id={episodeID}&ext=show&client_id={client_id}&package=com.huawei.hwvplayer.youku"
             logging.debug(f"API request url: {apiRequest}")
             videoData = json.loads(open_url(apiRequest))
-            showID = videoData["show"]["id"]
+            if "show" in videoData and videoData["show"]:
+                showID = videoData["show"]["id"]
     else:
         if url.__contains__("/show_page/"):
             showID = re.search(r'id_(.*?)\.html', url).group(1).rstrip("==")
@@ -31,7 +34,26 @@ def youku_extractor(url):
             # https://list.youku.com/show/module?id={showid}&tab=showInfo&callback=jQuery
             logging.debug(f"API request url: {apiRequest}")
             videoData = json.loads(open_url(apiRequest))
-            showID = videoData["show"]["id"]
+            if "show" in videoData and videoData["show"]:
+                showID = videoData["show"]["id"]
+
+    if not showID:
+        logging.info("API did not return show id, trying to extract from page")
+        page = None
+        try:
+            page = ini_playwright_page(headless=True, images=False)
+            page.goto(url, wait_until="networkidle", timeout=60000)
+            scripts = page.evaluate("() => Array.from(document.querySelectorAll('script')).map(s => s.textContent).join('\\n')")
+            show_id_pattern = r'showId["\']?\s*[:=]\s*["\']?([a-zA-Z0-9_-]+)'
+            matches = re.findall(show_id_pattern, scripts)
+            if matches:
+                showID = matches[0]
+                logging.info(f"Extracted show id from page: {showID}")
+        except Exception as e:
+            logging.error(f"Failed to extract show id from page: {e}")
+        finally:
+            if page:
+                cleanup_playwright_page(page)
     logging.info(f"show id: {showID}")
     apiRequest = f"https://openapi.youku.com/v2/shows/show.json?show_id={showID}&client_id={client_id}&package=com.huawei.hwvplayer.youku"
     logging.debug(f"API request url: {apiRequest}")

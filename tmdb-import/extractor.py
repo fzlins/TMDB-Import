@@ -25,6 +25,12 @@ def extract_from_url(url, language="zh-CN"):
     elif domain.endswith(".disneyplus.com"):
         from .extractors import disneyplus
         episodes = disneyplus.disneyplus_extractor(url=url, language=language)
+    elif domain.endswith(".hbomax.com"):
+        from .extractors import hbomax
+        episodes = hbomax.hbomax_extractor(url=url, language=language)
+    elif domain.endswith(".tvbanywhere.com"):
+        from .extractors import tvbanywhere
+        episodes = tvbanywhere.tvbanywhere_extractor(url=url, language=language)
     elif domain.__contains__("fod.fujitv."):
         from .extractors import fod
         episodes = fod.fod_extractor(url)
