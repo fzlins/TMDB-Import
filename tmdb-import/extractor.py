@@ -30,7 +30,7 @@ def extract_from_url(url, language="zh-CN"):
         episodes = disneyplus.disneyplus_extractor(url=url, language=language)
     elif domain.endswith(".hbomax.com"):
         from .extractors import hbomax
-        episodes = hbomax.hbomax_extractor(url=url, language=language)
+        episodes = hbomax.hbomax_extractor(url=url)
     elif domain.endswith(".tvbanywhere.com"):
         from .extractors import tvbanywhere
         episodes = tvbanywhere.tvbanywhere_extractor(url=url, language=language)

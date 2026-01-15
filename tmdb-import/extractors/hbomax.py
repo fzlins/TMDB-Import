@@ -4,7 +4,7 @@ import logging
 from ..common import Episode, open_url, ini_playwright_page, cleanup_playwright_page
 
 # ex: https://www.hbomax.com/hk/en/shows/talking-tom-heroes-suddenly-super/55b42a25-3234-452c-a05f-5ad8a318a66e
-def hbomax_extractor(url, language="zh-CN"):
+def hbomax_extractor(url):
     logging.info("hbomax_extractor is called")
 
     urlData = urlparse(url)
