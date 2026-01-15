@@ -1,5 +1,4 @@
 import json
-from urllib.parse import urlparse
 import logging
 from ..common import Episode
 from ..common import ini_playwright_page, cleanup_playwright_page
@@ -7,23 +6,6 @@ from ..common import ini_playwright_page, cleanup_playwright_page
 # ex: https://www.crunchyroll.com/fr/series/GDKHZEJN0/dragon-raja--the-blazing-dawn-
 def crunchyroll_extractor(url):
     logging.info("crunchyroll_extractor is called")
-
-    urlData = urlparse(url)
-    urlPath = urlData.path.strip('/')
-    parts = urlPath.split('/')
-    
-    if len(parts) >= 3 and parts[1] == 'series':
-        url_language = parts[0]
-        series_id = parts[2]
-    else:
-        url_language = 'en'
-        series_id = parts[-2]
-    
-    if '-' in url_language:
-        lang_parts = url_language.split('-')
-        locale = lang_parts[0] + '-' + lang_parts[1].upper()
-    else:
-        locale = url_language + '-' + url_language.upper()
 
     episodes = {}
     auth_token = None
@@ -38,8 +20,18 @@ def crunchyroll_extractor(url):
                 auth_token = route.request.headers['authorization']
             route.continue_()
 
+        def handle_response(response):
+            if 'content/v2/cms' in response.url and response.status == 200:
+                try:
+                    api_responses[response.url] = json.loads(response.text())
+                except:
+                    pass
+
+        api_responses = {}
         page.route('**/*', handle_route)
+        page.on('response', handle_response)
         page.goto(url)
+        page.evaluate("() => { localStorage.clear(); sessionStorage.clear(); }")
 
         for i in range(max_retries):
             try:
@@ -55,58 +47,58 @@ def crunchyroll_extractor(url):
             if i < max_retries - 1:
                 page.wait_for_timeout(retry_delay)
 
-        if auth_token:
-            apiRequest = f"https://www.crunchyroll.com/content/v2/cms/series/{series_id}/seasons?force_locale=&locale={locale}"
-            logging.debug(f"API request url: {apiRequest}")
-            response = page.request.get(apiRequest, headers={'Authorization': auth_token})
-            
-            if response.status == 200:
-                soureData = json.loads(response.text())
-                
-                if "data" in soureData:
-                    for season in soureData["data"]:
-                        season_id = season["id"]
-                        season_number = season.get("season_number", 1)
+        seasons_data = {}
+        episodes_data = {}
 
-                        apiRequest = f"https://www.crunchyroll.com/content/v2/cms/seasons/{season_id}/episodes?locale={locale}"
-                        logging.debug(f"API request url: {apiRequest}")
-                        response = page.request.get(apiRequest, headers={'Authorization': auth_token})
-                        
-                        if response.status == 200:
-                            episodeData = json.loads(response.text())
-                            
-                            if "data" in episodeData:
-                                for episode in episodeData["data"]:
-                                    episode_number = episode.get("episode_number", "")
-                                    if not episode_number:
-                                        continue
-                                    episode_name = episode.get("title", "")
-                                    episode_air_date = episode.get("premium_available_date", "").split("T")[0] if episode.get("premium_available_date") else ""
-                                    episode_runtime = episode.get("duration_ms", 0) // 1000 // 60 if episode.get("duration_ms") else ""
-                                    episode_overview = episode.get("description", "")
-                                    episode_backdrop = ""
-                                    
-                                    if "images" in episode and "thumbnail" in episode["images"]:
-                                        thumbnails = episode["images"]["thumbnail"]
-                                        if isinstance(thumbnails, list) and thumbnails:
-                                            if isinstance(thumbnails[0], list):
-                                                thumbnails = thumbnails[0]
-                                            for img in thumbnails:
-                                                if isinstance(img, dict) and img.get("source"):
-                                                    if img.get("width", 0) >= 1920:
-                                                        episode_backdrop = img.get("source", "")
-                                                        break
-                                                    elif not episode_backdrop:
-                                                        episode_backdrop = img.get("source", "")
-                                    
-                                    episode_key = f"{season_number}-{episode_number}"
-                                    episodes[episode_key] = Episode(episode_key, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
-        else:
+        for api_url, api_data in api_responses.items():
+            if '/seasons' in api_url and '/episodes' not in api_url and "data" in api_data:
+                for season in api_data["data"]:
+                    seasons_data[season["id"]] = season
+            elif '/episodes' in api_url and "data" in api_data:
+                episodes_data[api_url] = api_data["data"]
+
+        for season_id, season in seasons_data.items():
+            season_number = season.get("season_number", 1)
+            for ep_api_url, ep_data in episodes_data.items():
+                if f'/seasons/{season_id}/episodes' in ep_api_url:
+                    for episode in ep_data:
+                        episode_number = episode.get("episode_number", "")
+                        if not episode_number:
+                            continue
+                        episode_name = episode.get("title", "")
+                        episode_air_date = episode.get("premium_available_date", "").split("T")[0] if episode.get("premium_available_date") else ""
+                        episode_runtime = episode.get("duration_ms", 0) // 1000 // 60 if episode.get("duration_ms") else ""
+                        episode_overview = episode.get("description", "")
+                        episode_backdrop = _get_episode_backdrop(episode)
+                        episode_key = f"{season_number}-{episode_number}"
+                        episodes[episode_key] = Episode(episode_key, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
+
+        if not auth_token:
             logging.warning("Could not capture Authorization token")
 
         logging.info(f"Extracted {len(episodes)} episodes")
 
+    except Exception as e:
+        logging.error(f"Error in crunchyroll_extractor: {e}")
     finally:
         cleanup_playwright_page(page)
 
     return episodes
+
+def _get_episode_backdrop(episode):
+    if "images" not in episode or "thumbnail" not in episode["images"]:
+        return ""
+    thumbnails = episode["images"]["thumbnail"]
+    if not isinstance(thumbnails, list) or not thumbnails:
+        return ""
+    if isinstance(thumbnails[0], list):
+        thumbnails = thumbnails[0]
+    max_width = 0
+    backdrop = ""
+    for img in thumbnails:
+        if isinstance(img, dict) and img.get("source"):
+            width = img.get("width", 0)
+            if width > max_width:
+                max_width = width
+                backdrop = img.get("source", "")
+    return backdrop
