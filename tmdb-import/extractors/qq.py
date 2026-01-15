@@ -37,34 +37,44 @@ def qq_extractor(url):
             for episodeData in videoData["results"]:
                 category_map = episodeData["fields"]["category_map"]
                 
-                if "正片" not in category_map:
-                    continue
-                
-                episode_number_raw = int(episodeData["fields"]["episode"])
-                if episode_number_raw == 0:
-                    episode_number = episode_counter
-                    episode_counter += 1
-                else:
-                    episode_number = episode_number_raw
-                
-                apiRequest = f"https://node.video.qq.com/x/api/float_vinfo2?vid={episodeData['fields']['vid']}"
-                logging.debug(f"API request url: {apiRequest}")
-                
-                vinfo_data = json.loads(open_url(apiRequest))
-                video_info = vinfo_data.get("c", {})
-                
-                episode_name = video_info.get("second_title", "") or video_info.get("title", "")
-                episode_name = re.sub(r'_\d+$', '', episode_name)
-                episode_name = re.sub(r'^第\d+集\s*', '', episode_name)
-                
-                pic_data = video_info.get("pic", "")
-                episode_backdrop = pic_data.replace("/160", "/1280") if pic_data else ""
-                
-                episode_air_date = episodeData["fields"]["video_checkup_time"].split(" ")[0]
-                episode_runtime = round(int(episodeData["fields"]["duration"]) / 60)
-                
-                episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, "", episode_backdrop)
+                if len(category_map) > 1 and category_map[1] == "正片":
+                    episode_number_raw = int(episodeData["fields"]["episode"])
+                    vid = episodeData["fields"]["vid"]
+                    
+                    if episode_number_raw == 0:
+                        episode_number = episode_counter
+                        episode_counter += 1
+                    else:
+                        episode_number = episode_number_raw
+                        if episode_number >= episode_counter:
+                            episode_counter = episode_number + 1
+                    
+                    apiRequest = f"https://node.video.qq.com/x/api/float_vinfo2?vid={vid}"
+                    logging.debug(f"API request url: {apiRequest}")
+                    
+                    vinfo_data = json.loads(open_url(apiRequest))
+                    video_info = vinfo_data.get("c", {})
+                    
+                    second_title = video_info.get("second_title")
+                    title = video_info.get("title")
+                    
+                    episode_name = second_title or title or ""
+                    episode_name = re.sub(r'_\d+$', '', episode_name)
+                    episode_name = re.sub(r'^第\d+集\s*', '', episode_name)
+                    
+                    pic_data = video_info.get("pic", "")
+                    episode_backdrop = pic_data.replace("/160", "/1280") if pic_data else ""
+                    
+                    episode_air_date = episodeData["fields"]["video_checkup_time"].split(" ")[0]
+                    episode_runtime = round(int(episodeData["fields"]["duration"]) / 60)
+                    
+                    episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, "", episode_backdrop)
             
             current_batch = []
+    
+    titles = [ep.name for ep in episodes.values() if ep.name]
+    if titles and len(set(titles)) == 1:
+        for ep in episodes.values():
+            ep.name = ""
     
     return episodes
