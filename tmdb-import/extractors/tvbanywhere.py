@@ -4,7 +4,7 @@ import logging
 from ..common import Episode, open_url
 
 # ex: https://www.tvbanywhere.com/en/webtv/programme/thequeenofnews2_144840/766522/The-QUEEN-Of-News
-def tvbanywhere_extractor(url, language="zh-CN"):
+def tvbanywhere_extractor(url):
     logging.info("tvbanywhere_extractor is called")
 
     urlData = urlparse(url)

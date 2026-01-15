@@ -33,7 +33,7 @@ def extract_from_url(url, language="zh-CN"):
         episodes = hbomax.hbomax_extractor(url=url)
     elif domain.endswith(".tvbanywhere.com"):
         from .extractors import tvbanywhere
-        episodes = tvbanywhere.tvbanywhere_extractor(url=url, language=language)
+        episodes = tvbanywhere.tvbanywhere_extractor(url=url)
     elif domain.__contains__("fod.fujitv."):
         from .extractors import fod
         episodes = fod.fod_extractor(url)
