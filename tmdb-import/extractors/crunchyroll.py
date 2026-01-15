@@ -48,30 +48,43 @@ def crunchyroll_extractor(url):
                 page.wait_for_timeout(retry_delay)
 
         seasons_data = {}
-        episodes_data = {}
+        episodes_api_template = None
 
         for api_url, api_data in api_responses.items():
             if '/seasons' in api_url and '/episodes' not in api_url and "data" in api_data:
                 for season in api_data["data"]:
                     seasons_data[season["id"]] = season
             elif '/episodes' in api_url and "data" in api_data:
-                episodes_data[api_url] = api_data["data"]
+                episodes_api_template = api_url
+
+        is_multi_season = len(seasons_data) > 1
 
         for season_id, season in seasons_data.items():
             season_number = season.get("season_number", 1)
-            for ep_api_url, ep_data in episodes_data.items():
-                if f'/seasons/{season_id}/episodes' in ep_api_url:
-                    for episode in ep_data:
-                        episode_number = episode.get("episode_number", "")
-                        if not episode_number:
-                            continue
-                        episode_name = episode.get("title", "")
-                        episode_air_date = episode.get("premium_available_date", "").split("T")[0] if episode.get("premium_available_date") else ""
-                        episode_runtime = episode.get("duration_ms", 0) // 1000 // 60 if episode.get("duration_ms") else ""
-                        episode_overview = episode.get("description", "")
-                        episode_backdrop = _get_episode_backdrop(episode)
-                        episode_key = f"{season_number}-{episode_number}"
-                        episodes[episode_key] = Episode(episode_key, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
+
+            if episodes_api_template:
+                import re
+                apiRequest = re.sub(r'/seasons/[^/]+/episodes', f'/seasons/{season_id}/episodes', episodes_api_template)
+                response = page.request.get(apiRequest, headers={'Authorization': auth_token})
+
+                if response.status == 200:
+                    episodeData = json.loads(response.text())
+
+                    if "data" in episodeData:
+                        for episode in episodeData["data"]:
+                            episode_number = episode.get("episode_number", "")
+                            if not episode_number:
+                                continue
+                            episode_name = episode.get("title", "")
+                            episode_air_date = episode.get("premium_available_date", "").split("T")[0] if episode.get("premium_available_date") else ""
+                            episode_runtime = episode.get("duration_ms", 0) // 1000 // 60 if episode.get("duration_ms") else ""
+                            episode_overview = episode.get("description", "")
+                            episode_backdrop = _get_episode_backdrop(episode)
+                            if is_multi_season:
+                                episode_key = f"S{season_number}E{episode_number}"
+                            else:
+                                episode_key = episode_number
+                            episodes[episode_key] = Episode(episode_key, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
 
         if not auth_token:
             logging.warning("Could not capture Authorization token")

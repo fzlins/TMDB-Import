@@ -48,7 +48,6 @@ def hbomax_extractor(url):
 
         logging.debug(f"Found {len(seasons)} seasons")
 
-        episode_count = 1
         for season in seasons:
             if not isinstance(season, dict):
                 continue
@@ -61,8 +60,14 @@ def hbomax_extractor(url):
             for ep in episodes_data:
                 if not isinstance(ep, dict):
                     continue
-                episode_number = str(episode_count)
-                episode_count += 1
+                episode_number = ep.get("episodeNumber", "")
+                if not episode_number:
+                    continue
+
+                if len(seasons) > 1:
+                    episode_key = f"S{season_number}E{episode_number}"
+                else:
+                    episode_key = str(episode_number)
 
                 title_obj = ep.get("title", {})
                 if isinstance(title_obj, dict):
@@ -90,7 +95,7 @@ def hbomax_extractor(url):
                 else:
                     episode_backdrop = ""
 
-                episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
+                episodes[episode_key] = Episode(episode_key, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
 
         logging.info(f"Successfully extracted {len(episodes)} episodes")
         return episodes
