@@ -12,9 +12,9 @@ import configparser
 config = configparser.ConfigParser()
 config.read('config.ini', encoding='utf-8-sig')
 
-def import_spisode(tmdb_id, season_number, language):
+def import_spisode(tmdb_id, season_number, language, csv_filename="import.csv"):
     currentData = {}
-    importData = read_csv("import.csv")
+    importData = read_csv(csv_filename)
 
     if language == "":
         print("Missing language parameter.")
@@ -53,6 +53,8 @@ def import_spisode(tmdb_id, season_number, language):
                     password.fill(tmdb_password)
 
                     page.locator("#login_button").click()
+                    # Wait for login to complete
+                    page.wait_for_selector("li[class='user']", timeout=30000)
                 else:
                     # manual login
                     page.wait_for_selector("li[class='user']", timeout=30000)
@@ -76,7 +78,7 @@ def import_spisode(tmdb_id, season_number, language):
             page.wait_for_selector(".k-master-row", timeout=30000)
             for k_master_row in page.locator(".k-master-row").all():
                 all_columns = k_master_row.locator("td").all()
-                episode_number = re.sub("[^\d\.]", "", all_columns[0].text_content()) 
+                episode_number = re.sub(r"[^\d\.]", "", all_columns[0].text_content()) 
                 currentData[episode_number] = {}
                 currentData[episode_number]["name"] = all_columns[1].text_content().strip()
                 currentData[episode_number]["overview"] = all_columns[2].text_content().strip()
@@ -329,5 +331,11 @@ def import_spisode(tmdb_id, season_number, language):
                 cleanup_playwright_page(page)
             except Exception as e:
                 logging.error(f"Failed to cleanup episode import page: {e}")
+        
+        if config.getboolean('DEFAULT', 'delete_csv_after_import', fallback=False):
+            try:
+                os.remove(csv_filename)
+            except Exception as e:
+                logging.error(f"Failed to delete CSV file: {e}")
     
     return
