@@ -79,31 +79,33 @@ Windows 11, Chrome/Chromium, Python 3, and Visual Studio Code.
 # Supported Sites
 | Website | Title | Plot | Duration | Release Date | Backdrop | Default Language |
 | :-----| :----: | :----: | :----: | :----: | :----: | :----- |
-| anidb | &#10004; | x | &#10004; | &#10004; | x | Follow site |
-| apple | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
-| asahi | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | ja-JP |
-| bilibili | &#10004; | x | &#10004; | &#10004; | &#10004; | zh-CN |
-| cctv | &#10004; | &#10004; | &#10004; | x | &#10004; | zh-CN |
-| disney+ | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
-| fod | &#10004; | &#10004; | x | &#10004; | &#10004; | ja-JP |
-| iqiyi | &#10004; | x | x | x | &#10004; | zh-CN |
-| ixigua | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
-| kktv | &#10004; | x | &#10004; | &#10004; | &#10004; | zh-TW |
-| linetv | &#10004; | x | &#10004; | x | &#10004; | zh-TW |
-| litv | &#10004; | x | x | x | &#10004; | zh-TW |
-| mgtv | &#10004; | x | &#10004; | &#10004; | x | zh-CN |
-| mgtv | &#10004; | x | x | x | x | zh-TW |
-| mytvsuper | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-TW |
-| myvideo | &#10004; |  &#10004; | x | x | &#10004; | zh-TW |
-| netflix | &#10004; | &#10004; | x | &#10004; | x | Follow site |
-| nhk | &#10004; | &#10004; | &#10004; | x | &#10004; | ja-JP |
-| paravi | &#10004; | &#10004; | x | &#10004; | &#10004; | ja-JP |
-| primevideo | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | Follow site |
-| qq | &#10004; | x | &#10004; | &#10004; | x | zh-CN |
-| sohu | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
-| tvdb | &#10004; | x | &#10004; | &#10004; | x | Follow site |
-| viki | x | &#10004; | &#10004; | x | &#10004; | en-US |
-| viu | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
-| yahoo | &#10004; | &#10004; | &#10004; | x | x | Follow site |
-| wavve | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | ko-KR |
-| youku | x | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
+| [anidb](https://anidb.net) | &#10004; | x | &#10004; | &#10004; | x | Follow site |
+| [apple](https://tv.apple.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
+| [asahi](https://tv-asahi.co.jp) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | ja-JP |
+| [bilibili](https://www.bilibili.com) | &#10004; | x | &#10004; | &#10004; | &#10004; | zh-CN |
+| [crunchyroll](https://www.crunchyroll.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | Follow site |
+| [cctv](https://tv.cctv.com) | &#10004; | &#10004; | &#10004; | x | &#10004; | zh-CN |
+| [disney+](https://www.disneyplus.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
+| [fod](https://fod.fujitv.co.jp) | &#10004; | &#10004; | x | &#10004; | &#10004; | ja-JP |
+| [hbomax](https://www.hbomax.com) | &#10004; | &#10004; | x | &#10004; | &#10004; | Follow site |
+| [iqiyi](https://www.iqiyi.com) | &#10004; | x | x | x | &#10004; | zh-CN |
+| [ixigua](https://www.ixigua.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
+| [kktv](https://kktv.me) | &#10004; | x | &#10004; | &#10004; | &#10004; | zh-TW |
+| [linetv](https://www.linetv.tw) | &#10004; | x | &#10004; | x | &#10004; | zh-TW |
+| [litv](https://www.litv.tv) | &#10004; | x | x | x | &#10004; | zh-TW |
+| [mgtv](https://www.mgtv.com) | &#10004; | x | &#10004; | &#10004; | x | zh-CN |
+| [mytvsuper](https://www.mytvsuper.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-TW |
+| [myvideo](https://www.myvideo.net.tw) | &#10004; |  &#10004; | x | x | &#10004; | zh-TW |
+| [netflix](https://www.netflix.com) | &#10004; | &#10004; | x | &#10004; | x | Follow site |
+| [nhk](https://www.nhk.or.jp) | &#10004; | &#10004; | &#10004; | x | &#10004; | ja-JP |
+| [paravi](https://paravi.jp) | &#10004; | &#10004; | x | &#10004; | &#10004; | ja-JP |
+| [primevideo](https://www.primevideo.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | Follow site |
+| [qq](https://v.qq.com) | &#10004; | x | &#10004; | &#10004; | &#10004; | zh-CN |
+| [sohu](https://tv.sohu.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
+| [tvdb](https://www.thetvdb.com) | &#10004; | x | &#10004; | &#10004; | x | Follow site |
+| [tvbanywhere](https://www.tvbanywhere.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-HK |
+| [viki](https://www.viki.com) | x | &#10004; | &#10004; | x | &#10004; | en-US |
+| [viu](https://www.viu.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
+| [yahoo](https://tv.yahoo.co.jp) | &#10004; | &#10004; | &#10004; | x | x | Follow site |
+| [wavve](https://www.wavve.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | ko-KR |
+| [youku](https://www.youku.com) | x | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
