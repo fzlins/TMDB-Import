@@ -37,7 +37,7 @@ def qq_extractor(url):
             for episodeData in videoData["results"]:
                 category_map = episodeData["fields"]["category_map"]
                 
-                if len(category_map) > 1 and category_map[1] == "正片":
+                if any(isinstance(item, str) and "正片" in item for item in category_map):
                     episode_number_raw = int(episodeData["fields"]["episode"])
                     vid = episodeData["fields"]["vid"]
                     
