@@ -11,6 +11,8 @@ def iqiyi_extractor(url):
     webPage = open_url(url)
     if url.__contains__("iqiyi.com/lib/m_"):
         albumId = re.search(r'movlibalbumaid=\"(\d+)\"', str(webPage)).group(1)
+    elif re.search(r'iqiyi\.com/a_', url):
+        albumId = re.search(r'data-album-id="(\d+)"', str(webPage)).group(1)
     else:
         albumId = re.search(r'\"albumId\":(\d+),\"channelId', str(webPage)).group(1)
     logging.info(f"album_id: {albumId}")
@@ -40,7 +42,7 @@ def iqiyi_extractor(url):
             episode_runtime = str(int(duration[0]) * 60 + int(duration[1]))
         elif len(duration) == 2:
             episode_runtime = duration[0] 
-        episode_overview = episode["description"].strip().replace("。\n", "。\p").replace("！\n", "！\p").replace("？\n", "？\p").replace("…\n", "…\p").replace("”\n", "”\p").replace("\n", "").replace("\p", "\n")
+        episode_overview = episode["description"].strip().replace("\u3002\n", "\u3002\p").replace("\uff01\n", "\uff01\p").replace("\uff1f\n", "\uff1f\p").replace("\u2026\n", "\u2026\p").replace("\u201d\n", "\u201d\p").replace("\n", "").replace("\p", "\n")
         episode_backdrop = episode["imageUrl"]
 
         pixel = ("0", "0")
