@@ -1,6 +1,6 @@
 # TMDB-Import
 
-[![English](https://img.shields.io/badge/docs-English-blue)](../README.md) [![简体中文](https://img.shields.io/badge/docs-简体中文-yellow)](./README.zh-CN.md)
+[![English](https://img.shields.io/badge/docs-English-blue)](../README.md) [![简体中文](https://img.shields.io/badge/docs-简体中文-yellow)](./README.zh-CN.md) [![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/fzlins/TMDB-Import)
 
 脚本使用 Playwright 自动化框架，仅支持 Chrome/Chromium 浏览器。Playwright 会自动下载和管理浏览器，无需手动安装驱动程序。
 
