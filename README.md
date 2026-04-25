@@ -4,16 +4,22 @@
 
 This script uses the Playwright automation framework and only supports Chrome/Chromium browsers. Playwright automatically downloads and manages browsers, eliminating the need for manual driver installation.
 
-# Required Packages
+# Installation
+
+## Install Dependencies
+
+### Option 1: Install from requirements.txt (Recommended)
+```bash
+pip install -r requirements.txt
+playwright install chromium
 ```
+
+### Option 2: Install packages individually
+```bash
 pip install playwright
 pip install python-dateutil
 pip install Pillow
 pip install bordercrop
-```
-
-Install Playwright browser:
-```
 playwright install chromium
 ```
 

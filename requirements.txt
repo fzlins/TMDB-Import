@@ -1,0 +1,14 @@
+# TMDB-Import Requirements
+# This file lists all Python dependencies for the project
+
+# Browser automation framework
+playwright>=1.40.0
+
+# Date and time utilities
+python-dateutil>=2.8.0
+
+# Image processing library
+Pillow>=10.0.0
+
+# Image border cropping
+bordercrop>=0.1.7

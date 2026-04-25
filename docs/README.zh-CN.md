@@ -4,18 +4,22 @@
 
 脚本使用 Playwright 自动化框架，仅支持 Chrome/Chromium 浏览器。Playwright 会自动下载和管理浏览器，无需手动安装驱动程序。
 
-# 所需依赖包
+# 安装
 
+## 安装依赖包
+
+### 方式一：使用 requirements.txt 安装（推荐）
+```bash
+pip install -r requirements.txt
+playwright install chromium
 ```
+
+### 方式二：单独安装各个依赖包
+```bash
 pip install playwright
 pip install python-dateutil
 pip install Pillow
 pip install bordercrop
-```
-
-安装 Playwright 浏览器：
-
-```
 playwright install chromium
 ```
 
