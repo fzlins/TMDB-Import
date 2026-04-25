@@ -17,10 +17,12 @@ def youku_extractor(url):
         showID = show_param
     elif vid_param or "video?" in url:
         episodeID = vid_param or re.search(r'id_(.*?)\.html', url).group(1).rstrip("==")
-        videoData = json.loads(open_url(f"https://api.youku.com/videos/show.json?video_id={episodeID}&ext=show&client_id={client_id}&package=com.huawei.hwvplayer.youku"))
+        videoData = json.loads(open_url(f"https://openapi.youku.com/v2/videos/show.json?video_id={episodeID}&ext=show&client_id={client_id}&package=com.huawei.hwvplayer.youku"))
         showID = videoData.get("show", {}).get("id") or episodeID
     else:
-        showID = re.search(r'id_(.*?)\.html', url).group(1).rstrip("==")
+        episodeID = re.search(r'id_(.*?)\.html', url).group(1).rstrip("==")
+        videoData = json.loads(open_url(f"https://openapi.youku.com/v2/videos/show.json?video_id={episodeID}&ext=show&client_id={client_id}&package=com.huawei.hwvplayer.youku"))
+        showID = videoData.get("show", {}).get("id") or episodeID
     
     logging.info(f"show id: {showID}")
     show_data = json.loads(open_url(f"https://openapi.youku.com/v2/shows/show.json?show_id={showID}&client_id={client_id}&package=com.huawei.hwvplayer.youku"))
@@ -76,7 +78,7 @@ def youku_extractor(url):
         for episode in showData["videos"]:
             episodeID = episode["id"].strip("==")
             try:
-                videoData = json.loads(open_url(f"https://api.youku.com/videos/show.json?video_id={episodeID}&client_id={client_id}&package=com.huawei.hwvplayer.youku"))
+                videoData = json.loads(open_url(f"https://openapi.youku.com/v2/videos/show.json?video_id={episodeID}&client_id={client_id}&package=com.huawei.hwvplayer.youku"))
                 episode_name = episode.get("rc_title") or videoData["title"]
                 episode_air_date = videoData["published"].split(" ")[0]
                 episode_runtime = round(float(videoData["duration"]) / 60)
