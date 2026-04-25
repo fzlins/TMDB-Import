@@ -8,9 +8,8 @@ from ..processors.image import process_image, TYPE_BACKDROP
 from ..common import *
 import re
 
-import configparser
-config = configparser.ConfigParser()
-config.read('config.ini', encoding='utf-8-sig')
+# Config is now imported from common.py (singleton pattern)
+# No need to read config.ini again
 
 def import_spisode(tmdb_id, season_number, language, csv_filename="import.csv"):
     currentData = {}

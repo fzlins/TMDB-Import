@@ -1,7 +1,41 @@
 import configparser
 import os
-config = configparser.ConfigParser()
-config.read('config.ini', encoding='utf-8-sig')
+
+# Singleton Config class to avoid multiple reads of config.ini
+class Config:
+    _instance = None
+    _config = None
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(Config, cls).__new__(cls)
+            cls._config = configparser.ConfigParser()
+            cls._config.read('config.ini', encoding='utf-8-sig')
+        return cls._instance
+    
+    def get(self, section, option, fallback=None):
+        """Get configuration value"""
+        return self._config.get(section, option, fallback=fallback)
+    
+    def getboolean(self, section, option, fallback=None):
+        """Get boolean configuration value"""
+        return self._config.getboolean(section, option, fallback=fallback)
+    
+    def getint(self, section, option, fallback=None):
+        """Get integer configuration value"""
+        return self._config.getint(section, option, fallback=fallback)
+    
+    def getfloat(self, section, option, fallback=None):
+        """Get float configuration value"""
+        return self._config.getfloat(section, option, fallback=fallback)
+    
+    @property
+    def raw_config(self):
+        """Access to raw ConfigParser instance if needed"""
+        return self._config
+
+# Global singleton instance
+config = Config()
 
 # Custom exceptions for Playwright operations
 class PlaywrightError(Exception):
