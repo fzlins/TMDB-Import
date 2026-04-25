@@ -61,7 +61,7 @@ python -m tmdb-import "https://www.themoviedb.org/tv/{tv_id}/season/{season_numb
 # 组合选项: python -m tmdb-import -d --headless "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
 ```
 
-- 导入目录下的 import.csv 的数据到 TMDB。上传背景图时，自动切除黑边和适配 TMDB 所要求的 1.78 比例。第一次运行需要在登陆界面手动登陆（或者在代码中填写实现自动登陆），forced_upload（值为 True 时，在允许在 TMDB 已有背景图片的情况下继续上传）
+- 导入目录下的 import.csv 的数据到 TMDB。上传背景图时，自动切除黑边并适配 TMDB 所要求的宽高比。第一次运行需要在登陆界面手动登陆，也可在 `config.ini` 中填写 `tmdb_username` 和 `tmdb_password` 实现自动登陆。更多选项请参阅[配置说明](#配置说明)。
 
 ### 图片处理
 
@@ -86,6 +86,36 @@ python -m tmdb-import --headless fitsize 1920*1080 "https://www.***.com/image.jp
 
 - 按给出的长宽裁剪图片
 
+# 配置说明
+
+工作目录下的 `config.ini` 文件用于控制脚本行为，所有配置项均位于 `[DEFAULT]` 节。
+
+| 配置项 | 默认值 | 说明 |
+| :----- | :----: | :--- |
+| `encoding` | `utf-8-sig` | CSV 文件编码（如 `utf-8`、`utf-8-sig`、`gbk`） |
+| `save_user_profile` | `true` | 将浏览器会话持久化到 `Browser/` 目录，避免每次运行都需要重新登陆 |
+| `tmdb_username` | *(留空)* | TMDB 账号用户名，用于自动登陆 |
+| `tmdb_password` | *(留空)* | TMDB 账号密码，用于自动登陆 |
+| `backdrop_forced_upload` | `false` | 值为 `true` 时，即使 TMDB 已有背景图也强制上传 |
+| `backdrop_vote_after_upload` | `false` | 值为 `true` 时，上传背景图后自动点赞 |
+| `filter_words` | *(留空)* | 过滤词，多个过滤词用逗号分隔；集名包含过滤词的条目将被排除在 CSV 之外（如 `番外,加更`） |
+| `rename_csv_on_import` | `false` | 值为 `true` 时，导入前将 `import.csv` 重命名为 `import_{tmdb_id}_s{season}_{language}.csv` |
+| `delete_csv_after_import` | `false` | 值为 `true` 时，导入完成后删除 CSV 文件 |
+
+`config.ini` 示例：
+```ini
+[DEFAULT]
+encoding = utf-8-sig
+save_user_profile = true
+tmdb_username = your_username
+tmdb_password = your_password
+backdrop_forced_upload = false
+backdrop_vote_after_upload = false
+filter_words = 番外,加更
+rename_csv_on_import = false
+delete_csv_after_import = false
+```
+
 # 测试环境
 
 Windows 11、Chrome/Chromium、Python 3 和 Visual Studio Code。
@@ -109,7 +139,6 @@ Windows 11、Chrome/Chromium、Python 3 和 Visual Studio Code。
 | [linetv](https://www.linetv.tw)     | &#10004; |    x     | &#10004; |    x     | &#10004; | zh-TW    |
 | [litv](https://www.litv.tv)       | &#10004; |    x     |    x     |    x     | &#10004; | zh-TW    |
 | [mgtv](https://www.mgtv.com)       | &#10004; |    x     | &#10004; | &#10004; |    x     | zh-CN    |
-| [mgtv](https://www.mgtv.com)       | &#10004; |    x     |    x     |    x     |    x     | zh-TW    |
 | [mytvsuper](https://www.mytvsuper.com)  | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-TW    |
 | [myvideo](https://www.myvideo.net.tw)    | &#10004; | &#10004; |    x     |    x     | &#10004; | zh-TW    |
 | [netflix](https://www.netflix.com)    | &#10004; | &#10004; |    x     | &#10004; |    x     | 跟随网站 |

@@ -52,7 +52,7 @@ python -m tmdb-import "https://www.themoviedb.org/tv/{tv_id}/season/{season_numb
 # Headless mode: python -m tmdb-import --headless "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
 # Combined options: python -m tmdb-import -d --headless "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
 ```
-- Import data from import.csv in the directory to TMDB. When uploading background images, automatically crop black borders and adapt to the 1.78 ratio required by TMDB. First run requires manual login at the login interface (or fill in code to implement automatic login), forced_upload (when set to True, allows continued upload when TMDB already has background images)
+- Import data from import.csv in the directory to TMDB. When uploading backdrop images, automatically crop black borders and adapt to the aspect ratio required by TMDB. On first run, manual login is required (or set `tmdb_username` and `tmdb_password` in `config.ini` for automatic login). See [Configuration](#configuration) for more options.
 
 ### Image Processing
 ```
@@ -72,6 +72,36 @@ python -m tmdb-import fitsize width*height "https://www.***.com/image.jpg"
 python -m tmdb-import --headless fitsize 1920*1080 "https://www.***.com/image.jpg"  # Crop in headless mode
 ```
 - Crop images according to specified width and height
+
+# Configuration
+
+The `config.ini` file in the working directory controls the behaviour of the script. All settings are placed under the `[DEFAULT]` section.
+
+| Key | Default | Description |
+| :-- | :-----: | :---------- |
+| `encoding` | `utf-8-sig` | CSV file encoding (e.g. `utf-8`, `utf-8-sig`, `gbk`) |
+| `save_user_profile` | `true` | Persist the browser session under the `Browser/` folder so you stay logged in between runs |
+| `tmdb_username` | *(empty)* | TMDB account username for automatic login |
+| `tmdb_password` | *(empty)* | TMDB account password for automatic login |
+| `backdrop_forced_upload` | `false` | When `true`, upload a backdrop image even if one already exists on TMDB |
+| `backdrop_vote_after_upload` | `false` | When `true`, automatically cast a thumbs-up vote on the newly uploaded backdrop |
+| `filter_words` | *(empty)* | Comma-separated words; episodes whose titles contain any of these words are excluded from the CSV (e.g. `番外,加更`) |
+| `rename_csv_on_import` | `false` | When `true`, rename `import.csv` to `import_{tmdb_id}_s{season}_{language}.csv` before importing |
+| `delete_csv_after_import` | `false` | When `true`, delete the CSV file after a successful import |
+
+Example `config.ini`:
+```ini
+[DEFAULT]
+encoding = utf-8-sig
+save_user_profile = true
+tmdb_username = your_username
+tmdb_password = your_password
+backdrop_forced_upload = false
+backdrop_vote_after_upload = false
+filter_words = 番外,加更
+rename_csv_on_import = false
+delete_csv_after_import = false
+```
 
 # Test Environment
 Windows 11, Chrome/Chromium, Python 3, and Visual Studio Code.
