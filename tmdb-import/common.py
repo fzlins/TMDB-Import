@@ -33,7 +33,9 @@ class Episode:
         self.csv_header = ["episode_number", "name", "air_date", "runtime", "overview", "backdrop"]
 
     def __iter__(self):
-        return iter([self.episode_number, self.name, self.air_date, self.runtime, self.overview, self.backdrop])
+        # Remove newlines from overview when writing to CSV
+        clean_overview = self.overview.replace('\n', ' ').replace('\r', ' ') if self.overview else self.overview
+        return iter([self.episode_number, self.name, self.air_date, self.runtime, clean_overview, self.backdrop])
 
 class Season():
     def __init__(self, season_number, name="", overview="", episodes={}, poster="", crew={}, guest_stars={}):
