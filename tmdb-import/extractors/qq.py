@@ -1,7 +1,7 @@
 import json
 import logging
 import re
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from ..common import Episode, open_url
 
 # ex: https://v.qq.com/x/cover/mzc00200t0fg7k8/o0043eaefxx.html?ptag=douban.tv
@@ -119,11 +119,11 @@ def qq_extractor(url):
             }
     
     # 使用线程池并发请求，最多15个并发（测试显示安全且更快）
+    # 使用 map() 保持集数顺序
     with ThreadPoolExecutor(max_workers=15) as executor:
-        futures = [executor.submit(fetch_episode_detail, info) for info in episode_base_info]
+        results = executor.map(fetch_episode_detail, episode_base_info)
         
-        for future in as_completed(futures):
-            result = future.result()
+        for result in results:
             episodes[result["episode_number"]] = Episode(
                 result["episode_number"],
                 result["episode_name"],
