@@ -132,7 +132,7 @@ Windows 11, Chrome/Chromium, Python 3, and Visual Studio Code.
 | [mgtv](https://www.mgtv.com) | &#10004; | x | &#10004; | &#10004; | x | zh-CN |
 | [mytvsuper](https://www.mytvsuper.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-TW |
 | [myvideo](https://www.myvideo.net.tw) | &#10004; |  &#10004; | x | x | &#10004; | zh-TW |
-| [netflix](https://www.netflix.com) | &#10004; | &#10004; | x | &#10004; | x | Follow site |
+| [netflix](https://www.netflix.com) | &#10004; | &#10004; | x | x | x | Follow site |
 | [nhk](https://www.nhk.or.jp) | &#10004; | &#10004; | &#10004; | x | &#10004; | ja-JP |
 | [paravi](https://paravi.jp) | &#10004; | &#10004; | x | &#10004; | &#10004; | ja-JP |
 | [primevideo](https://www.primevideo.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | Follow site |
