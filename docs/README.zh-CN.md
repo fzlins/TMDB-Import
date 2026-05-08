@@ -132,6 +132,7 @@ Windows 11、Chrome/Chromium、Python 3 和 Visual Studio Code。
 | [apple](https://tv.apple.com)      | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN    |
 | [asahi](https://tv-asahi.co.jp)      | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | ja-JP    |
 | [bilibili](https://www.bilibili.com)   | &#10004; |    x     | &#10004; | &#10004; | &#10004; | zh-CN    |
+| [bilibili.tv](https://www.bilibili.tv) | &#10004; |    x     |    x     | &#10004; | &#10004; | 跟随网站 |
 | [crunchyroll](https://www.crunchyroll.com)| &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | 跟随网站 |
 | [cctv](https://tv.cctv.com)       | &#10004; | &#10004; | &#10004; |    x     | &#10004; | zh-CN    |
 | [disney+](https://www.disneyplus.com)    | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN    |
