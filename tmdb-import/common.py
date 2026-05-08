@@ -118,6 +118,21 @@ def remove_duplicate_backdrop(import_data):
         
     return import_data
 
+def remove_duplicate_name(import_data):
+    name_dict = {}
+    for value in import_data.values():
+        if value.name != "":
+            if value.name in name_dict:
+                name_dict[value.name] += 1
+            else:
+                name_dict[value.name] = 1
+
+    for value in import_data.values():
+        if value.name != "" and name_dict[value.name] > 1:
+            import_data[value.episode_number].name = ""
+
+    return import_data
+
 def filter_by_name(import_data, filter_words):
     if not filter_words:
         return import_data
@@ -145,6 +160,7 @@ def create_csv(filename, import_data = {}):
     filter_words = config.get("DEFAULT", "filter_words", fallback="")
     import_data = remove_duplicate_overview(import_data)
     import_data = remove_duplicate_backdrop(import_data)
+    import_data = remove_duplicate_name(import_data)
     import_data = filter_by_name(import_data, filter_words)
     
     # Check if any episode uses season format (S{season}E{episode})

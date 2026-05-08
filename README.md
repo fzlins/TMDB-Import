@@ -136,6 +136,7 @@ Windows 11, Chrome/Chromium, Python 3, and Visual Studio Code.
 | [nhk](https://www.nhk.or.jp) | &#10004; | &#10004; | &#10004; | x | &#10004; | ja-JP |
 | [paravi](https://paravi.jp) | &#10004; | &#10004; | x | &#10004; | &#10004; | ja-JP |
 | [primevideo](https://www.primevideo.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | Follow site |
+| [ptsplus](https://www.ptsplus.tv) | &#10004; | &#10004; | &#10004; | x | &#10004; | zh-TW |
 | [qq](https://v.qq.com) | &#10004; | x | &#10004; | &#10004; | &#10004; | zh-CN |
 | [sohu](https://tv.sohu.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
 | [tvdb](https://www.thetvdb.com) | &#10004; | x | &#10004; | &#10004; | x | Follow site |

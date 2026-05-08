@@ -46,6 +46,9 @@ def extract_from_url(url, language="zh-CN"):
     elif domain.endswith("kktv.me"):
         from .extractors import kktv
         episodes = kktv.kktv_extractor(url)
+    elif domain.endswith(".ptsplus.tv"):
+        from .extractors import ptsplus
+        episodes = ptsplus.ptsplus_extractor(url)
     elif domain.endswith(".litv.tv"):
         from .extractors import litv
         episodes = litv.litv_extractor(url)
