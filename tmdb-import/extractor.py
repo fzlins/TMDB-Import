@@ -73,6 +73,9 @@ def extract_from_url(url, language="zh-CN"):
     elif domain.endswith(".nhk.jp") or domain.endswith(".nhk.or.jp"):
         from .extractors import nhk
         episodes = nhk.nhk_extractor(url)
+    elif domain.endswith("tver.jp"):
+        from .extractors import tver
+        episodes = tver.tver_extractor(url)
     elif domain.endswith(".paravi.jp"):
         from .extractors import paravi
         episodes = paravi.paravi_extractor(url)

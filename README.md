@@ -142,6 +142,7 @@ Windows 11, Chrome/Chromium, Python 3, and Visual Studio Code.
 | [sohu](https://tv.sohu.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
 | [tvdb](https://www.thetvdb.com) | &#10004; | x | &#10004; | &#10004; | x | Follow site |
 | [tvbanywhere](https://www.tvbanywhere.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-HK |
+| [tver](https://tver.jp) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | ja-JP |
 | [viki](https://www.viki.com) | x | &#10004; | &#10004; | x | &#10004; | en-US |
 | [viu](https://www.viu.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
 | [yahoo](https://tv.yahoo.co.jp) | &#10004; | &#10004; | &#10004; | x | x | Follow site |
