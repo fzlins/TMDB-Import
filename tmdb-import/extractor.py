@@ -97,6 +97,9 @@ def extract_from_url(url, language="zh-CN"):
     elif domain.endswith(".youku.com"):
         from .extractors import youku
         episodes = youku.youku_extractor(url)
+    elif domain.endswith(".youtube.com") or domain.endswith("youtu.be"):
+        from .extractors import youtube
+        episodes = youtube.youtube_extractor(url)
     else:
         logging.info(f"Do not support {domain}")
         return

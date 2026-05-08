@@ -158,3 +158,4 @@ Windows 11、Chrome/Chromium、Python 3 和 Visual Studio Code。
 | [yahoo](https://tv.yahoo.co.jp)      | &#10004; | &#10004; | &#10004; |    x     |    x     | 跟随网站 |
 | [wavve](https://www.wavve.com)      | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | ko-KR    |
 | [youku](https://www.youku.com)      |    x     | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN    |
+| [youtube](https://www.youtube.com)  | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | 跟随网站 |
