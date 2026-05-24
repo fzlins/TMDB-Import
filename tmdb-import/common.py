@@ -482,7 +482,11 @@ def safe_playwright_operation(operation_func, *args, **kwargs):
 def open_url(url, encoding = ""):
     if encoding == "":
         encoding = config.get("DEFAULT","encoding", fallback="utf-8-sig")
+    from urllib.parse import urlparse
     from urllib.request import Request, urlopen
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError(f"Unsupported URL scheme: {parsed.scheme!r}")
     req = Request(url)
     userAgernt = "Mozilla/5.0 (Windows NT 6.3;Win64;x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36"
     req.add_header('User-Agent', userAgernt)

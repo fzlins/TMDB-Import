@@ -40,5 +40,5 @@ def import_from_url(url):
             except Exception as e:
                 print(f"Failed to rename CSV: {e}")
     
-    from .importors.episode import import_spisode
-    import_spisode(tmdb_id, season_number, language, csv_filename)
+    from .importors.episode import import_episode
+    import_episode(tmdb_id, season_number, language, csv_filename)

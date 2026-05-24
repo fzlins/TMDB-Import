@@ -11,7 +11,7 @@ import re
 # Config is now imported from common.py (singleton pattern)
 # No need to read config.ini again
 
-def import_spisode(tmdb_id, season_number, language, csv_filename="import.csv"):
+def import_episode(tmdb_id, season_number, language, csv_filename="import.csv"):
     currentData = {}
     importData = read_csv(csv_filename)
 
@@ -58,8 +58,8 @@ def import_spisode(tmdb_id, season_number, language, csv_filename="import.csv"):
                     # manual login
                     page.wait_for_selector("li[class='user']", timeout=30000)
             except Exception as err:
-                logging.error("Falied to login to TMDB", exc_info= err)
-                exit()
+                logging.error("Failed to login to TMDB", exc_info= err)
+                raise PlaywrightError("Login failed") from err
 
         # Get season data from tmdb
         page.goto(f"https://www.themoviedb.org/tv/{tmdb_id}/season/{season_number}/edit?active_nav_item=episodes&language={language}")
@@ -164,7 +164,7 @@ def import_spisode(tmdb_id, season_number, language, csv_filename="import.csv"):
 
         # create episodes
         if len(createList) > 0:
-            for episoideNumber in createList:
+            for episodeNumber in createList:
                 # Wait for update button to disappear
                 try:
                     page.wait_for_selector("button[class='k-button k-button-icontext k-primary k-grid-update']", state="detached", timeout=60000)
@@ -174,77 +174,77 @@ def import_spisode(tmdb_id, season_number, language, csv_filename="import.csv"):
                 page.locator("button[class*='k-button'][class*='k-grid-add']").click()
                 time.sleep(random.uniform(1, 2))
                 # Wait for episode number field and get its value
-                episoideID = page.locator("#episode_number_numeric_text_box_field").get_attribute("aria-valuenow", timeout=60000)
+                episodeID = page.locator("#episode_number_numeric_text_box_field").get_attribute("aria-valuenow", timeout=60000)
                 time.sleep(random.uniform(1, 2))
                 
-                if (int(episoideID) != int(episoideNumber)):
+                if (int(episodeID) != int(episodeNumber)):
                     episodeNumberField = page.locator("input[role='spinbutton']")
                     episodeNumberField.press("Control+a")
-                    episodeNumberField.type(str(episoideNumber))
+                    episodeNumberField.type(str(episodeNumber))
 
-                episoideName = page.locator(f"#{language}_name_text_input_field")
-                if (createList[episoideNumber].__contains__("name") and len(createList[episoideNumber]['name']) > 0):
-                    episoideName.fill(createList[episoideNumber]['name'])
+                episodeName = page.locator(f"#{language}_name_text_input_field")
+                if (createList[episodeNumber].__contains__("name") and len(createList[episodeNumber]['name']) > 0):
+                    episodeName.fill(createList[episodeNumber]['name'])
 
                 overview = page.locator(f"#{language}_overview_text_box_field")
-                if (createList[episoideNumber].__contains__("overview") and len(createList[episoideNumber]['overview']) > 0):
-                    overview.fill(importData[episoideNumber]['overview'])
+                if (createList[episodeNumber].__contains__("overview") and len(createList[episodeNumber]['overview']) > 0):
+                    overview.fill(importData[episodeNumber]['overview'])
 
                 runtime = page.locator(f"#{language}_runtime_text_input_field")
-                if (createList[episoideNumber].__contains__("runtime") and len(createList[episoideNumber]['runtime']) > 0):
-                    runtime.fill(importData[episoideNumber]['runtime'])
+                if (createList[episodeNumber].__contains__("runtime") and len(createList[episodeNumber]['runtime']) > 0):
+                    runtime.fill(importData[episodeNumber]['runtime'])
 
-                if (createList[episoideNumber].__contains__("air_date") and len(createList[episoideNumber]['air_date']) > 0):
+                if (createList[episodeNumber].__contains__("air_date") and len(createList[episodeNumber]['air_date']) > 0):
                     airdate = page.locator("#air_date_date_picker_field")
                     airdate.clear()
-                    if createList[episoideNumber]['air_date'].lower() != "null":
-                        airdate.fill(createList[episoideNumber]['air_date'])
+                    if createList[episodeNumber]['air_date'].lower() != "null":
+                        airdate.fill(createList[episodeNumber]['air_date'])
 
                 page.locator("button[ref-update-button]").click()
 
-        # update episoides
-        for episoideNumber in updateList:
-            page.goto(f"https://www.themoviedb.org/tv/{tmdb_id}/season/{season_number}/episode/{episoideNumber}/edit?active_nav_item=primary_facts&language={language}")
+        # update episodes
+        for episodeNumber in updateList:
+            page.goto(f"https://www.themoviedb.org/tv/{tmdb_id}/season/{season_number}/episode/{episodeNumber}/edit?active_nav_item=primary_facts&language={language}")
 
             save_submit = False
             # update name
-            if updateList[episoideNumber].__contains__("name"):
+            if updateList[episodeNumber].__contains__("name"):
                 nameInputID = f"{language}_name".replace('-', '_')
                 page.wait_for_selector(f"#{nameInputID}", timeout=30000)
                 nameInput = page.locator(f"#{nameInputID}")
                 if nameInput.get_attribute("disabled") != "true":
                     nameInput.clear()
-                    if updateList[episoideNumber]["name"] != "null":
-                        nameInput.fill(updateList[episoideNumber]["name"])
+                    if updateList[episodeNumber]["name"] != "null":
+                        nameInput.fill(updateList[episodeNumber]["name"])
                         save_submit = True
 
             # update overview
-            if updateList[episoideNumber].__contains__("overview"):
+            if updateList[episodeNumber].__contains__("overview"):
                 overviewInputID = f"{language}_overview".replace('-', '_')
                 page.wait_for_selector(f"#{overviewInputID}", timeout=30000)
                 overviewInput = page.locator(f"#{overviewInputID}")
                 if overviewInput.get_attribute("disabled") != "true":
                     overviewInput.clear()
-                    overviewInput.fill(updateList[episoideNumber]["overview"])
+                    overviewInput.fill(updateList[episodeNumber]["overview"])
                     save_submit = True
 
             # update runtime
-            if updateList[episoideNumber].__contains__("runtime"):
+            if updateList[episodeNumber].__contains__("runtime"):
                 page.wait_for_selector("#runtime", timeout=30000)
                 runtimeInput = page.locator("#runtime")
                 if runtimeInput.get_attribute("disabled") != "true":
                     runtimeInput.clear()
-                    runtimeInput.fill(updateList[episoideNumber]["runtime"])
+                    runtimeInput.fill(updateList[episodeNumber]["runtime"])
                     save_submit = True
 
             # Update air date
-            if updateList[episoideNumber].__contains__("air_date"):
+            if updateList[episodeNumber].__contains__("air_date"):
                 page.wait_for_selector("#air_date", timeout=30000)
                 airDateField = page.locator("#air_date")
                 if airDateField.get_attribute("disabled") != "true":
                     airDateField.clear()
-                    if updateList[episoideNumber]["air_date"].lower() != "null":
-                        airDateField.fill(updateList[episoideNumber]["air_date"])
+                    if updateList[episodeNumber]["air_date"].lower() != "null":
+                        airDateField.fill(updateList[episodeNumber]["air_date"])
                     save_submit = True
 
             if save_submit:
@@ -265,22 +265,22 @@ def import_spisode(tmdb_id, season_number, language, csv_filename="import.csv"):
         if not backdrop_forced_upload:
             page.goto(f"https://www.themoviedb.org/tv/{tmdb_id}/season/{season_number}")
             time.sleep(3)
-            for episoideNumber in importData:
-                if (importData[episoideNumber].__contains__("backdrop") and len(importData[episoideNumber]['backdrop']) > 0):
-                    css_selector = f"div[class='image'] a[data-episode-number='{episoideNumber}'][data-season-number='{season_number}'] img"
+            for episodeNumber in importData:
+                if (importData[episodeNumber].__contains__("backdrop") and len(importData[episodeNumber]['backdrop']) > 0):
+                    css_selector = f"div[class='image'] a[data-episode-number='{episodeNumber}'][data-season-number='{season_number}'] img"
                     if len(page.locator(css_selector).all()) > 0:
-                        importData[episoideNumber]['backdrop'] = ""
+                        importData[episodeNumber]['backdrop'] = ""
 
-        for episoideNumber in importData:
-            if (importData[episoideNumber].__contains__("backdrop") and len(importData[episoideNumber]['backdrop']) > 0):
+        for episodeNumber in importData:
+            if (importData[episodeNumber].__contains__("backdrop") and len(importData[episodeNumber]['backdrop']) > 0):
                 try:
                     # download backdrop
-                    urlData = urlparse(importData[episoideNumber]['backdrop'])
-                    fileName = f"{tmdb_id}_{season_number}_{episoideNumber}.jpg"
+                    urlData = urlparse(importData[episodeNumber]['backdrop'])
+                    fileName = f"{tmdb_id}_{season_number}_{episodeNumber}.jpg"
                     logging.info(f"{fileName} is downloading...")
                     image_path = os.path.join(image_folder, fileName)
                     if urlData.query.__contains__('imageWidth') and urlData.query.__contains__('imageHeight'):
-                        backdrop_url = importData[episoideNumber]['backdrop'].split('?')[0]
+                        backdrop_url = importData[episodeNumber]['backdrop'].split('?')[0]
                         new_backdrop_url = backdrop_url.replace("imageWidth", "0").replace("imageHeight", "0")
                         try:
                             urllib.request.urlretrieve(new_backdrop_url, image_path)
@@ -293,7 +293,7 @@ def import_spisode(tmdb_id, season_number, language, csv_filename="import.csv"):
                             print(new_backdrop_url)
                             urllib.request.urlretrieve(new_backdrop_url, image_path)
                     else:
-                        urllib.request.urlretrieve(importData[episoideNumber]['backdrop'], image_path)
+                        urllib.request.urlretrieve(importData[episodeNumber]['backdrop'], image_path)
 
                     # Fit backdrop aspect ratio
                     if not process_image(image_path, TYPE_BACKDROP):
@@ -305,7 +305,7 @@ def import_spisode(tmdb_id, season_number, language, csv_filename="import.csv"):
                     time.sleep(3)
 
                     # upload backdrop
-                    page.goto(f"https://www.themoviedb.org/tv/{tmdb_id}/season/{season_number}/episode/{episoideNumber}/images/backdrops")
+                    page.goto(f"https://www.themoviedb.org/tv/{tmdb_id}/season/{season_number}/episode/{episodeNumber}/images/backdrops")
                     if len(page.locator("li[id='no_results']").all()) != 1 and not backdrop_forced_upload:
                         continue
 
@@ -336,7 +336,7 @@ def import_spisode(tmdb_id, season_number, language, csv_filename="import.csv"):
                                 # Get thumbs up button
                                 thumbs_up = last_card.locator("a.thumbs_up")
                                 if thumbs_up.count() > 0:
-                                    logging.info(f"Voting for uploaded image of episode {episoideNumber}")
+                                    logging.info(f"Voting for uploaded image of episode {episodeNumber}")
                                     thumbs_up.click()
                                     time.sleep(random.uniform(1, 2))
                         except Exception as e:
@@ -344,7 +344,7 @@ def import_spisode(tmdb_id, season_number, language, csv_filename="import.csv"):
                                 f"Failed to vote for uploaded image: {e}", exc_info=e)
                 except Exception as e:
                     logging.error(
-                        f"Download/upload backdrop error for: {importData[episoideNumber]['backdrop']}.", exc_info=e)
+                        f"Download/upload backdrop error for: {importData[episodeNumber]['backdrop']}.", exc_info=e)
 
     except PlaywrightError as e:
         logging.error(f"Playwright error during episode import: {e}")
