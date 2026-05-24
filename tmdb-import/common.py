@@ -72,21 +72,26 @@ class Episode:
         return iter([self.episode_number, self.name, self.air_date, self.runtime, clean_overview, self.backdrop])
 
 class Season():
-    def __init__(self, season_number, name="", overview="", episodes={}, poster="", crew={}, guest_stars={}):
+    def __init__(self, season_number, name=None, overview=None, episodes=[], poster=None, crew=None, guest_stars=None):
         self.season_number = season_number
         self.name = name
         self.overview = overview
         self.episodes = episodes
         self.poster = poster
-        self.crew = crew
-        self.guest_stars = guest_stars
+        self.crew = crew if crew is not None else []
+        self.guest_stars = guest_stars if guest_stars is not None else []
 
 class TV():
-    def __init__(self, *args):
-        self.id = None
-        self.name = None
-        self.overview = None
-        self.poster = None
+    def __init__(self, url=None, id=None, name=None, seasons=None, overview=None, poster=None, backdrop=None, logo=None):
+        self.id = id
+        self.url = url
+        self.name = name
+        self.seasons = seasons if seasons is not None else []
+        self.overview = overview
+        self.poster = poster
+        self.backdrop = backdrop
+        self.logo = logo
+
 
 def remove_duplicate_overview(import_data):
     overview_dict = {}
