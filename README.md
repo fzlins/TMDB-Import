@@ -98,6 +98,7 @@ The `config.ini` file in the working directory controls the behaviour of the scr
 | `filter_words` | *(empty)* | Comma-separated words; episodes whose titles contain any of these words are excluded from the CSV (e.g. `番外,加更`) |
 | `rename_csv_on_import` | `false` | When `true`, rename `import.csv` to `import_{tmdb_id}_s{season}_{language}.csv` before importing |
 | `delete_csv_after_import` | `false` | When `true`, delete the CSV file after a successful import |
+| `chinese_convert` | *(empty)* | Convert Chinese text variant after extraction. Leave empty to disable. Options: `zh-CN` (Simplified), `zh-TW` (Taiwan Traditional), `zh-HK` (Hong Kong Traditional). Only applied when the source language is Chinese (`zh-*`). |
 
 Example `config.ini`:
 ```ini
@@ -111,6 +112,7 @@ backdrop_vote_after_upload = false
 filter_words = 番外,加更
 rename_csv_on_import = false
 delete_csv_after_import = false
+chinese_convert = 
 ```
 
 # Test Environment
