@@ -109,6 +109,7 @@ python -m tmdb-import --headless fitsize 1920*1080 "https://www.***.com/image.jp
 | `filter_words` | *(留空)* | 过滤词，多个过滤词用逗号分隔；集名包含过滤词的条目将被排除在 CSV 之外（如 `番外,加更`） |
 | `rename_csv_on_import` | `false` | 值为 `true` 时，导入前将 `import.csv` 重命名为 `import_{tmdb_id}_s{season}_{language}.csv` |
 | `delete_csv_after_import` | `false` | 值为 `true` 时，导入完成后删除 CSV 文件 |
+| `chinese_convert` | *(留空)* | 抓取后对中文文本进行字体转换。留空则不转换。可选值：`zh-CN`（大陆简体）、`zh-TW`（台湾繁体）、`zh-HK`（香港繁体）。仅当来源语言为中文（`zh-*`）时生效。 |
 
 `config.ini` 示例：
 ```ini
@@ -122,6 +123,7 @@ backdrop_vote_after_upload = false
 filter_words = 番外,加更
 rename_csv_on_import = false
 delete_csv_after_import = false
+chinese_convert = 
 ```
 
 # 测试环境

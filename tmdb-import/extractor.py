@@ -114,6 +114,13 @@ def extract_from_url(url, language="zh-CN"):
         return
 
     if metadata:
+        chinese_target = config.get("DEFAULT", "chinese_convert", fallback="").strip()
+        if chinese_target:
+            from .util.chinese_convert import is_chinese_language, convert_metadata
+            if is_chinese_language(metadata.language):
+                logging.info(f"Converting Chinese text to {chinese_target}")
+                convert_metadata(metadata, chinese_target)
+
         save_metadata_json("metadata.json", metadata)
 
         all_episodes = {}
@@ -140,3 +147,4 @@ def extract_from_url(url, language="zh-CN"):
             create_csv("import.csv", all_episodes)
 
     logging.info(f"Extracting data is complete")
+    return metadata

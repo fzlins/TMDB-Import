@@ -12,3 +12,6 @@ Pillow>=10.0.0
 
 # Image border cropping
 bordercrop>=0.1.7
+
+# Chinese variant conversion (Simplified ↔ Traditional)
+opencc-python-reimplemented>=0.1.7
