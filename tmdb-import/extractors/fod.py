@@ -2,7 +2,7 @@ import json
 import urllib.request
 from urllib.parse import urlparse
 import logging
-from ..common import Episode, ini_playwright_page, cleanup_playwright_page, open_url
+from ..common import Episode, Metadata, Season, ini_playwright_page, cleanup_playwright_page, open_url
 
 # ex: https://fod.fujitv.co.jp/title/4v97/
 def fod_extractor(url):
@@ -54,4 +54,4 @@ def fod_extractor(url):
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
         episodeNumber = episodeNumber + 1
 
-    return episodes
+    return Metadata(url=url, language="ja-JP", name=season_name, overview=season_overview, backdrop=season_backdrop, seasons=[Season(None, episodes=episodes)])

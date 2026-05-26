@@ -1,6 +1,6 @@
 import json
 import logging
-from ..common import Episode
+from ..common import Episode, Metadata, Season
 from ..common import ini_playwright_page, cleanup_playwright_page
 import re
 
@@ -11,6 +11,8 @@ def myvideo_extractor(url):
     page = ini_playwright_page()
     page.goto(url)
 
+    season_name = None
+    season_overview = None
     try:
         season_name = page.locator("div[class='title'] h2").text_content()
         logging.info(f"name: {season_name}")
@@ -52,7 +54,7 @@ def myvideo_extractor(url):
         episode_number = episode_number + 1
 
     cleanup_playwright_page(page)
-    return episodes
+    return Metadata(url=url, language="zh-TW", name=season_name, overview=season_overview, seasons=[Season(None, episodes=episodes)])
 
 def get_large_image(url):
     return url.split('_', 1)[0] + '.' + url.rsplit('.', 1)[-1]

@@ -2,7 +2,7 @@ import json
 from urllib.parse import urlparse
 import logging
 from datetime import datetime
-from ..common import Episode, open_url
+from ..common import Episode, Metadata, Season, open_url
 
 def get_large_image(url):
     return str(url).replace(".xs.",".md.")
@@ -51,4 +51,4 @@ def kktv_extractor(url):
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
         episodeNumber = episodeNumber + 1
 
-    return episodes
+    return Metadata(url=url, language="zh-TW", name=season_name, overview=season_overview, poster=season_poster, seasons=[Season(None, episodes=episodes)])

@@ -1,5 +1,5 @@
 import logging
-from ..common import Episode
+from ..common import Episode, Metadata, Season
 from ..common import ini_playwright_page, cleanup_playwright_page
 
 # Ex: https://anidb.net/anime/2073
@@ -46,7 +46,7 @@ def anidb_extractor(url):
                 # except:
                     # pass
 
-        return episodes
+        return Metadata(url=url, language="en-US", seasons=[Season(None, episodes=episodes)])
     
     finally:
         cleanup_playwright_page(page)

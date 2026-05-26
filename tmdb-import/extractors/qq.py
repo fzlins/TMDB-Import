@@ -2,7 +2,7 @@ import json
 import logging
 import re
 from concurrent.futures import ThreadPoolExecutor
-from ..common import Episode, open_url
+from ..common import Episode, Metadata, Season, open_url
 
 # ex: https://v.qq.com/x/cover/mzc00200t0fg7k8/o0043eaefxx.html?ptag=douban.tv
 # ex: https://v.qq.com/x/cover/mzc00200t0fg7k8.html
@@ -141,4 +141,4 @@ def qq_extractor(url):
             ep.name = ""
     
     logging.info(f"Successfully extracted {len(episodes)} episodes")
-    return episodes
+    return Metadata(url=url, language="zh-CN", seasons=[Season(None, episodes=episodes)])

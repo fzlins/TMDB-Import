@@ -1,5 +1,6 @@
+import re
 import logging
-from ..common import Episode
+from ..common import Episode, Metadata, Season
 from ..common import ini_playwright_page, cleanup_playwright_page
 from datetime import datetime
 
@@ -9,6 +10,9 @@ def tvdb_extractor(url):
 
     page = ini_playwright_page(save_user_profile=True)
     
+    match = re.search(r'/seasons/official/(\d+)', url)
+    season_number = int(match.group(1)) if match else 1
+
     try:
         page.goto(url)
         
@@ -40,7 +44,7 @@ def tvdb_extractor(url):
             episode_backdrop = ""
             episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
         
-        return episodes
+        return Metadata(url=url, seasons=[Season(season_number, episodes=episodes)])
         
     finally:
         cleanup_playwright_page(page)

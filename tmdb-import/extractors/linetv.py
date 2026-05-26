@@ -2,7 +2,7 @@ import json
 from urllib.parse import urlparse
 import logging
 import re
-from ..common import Episode, open_url
+from ..common import Episode, Metadata, Season, open_url
 
 # ex: https://www.linetv.tw/drama/15566 or https://www.linetv.tw/drama/18009/eps/1
 def linetv_extractor(url):
@@ -16,7 +16,7 @@ def linetv_extractor(url):
     match = re.search(r'/drama/(\d+)', urlPath)
     if not match:
         logging.error(f"Could not extract drama ID from URL: {url}")
-        return {}
+        return Metadata(url=url, seasons=[])
     
     drama_id = match.group(1)
     logging.info(f"Extracted drama_id: {drama_id}")
@@ -75,4 +75,4 @@ def linetv_extractor(url):
             )
     
     logging.info(f"Total episodes found: {len(episodes)}")
-    return episodes
+    return Metadata(url=url, language="zh-TW", name=season_name, seasons=[Season(None, episodes=episodes)])

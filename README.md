@@ -47,8 +47,12 @@ python -m tmdb-import "http://www.***.com/video.html"
 python -m tmdb-import -d "http://www.***.com/video.html"  # Enable debug logging
 python -m tmdb-import --headless "http://www.***.com/video.html"  # Run in headless mode
 python -m tmdb-import -d --headless "http://www.***.com/video.html"  # Debug + headless mode
+python -m tmdb-import "http://www.***.com/video.html" --debug  # Options can also be placed after URL
 ```
-- Extract episode data through web links, including title, plot description, duration, release time (mostly current platform time), and background image links, and generate import.csv file for subsequent import.
+- Extract episode data through web links, including title, plot description, duration, release time (mostly current platform time), and background image links.
+- Output files:
+	- `metadata.json`: Full structured metadata (show-level fields, season-level fields, episode list by season)
+	- `import.csv`: Flattened episode list for TMDB import
 
 ### Import Data to TMDB
 ```
@@ -131,7 +135,7 @@ Windows 11, Chrome/Chromium, Python 3, and Visual Studio Code.
 | [linetv](https://www.linetv.tw) | &#10004; | x | &#10004; | x | &#10004; | zh-TW |
 | [litv](https://www.litv.tv) | &#10004; | x | x | x | &#10004; | zh-TW |
 | [mgtv](https://www.mgtv.com) | &#10004; | x | &#10004; | &#10004; | x | zh-CN |
-| [mytvsuper](https://www.mytvsuper.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-TW |
+| [mytvsuper](https://www.mytvsuper.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-HK |
 | [myvideo](https://www.myvideo.net.tw) | &#10004; |  &#10004; | x | x | &#10004; | zh-TW |
 | [netflix](https://www.netflix.com) | &#10004; | &#10004; | x | x | x | Follow site |
 | [nhk](https://www.nhk.or.jp) | &#10004; | &#10004; | &#10004; | x | &#10004; | ja-JP |

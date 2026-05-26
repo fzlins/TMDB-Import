@@ -1,6 +1,6 @@
 import logging
 import re
-from ..common import Episode
+from ..common import Episode, Metadata, Season
 from ..common import ini_playwright_page, cleanup_playwright_page
 
 # ex: https://webcache.googleusercontent.com/search?q=cache:lPwlbfO5SXQJ:https://www.netflix.com/sg-zh/title/81568217&cd=1&hl=zh-CN&ct=clnk&gl=ca
@@ -31,7 +31,13 @@ def netflix_extractor(url):
             
             episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
             episode_number = episode_number + 1
+
+        try:
+            language = page.locator("select[name='LanguageSelect']").evaluate("el => el.value")
+            logging.info(f"Detected language: {language}")
+        except:
+            language = None
     finally:
         cleanup_playwright_page(page)
     
-    return episodes
+    return Metadata(url=url, language=language, seasons=[Season(None, episodes=episodes)])

@@ -1,6 +1,6 @@
 import json, logging, re
 from datetime import datetime
-from ..common import Episode, ini_playwright_page, cleanup_playwright_page
+from ..common import Episode, Metadata, Season, ini_playwright_page, cleanup_playwright_page
 
 def _extract_episode_data(page):
     for script in page.locator("script").all():
@@ -16,8 +16,8 @@ def _extract_episode_data(page):
 
 def _parse_episode(ep_data, season_num=0):
     if not (ep_num := ep_data.get("episodeNumber", "")): return None
-    key = f"S{season_num}E{ep_num}" if season_num else str(ep_num)
-    return Episode(key, ep_data.get("title", ""),
+    episode_number = ep_num
+    return Episode(episode_number, ep_data.get("title", ""),
                    _parse_date(ep_data.get("releaseDate", "")), _parse_runtime(ep_data.get("runtime", "")),
                    ep_data.get("synopsis", ""), ep_data.get("images", {}).get("packshot") or ep_data.get("images", {}).get("covershot") or "")
 
@@ -44,7 +44,7 @@ def _parse_runtime(r):
 
 def primevideo_extractor(url):
     logging.info("primevideo_extractor is called")
-    page, episodes = None, {}
+    page, all_seasons = None, []
     try:
         page = ini_playwright_page(headless=True, images=False)
         if m := re.search(r'lcl_([a-z]{2}_[A-Z]{2})', url):
@@ -70,20 +70,25 @@ def primevideo_extractor(url):
                     page.goto(season_url, wait_until="networkidle", timeout=60000)
                     if (expander := page.locator("a[data-automation-id='ep-expander']")).count() > 0 and (href := expander.get_attribute("href")):
                         page.goto(href)
+                    season_eps = {}
                     for tid, ed in _extract_episode_data(page).items():
                         if ep := _parse_episode(ed, season_num):
-                            episodes[ep.episode_number] = ep
-                    logging.info(f"Extracted {len([ep for ep in episodes if ep.startswith(f'S{season_num}E')])} episodes from season {season_num}")
+                            season_eps[ep.episode_number] = ep
+                    logging.info(f"Extracted {len(season_eps)} episodes from season {season_num}")
+                    all_seasons.append(Season(season_num, episodes=season_eps))
                 except Exception as e:
                     logging.warning(f"Failed to extract season {season_num}: {e}", exc_info=True)
         else:
+            season_eps = {}
             for tid, ed in _extract_episode_data(page).items():
                 if ep := _parse_episode(ed):
-                    episodes[ep.episode_number] = ep
-        logging.info(f"Successfully extracted {len(episodes)} episodes")
+                    season_eps[ep.episode_number] = ep
+            all_seasons.append(Season(None, episodes=season_eps))
+        total = sum(len(s.episodes) for s in all_seasons)
+        logging.info(f"Successfully extracted {total} episodes")
     except Exception as e:
         logging.error(f"Failed to extract Prime Video data: {e}", exc_info=True)
-        return {}
+        return Metadata(url=url, seasons=[])
     finally:
         if page: cleanup_playwright_page(page)
-    return episodes
+    return Metadata(url=url, seasons=all_seasons)

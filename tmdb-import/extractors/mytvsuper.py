@@ -1,7 +1,7 @@
 import json
 import logging
 import re
-from ..common import Episode, open_url
+from ..common import Episode, Metadata, Season, open_url
 from datetime import datetime
 
 # Ex:"https://www.mytvsuper.com/tc/programme/justicesungbegins_140304/%E7%8B%80%E7%8E%8B%E4%B9%8B%E7%8E%8B/"
@@ -22,4 +22,4 @@ def mytvsuper_extractor(url):
         episode_overview = episode["desc_tc"]
         episode_backdrop = episode["image"]["large"]
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
-    return episodes
+    return Metadata(url=url, language="zh-HK", seasons=[Season(None, episodes=episodes)])

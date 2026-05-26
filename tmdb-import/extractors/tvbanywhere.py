@@ -1,7 +1,7 @@
 import json
 from urllib.parse import urlparse
 import logging
-from ..common import Episode, open_url
+from ..common import Episode, Metadata, Season, open_url
 
 # ex: https://www.tvbanywhere.com/en/webtv/programme/thequeenofnews2_144840/766522/The-QUEEN-Of-News
 def tvbanywhere_extractor(url):
@@ -25,7 +25,7 @@ def tvbanywhere_extractor(url):
 
     if not programme_id:
         logging.error("Failed to extract programme_id from URL")
-        return {}
+        return Metadata(url=url, seasons=[])
 
     logging.info(f"programme_id: {programme_id}")
 
@@ -45,7 +45,7 @@ def tvbanywhere_extractor(url):
         soureData = json.loads(open_url(apiRequest))
     except Exception as e:
         logging.error(f"Failed to request TVB Anywhere API: {e}")
-        return {}
+        return Metadata(url=url, seasons=[])
 
     episodes = {}
 
@@ -84,4 +84,4 @@ def tvbanywhere_extractor(url):
     except Exception as e:
         logging.error(f"Failed to get episode list: {e}")
 
-    return episodes
+    return Metadata(url=url, name=programme_name, overview=programme_desc, seasons=[Season(None, episodes=episodes)])

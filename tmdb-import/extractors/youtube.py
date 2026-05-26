@@ -2,7 +2,7 @@
 import logging
 import urllib.request
 from urllib.parse import urlparse, parse_qs
-from ..common import Episode
+from ..common import Episode, Metadata, Season
 
 #https://www.youtube.com/playlist?list=PLiC9HIB4b8TpWemiXT26r7Wv2Cg6b74SX 
 
@@ -110,7 +110,7 @@ def youtube_extractor(url):
     playlist_id = qs.get("list", [None])[0]
     if not playlist_id:
         logging.error("Could not extract playlist ID from URL")
-        return {}
+        return Metadata(url=url, seasons=[])
 
     logging.info(f"Playlist ID: {playlist_id}")
 
@@ -190,4 +190,4 @@ def youtube_extractor(url):
         logging.info(f"[{ep_num}] {video['title']} ({video['runtime']} min, {air_date})")
 
     logging.info(f"Extracted {len(episodes)} episodes from playlist '{playlist_name}'")
-    return episodes
+    return Metadata(url=url, name=playlist_name, seasons=[Season(None, episodes=episodes)])

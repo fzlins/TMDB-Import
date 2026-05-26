@@ -1,7 +1,7 @@
 import json
 from urllib.parse import urlparse
 import logging
-from ..common import Episode, open_url
+from ..common import Episode, Metadata, Season, open_url
 from datetime import datetime
 
 # language: zh
@@ -86,4 +86,4 @@ def viu_extractor(url):
         episode_overview = episode.get('description', '')
         episode_backdrop = episode.get('cover_image_url', '')
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
-    return episodes
+    return Metadata(url=url, seasons=[Season(None, episodes=episodes)])

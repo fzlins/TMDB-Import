@@ -1,6 +1,6 @@
 import logging
 import re
-from ..common import Episode
+from ..common import Episode, Metadata, Season
 from ..common import ini_playwright_page, cleanup_playwright_page
 
 # paravi ex: https://www.paravi.jp/title/64465
@@ -47,6 +47,6 @@ def paravi_extractor(url):
             episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
             episode_number = episode_number + 1
             
-        return episodes
+        return Metadata(url=url, language="ja-JP", name=season_name, overview=season_overview, backdrop=season_backdrop, seasons=[Season(None, episodes=episodes)])
     finally:
         cleanup_playwright_page(page)
