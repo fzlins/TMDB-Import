@@ -1,7 +1,7 @@
 import json
 import logging
 from urllib.parse import urlparse
-from ..common import Episode, open_url
+from ..common import Episode, Metadata, Season, open_url
 
 
 # ex: https://gyao.yahoo.co.jp/store/title/267001
@@ -28,5 +28,5 @@ def yahoo_extractor(url, language="en-US"):
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
         episode_number = episode_number + 1
 
-    return episodes
+    return Metadata(url=url, language=language, seasons=[Season(None, episodes=episodes)])
 

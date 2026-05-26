@@ -51,9 +51,13 @@ python -m tmdb-import "http://www.***.com/video.html"
 python -m tmdb-import -d "http://www.***.com/video.html"  # 启用调试日志
 python -m tmdb-import --headless "http://www.***.com/video.html"  # 无头模式运行
 python -m tmdb-import -d --headless "http://www.***.com/video.html"  # 调试+无头模式
+python -m tmdb-import "http://www.***.com/video.html" --debug  # 选项也可放在 URL 后
 ```
 
-- 通过网页链接来抓取剧集数据，包括标题、剧情介绍、时长、发布时间（大多数为当前平台的时间）和背景图链接，并生成 import.csv 文件用于之后的导入。
+- 通过网页链接来抓取剧集数据，包括标题、剧情介绍、时长、发布时间（大多数为当前平台的时间）和背景图链接。
+- 输出文件：
+	- `metadata.json`：完整结构化元数据（剧集级、季级、集级信息）
+	- `import.csv`：用于 TMDB 导入的扁平化剧集列表
 
 ### 导入数据到 TMDB
 
@@ -144,7 +148,7 @@ Windows 11、Chrome/Chromium、Python 3 和 Visual Studio Code。
 | [linetv](https://www.linetv.tw)     | &#10004; |    x     | &#10004; |    x     | &#10004; | zh-TW    |
 | [litv](https://www.litv.tv)       | &#10004; |    x     |    x     |    x     | &#10004; | zh-TW    |
 | [mgtv](https://www.mgtv.com)       | &#10004; |    x     | &#10004; | &#10004; |    x     | zh-CN    |
-| [mytvsuper](https://www.mytvsuper.com)  | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-TW    |
+| [mytvsuper](https://www.mytvsuper.com)  | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-HK    |
 | [myvideo](https://www.myvideo.net.tw)    | &#10004; | &#10004; |    x     |    x     | &#10004; | zh-TW    |
 | [netflix](https://www.netflix.com)    | &#10004; | &#10004; |    x     | x |    x     | 跟随网站 |
 | [nhk](https://www.nhk.or.jp)        | &#10004; | &#10004; | &#10004; |    x     | &#10004; | ja-JP    |

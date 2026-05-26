@@ -1,6 +1,6 @@
 import json
 import logging
-from ..common import Episode, open_url
+from ..common import Episode, Metadata, Season, open_url
 from datetime import datetime
 from urllib.parse import urlparse
 import re
@@ -53,4 +53,4 @@ def cctv_extractor(url):
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
         episode_number = episode_number + 1
 
-    return episodes
+    return Metadata(url=url, language="zh-CN", seasons=[Season(None, episodes=episodes)])

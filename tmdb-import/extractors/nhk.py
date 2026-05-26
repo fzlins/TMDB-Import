@@ -1,7 +1,7 @@
 import json
 from urllib.parse import urlparse, parse_qs
 import logging
-from ..common import Episode, open_url
+from ..common import Episode, Metadata, Season, open_url
 from datetime import datetime
 import re
 
@@ -60,4 +60,4 @@ def nhk_extractor(url):
                 nextURL = soureData["nextUrl"]
             else:
                 break
-    return episodes
+    return Metadata(url=url, language="ja-JP", seasons=[Season(None, episodes=episodes)])

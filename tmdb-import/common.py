@@ -72,26 +72,34 @@ class Episode:
         return iter([self.episode_number, self.name, self.air_date, self.runtime, clean_overview, self.backdrop])
 
 class Season():
-    def __init__(self, season_number, name=None, overview=None, episodes=[], poster=None, crew=None, guest_stars=None):
+    def __init__(self, season_number=None, name=None, overview=None, episodes=None, poster=None, crew=None, guest_stars=None):
         self.season_number = season_number
         self.name = name
         self.overview = overview
-        self.episodes = episodes
+        self.episodes = episodes if episodes is not None else []
         self.poster = poster
         self.crew = crew if crew is not None else []
         self.guest_stars = guest_stars if guest_stars is not None else []
 
-class TV():
-    def __init__(self, url=None, id=None, name=None, seasons=None, overview=None, poster=None, backdrop=None, logo=None):
+class Metadata():
+    def __init__(self, url=None, id=None, name=None, seasons=None, overview=None, poster=None, backdrop=None, logo=None, language=None, runtime=None, release_date=None):
         self.id = id
         self.url = url
         self.name = name
-        self.seasons = seasons if seasons is not None else []
+        self.seasons = seasons
         self.overview = overview
         self.poster = poster
         self.backdrop = backdrop
         self.logo = logo
+        self.language = language  # zh-CN, en-US, ja-JP, etc.
+        self.runtime = runtime
+        self.release_date = release_date
 
+def format_episode_number_for_csv(season_number, episode_number):
+    if season_number is None:
+        return str(episode_number)
+
+    return f"S{season_number}E{episode_number}"
 
 def remove_duplicate_overview(import_data):
     overview_dict = {}
@@ -159,6 +167,47 @@ def filter_by_name(import_data, filter_words):
             filtered_data[episode_number] = episode
 
     return filtered_data
+
+def save_metadata_json(filename, metadata):
+    import json
+    from datetime import date
+
+    def _episode_to_dict(ep):
+        return {
+            "episode_number": ep.episode_number,
+            "name": ep.name,
+            "air_date": str(ep.air_date) if isinstance(ep.air_date, date) else ep.air_date,
+            "runtime": ep.runtime,
+            "overview": ep.overview,
+            "backdrop": ep.backdrop,
+        }
+
+    def _season_to_dict(s):
+        return {
+            "season_number": s.season_number,
+            "name": s.name,
+            "overview": s.overview,
+            "poster": s.poster,
+            "episodes": [_episode_to_dict(v) for v in s.episodes.values()],
+        }
+
+    data = {
+        "url": metadata.url,
+        "id": metadata.id,
+        "name": metadata.name,
+        "overview": metadata.overview,
+        "poster": metadata.poster,
+        "backdrop": metadata.backdrop,
+        "logo": metadata.logo,
+        "language": metadata.language,
+        "runtime": metadata.runtime,
+        "release_date": str(metadata.release_date) if isinstance(metadata.release_date, date) else metadata.release_date,
+        "seasons": [_season_to_dict(s) for s in metadata.seasons],
+    }
+
+    encoding = config.get("DEFAULT", "encoding", fallback="utf-8-sig")
+    with open(filename, "w", encoding=encoding) as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
 
 def create_csv(filename, import_data = {}):
     encoding = config.get("DEFAULT","encoding", fallback="utf-8-sig")

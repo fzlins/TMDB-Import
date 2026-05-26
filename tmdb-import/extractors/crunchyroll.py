@@ -1,13 +1,13 @@
 import json
 import logging
-from ..common import Episode
+from ..common import Episode, Metadata, Season
 from ..common import ini_playwright_page, cleanup_playwright_page
 
 # ex: https://www.crunchyroll.com/fr/series/GDKHZEJN0/dragon-raja--the-blazing-dawn-
 def crunchyroll_extractor(url):
     logging.info("crunchyroll_extractor is called")
 
-    episodes = {}
+    season_list = []
     auth_token = None
     max_retries = 30
     retry_delay = 2000
@@ -57,10 +57,8 @@ def crunchyroll_extractor(url):
             elif '/episodes' in api_url and "data" in api_data:
                 episodes_api_template = api_url
 
-        is_multi_season = len(seasons_data) > 1
-
         for season_id, season in seasons_data.items():
-            season_number = season.get("season_number", 1)
+            season_number = season.get("season_number")
 
             if episodes_api_template:
                 import re
@@ -69,6 +67,7 @@ def crunchyroll_extractor(url):
 
                 if response.status == 200:
                     episodeData = json.loads(response.text())
+                    season_eps = {}
 
                     if "data" in episodeData:
                         for episode in episodeData["data"]:
@@ -80,23 +79,22 @@ def crunchyroll_extractor(url):
                             episode_runtime = episode.get("duration_ms", 0) // 1000 // 60 if episode.get("duration_ms") else ""
                             episode_overview = episode.get("description", "")
                             episode_backdrop = _get_episode_backdrop(episode)
-                            if is_multi_season:
-                                episode_key = f"S{season_number}E{episode_number}"
-                            else:
-                                episode_key = episode_number
-                            episodes[episode_key] = Episode(episode_key, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
+                            season_eps[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
+
+                    season_list.append(Season(season_number, name=season.get("title"), episodes=season_eps))
 
         if not auth_token:
             logging.warning("Could not capture Authorization token")
 
-        logging.info(f"Extracted {len(episodes)} episodes")
+        total_episodes = sum(len(s.episodes) for s in season_list)
+        logging.info(f"Extracted {total_episodes} episodes")
 
     except Exception as e:
         logging.error(f"Error in crunchyroll_extractor: {e}")
     finally:
         cleanup_playwright_page(page)
 
-    return episodes
+    return Metadata(url=url, seasons=season_list)
 
 def _get_episode_backdrop(episode):
     if "images" not in episode or "thumbnail" not in episode["images"]:

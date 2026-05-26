@@ -2,7 +2,7 @@ import json
 import logging
 import re
 from datetime import datetime
-from ..common import Episode, open_url
+from ..common import Episode, Metadata, Season, open_url
 
 # language: zh
 # Ex:"https://www.iqiyi.com/v_ik3832z0go.html"
@@ -58,4 +58,4 @@ def iqiyi_extractor(url):
 
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
 
-    return episodes
+    return Metadata(url=url, language="zh-CN", name=name, overview=description, poster=cover, seasons=[Season(None, episodes=episodes)])

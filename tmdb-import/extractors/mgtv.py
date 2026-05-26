@@ -1,6 +1,6 @@
 import json
 import logging
-from ..common import Episode, open_url
+from ..common import Episode, Metadata, Season, open_url
 
 # language: zh
 # backdrop: 860*484
@@ -17,7 +17,7 @@ def mgtv_extractor(url):
             collection_id = part
             break
     if collection_id == "":
-        return {} 
+        return Metadata(url=url, seasons=[]) 
     
 
     page = 1
@@ -38,7 +38,6 @@ def mgtv_extractor(url):
                 episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
         if soureData["data"]["total_page"] == soureData["data"]["current_page"]:
             break
-        else:
-            page = page + 1
+        page += 1
 
-    return episodes
+    return Metadata(url=url, language="zh-CN", seasons=[Season(None, episodes=episodes)])

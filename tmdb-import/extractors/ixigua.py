@@ -1,6 +1,6 @@
 import logging
 import re
-from ..common import Episode
+from ..common import Episode, Metadata, Season
 from ..common import ini_playwright_page, cleanup_playwright_page
 
 # ixigua ex: https://www.ixigua.com/7144949347581428232
@@ -42,4 +42,4 @@ def ixigua_extractor(url):
     finally:
         cleanup_playwright_page(page)
         
-    return episodes
+    return Metadata(url=url, language="zh-CN", name=season_name, overview=season_overview, seasons=[Season(None, episodes=episodes)])

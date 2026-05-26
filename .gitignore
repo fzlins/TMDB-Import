@@ -7,6 +7,7 @@ Image/
 # ignore file
 *.csv
 *.log
+*.json
 # Removed msedgedriver.exe - no longer needed with Playwright
 
 # Byte-compiled / optimized / DLL files

@@ -38,7 +38,7 @@ def main(**kwargs):
     headless_mode = False
     
     try:
-        opts, args = getopt.getopt(sys.argv[1:], _short_options, _options)
+        opts, args = getopt.gnu_getopt(sys.argv[1:], _short_options, _options)
     except getopt.GetoptError as e:
         print(f"Invalid option! Try '{script_name} --help' for more options.")
         return

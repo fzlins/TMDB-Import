@@ -1,16 +1,15 @@
 import logging
 
 def setup_custom_logger(name, debug_mode=False):
-    formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
+    level = logging.DEBUG if debug_mode else logging.INFO
 
-    handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
+    # Reconfigure root logger each run so CLI flags (-d/--debug) always win.
+    logging.basicConfig(
+        level=level,
+        format='%(asctime)s - %(levelname)s - %(module)s - %(message)s',
+        force=True,
+    )
+
     logger = logging.getLogger(name)
-    
-    if debug_mode:
-        logger.setLevel(logging.DEBUG)
-    else:
-        logger.setLevel(logging.INFO)
-    
-    logger.addHandler(handler)
+    logger.setLevel(level)
     return logger

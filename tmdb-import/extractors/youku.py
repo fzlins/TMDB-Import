@@ -1,7 +1,7 @@
 import json
 import logging
 import re
-from ..common import Episode, open_url, ini_playwright_page, cleanup_playwright_page
+from ..common import Episode, Metadata, Season, open_url, ini_playwright_page, cleanup_playwright_page
 from urllib.parse import urlparse, parse_qs
 
 def youku_extractor(url):
@@ -48,16 +48,16 @@ def youku_extractor(url):
                     show_data = json.loads(open_url(f"https://openapi.youku.com/v2/shows/show.json?show_id={showID}&client_id={client_id}&package=com.huawei.hwvplayer.youku"))
                 else:
                     logging.error("Failed to extract show id from page")
-                    return {}
+                    return Metadata(url=url, seasons=[])
         except Exception as e:
             logging.error(f"Failed to extract from page: {e}")
-            return {}
+            return Metadata(url=url, seasons=[])
         finally:
             cleanup_playwright_page(page)
     
     if "error" in show_data:
         logging.error(f"API returned error: {show_data}")
-        return {}
+        return Metadata(url=url, seasons=[])
     
     logging.info(f"show link: {show_data['link']}")
     logging.info(f"name: {show_data['name']}")
@@ -93,4 +93,4 @@ def youku_extractor(url):
             break
         page += 1
 
-    return episodes
+    return Metadata(url=url, language="zh-CN", seasons=[Season(None, episodes=episodes)])

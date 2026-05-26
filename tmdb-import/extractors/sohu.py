@@ -1,7 +1,7 @@
 import json
 import logging
 import re
-from ..common import Episode, open_url
+from ..common import Episode, Metadata, Season, open_url
 
 # language: zh
 # Ex:"https://tv.sohu.com/v/MjAyMjA4MTEvbjYwMTIwNDk3MS5zaHRtbA==.html?txid=9075b2a7de230eeef8505336cfdc34ae"
@@ -33,4 +33,4 @@ def sohu_extractor(url):
 
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
 
-    return episodes
+    return Metadata(url=url, language="zh-CN", name=name, overview=description, seasons=[Season(None, episodes=episodes)])

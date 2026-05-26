@@ -2,7 +2,7 @@ import json
 from urllib.parse import urlparse
 import logging
 from datetime import datetime
-from ..common import Episode, open_url
+from ..common import Episode, Metadata, Season, open_url
 
 # ex: https://www.bilibili.com/bangumi/media/md28234541
 def bilibili_extractor(url):
@@ -44,4 +44,4 @@ def bilibili_extractor(url):
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
         episode_number = episode_number + 1
 
-    return episodes
+    return Metadata(url=url, language="zh-CN", name=season_name, poster=season_poster, backdrop=season_backdrop, seasons=[Season(None, episodes=episodes)])

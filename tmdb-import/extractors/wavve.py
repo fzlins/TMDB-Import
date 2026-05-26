@@ -1,7 +1,7 @@
 import json
 import logging
 import re
-from ..common import Episode, open_url
+from ..common import Episode, Metadata, Season, open_url
 
 # language: kr
 # backdrop: 1280*720
@@ -22,4 +22,4 @@ def wavve_extractor(url):
         episode_backdrop = f"https://{episode['thumbnail']}"
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
         episode_number = episode_number + 1 
-    return episodes
+    return Metadata(url=url, language="ko-KR", seasons=[Season(None, episodes=episodes)])

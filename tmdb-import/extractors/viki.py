@@ -1,7 +1,7 @@
 import json
 import logging
 from urllib.parse import urlparse
-from ..common import Episode, open_url
+from ..common import Episode, Metadata, Season, open_url
 
 
 # ex: https://www.viki.com/tv/37350c-a-man-in-a-veil
@@ -38,4 +38,4 @@ def viki_extractor(url, language="en-US"):
         else:
             break
 
-    return episodes
+    return Metadata(url=url, language=language, seasons=[Season(None, episodes=episodes)])

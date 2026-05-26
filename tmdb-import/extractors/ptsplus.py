@@ -4,7 +4,7 @@ import re
 import urllib.request
 from urllib.parse import urlparse
 
-from ..common import Episode
+from ..common import Episode, Metadata, Season
 
 # ex: https://www.ptsplus.tv/zh/programs/2758c4b8-8e25-4d10-8dae-2d0978345c98
 # ex: https://www.ptsplus.tv/zh/programs/2758c4b8-8e25-4d10-8dae-2d0978345c98/seasons/90c4215b-b771-45f0-a1f1-fa506747da35
@@ -79,7 +79,7 @@ def ptsplus_extractor(url):
         program_id = path_parts[prog_idx + 1]
     except (ValueError, IndexError):
         logging.error(f"Could not extract program ID from URL: {url}")
-        return {}
+        return Metadata(url=url, seasons=[])
 
     try:
         season_idx = path_parts.index("seasons")
@@ -93,7 +93,7 @@ def ptsplus_extractor(url):
 
     if "errors" in data:
         logging.error(f"GraphQL errors: {data['errors']}")
-        return {}
+        return Metadata(url=url, seasons=[])
 
     program = data["data"]["program"]
     program_name = program["name"]
@@ -104,30 +104,34 @@ def ptsplus_extractor(url):
     all_seasons = program.get("seasons", [])
     if not all_seasons:
         logging.error("No seasons found for this program")
-        return {}
+        return Metadata(url=url, seasons=[])
 
     if season_id:
         # Extract from specific season only
         target_seasons = [s for s in all_seasons if s["id"] == season_id]
         if not target_seasons:
             logging.error(f"Season {season_id} not found in program {program_id}")
-            return {}
-        use_season_format = False
+            return Metadata(url=url, seasons=[])
     else:
         # Extract all seasons; sort chronologically (API returns newest first,
         # where season.number=1 is most recent, higher number = older).
         target_seasons = sorted(all_seasons, key=lambda s: s.get("number", 0), reverse=True)
-        use_season_format = len(target_seasons) > 1
 
-    episodes = {}
-    episode_counter = 1
+    season_list = []
 
-    for season_idx_sorted, season in enumerate(target_seasons, start=1):
+    for season in target_seasons:
+        season_number = season.get("number")
         season_name = season.get("name", "")
         logging.info(f"Season: {season_name}")
 
+        season_eps = {}
+        fallback_episode_counter = 1
+
         for ep in season.get("episodes", []):
-            ep_number = ep.get("number") or episode_counter
+            ep_number = ep.get("number")
+            if ep_number is None:
+                ep_number = fallback_episode_counter
+
             ep_name = re.sub(r'\s*ep\d+$', '', ep.get("name", ""), flags=re.IGNORECASE).strip()
             ep_overview = ep.get("introduction", "")
             ep_backdrop = ep.get("cover", "")
@@ -139,20 +143,26 @@ def ptsplus_extractor(url):
             # Per-episode air date is not exposed by the PTS+ API
             ep_air_date = ""
 
-            if use_season_format:
-                key = f"S{season_idx_sorted}E{ep_number}"
-            else:
-                key = episode_counter
-
-            episodes[key] = Episode(
-                ep_number if not use_season_format else key,
+            season_eps[ep_number] = Episode(
+                ep_number,
                 ep_name,
                 ep_air_date,
                 ep_runtime,
                 ep_overview,
                 ep_backdrop,
             )
-            episode_counter += 1
+            fallback_episode_counter += 1
 
-    logging.info(f"Successfully extracted {len(episodes)} episodes")
-    return episodes
+        season_list.append(
+            Season(
+                season_number=season_number,
+                name=season_name,
+                overview=season.get("introduction", ""),
+                poster=season.get("cover", ""),
+                episodes=season_eps,
+            )
+        )
+
+    total_episodes = sum(len(s.episodes) for s in season_list)
+    logging.info(f"Successfully extracted {total_episodes} episodes")
+    return Metadata(url=url, language="zh-TW", name=program_name, seasons=season_list)

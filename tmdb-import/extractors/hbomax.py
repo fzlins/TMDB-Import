@@ -1,7 +1,7 @@
 import json
 from urllib.parse import urlparse
 import logging
-from ..common import Episode, open_url, ini_playwright_page, cleanup_playwright_page
+from ..common import Episode, Metadata, Season, open_url, ini_playwright_page, cleanup_playwright_page
 
 # ex: https://www.hbomax.com/hk/en/shows/talking-tom-heroes-suddenly-super/55b42a25-3234-452c-a05f-5ad8a318a66e
 def hbomax_extractor(url):
@@ -14,7 +14,7 @@ def hbomax_extractor(url):
 
     if not show_id:
         logging.error("Failed to extract HBO Max show ID from URL")
-        return {}
+        return Metadata(url=url, seasons=[])
 
     page = None
     try:
@@ -24,13 +24,13 @@ def hbomax_extractor(url):
         next_data = page.evaluate("() => document.querySelector('#__NEXT_DATA__').textContent")
         data = json.loads(next_data)
 
-        episodes = {}
+        season_list = []
         page_props = data.get("props", {}).get("pageProps", {})
         mapped_data = page_props.get("mappedData", {})
 
         if not mapped_data:
             logging.error("Failed to find mappedData in page data")
-            return {}
+            return Metadata(url=url, seasons=[])
 
         seasons = None
         for key, value in mapped_data.items():
@@ -44,18 +44,20 @@ def hbomax_extractor(url):
 
         if not seasons:
             logging.error("Failed to find seasons data")
-            return {}
+            return Metadata(url=url, seasons=[])
 
         logging.debug(f"Found {len(seasons)} seasons")
 
         for season in seasons:
             if not isinstance(season, dict):
                 continue
-            season_number = season.get("seasonNumber", 1)
+            season_number = season.get("seasonNumber")
             episodes_data = season.get("episodes", [])
             if not isinstance(episodes_data, list):
                 continue
             logging.debug(f"Season {season_number}: {len(episodes_data)} episodes")
+
+            season_eps = {}
 
             for ep in episodes_data:
                 if not isinstance(ep, dict):
@@ -63,11 +65,6 @@ def hbomax_extractor(url):
                 episode_number = ep.get("episodeNumber", "")
                 if not episode_number:
                     continue
-
-                if len(seasons) > 1:
-                    episode_key = f"S{season_number}E{episode_number}"
-                else:
-                    episode_key = str(episode_number)
 
                 title_obj = ep.get("title", {})
                 if isinstance(title_obj, dict):
@@ -95,14 +92,17 @@ def hbomax_extractor(url):
                 else:
                     episode_backdrop = ""
 
-                episodes[episode_key] = Episode(episode_key, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
+                season_eps[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
 
-        logging.info(f"Successfully extracted {len(episodes)} episodes")
-        return episodes
+            season_list.append(Season(season_number, episodes=season_eps))
+
+        total_episodes = sum(len(s.episodes) for s in season_list)
+        logging.info(f"Successfully extracted {total_episodes} episodes")
+        return Metadata(url=url, seasons=season_list)
 
     except Exception as e:
         logging.error(f"Failed to extract HBO Max data: {e}")
-        return {}
+        return Metadata(url=url, seasons=[])
     finally:
         if page:
             cleanup_playwright_page(page)

@@ -4,7 +4,7 @@ import urllib.request
 import urllib.parse
 import logging
 from datetime import date, datetime, timezone, timedelta
-from ..common import Episode
+from ..common import Episode, Metadata, Season
 
 _PLATFORM_URL = "https://platform-api.tver.jp"
 _SERVICE_URL = "https://service-api.tver.jp"
@@ -161,4 +161,4 @@ def tver_extractor(url):
             ep_number, ep_name, air_date, runtime, description, backdrop
         )
 
-    return episodes
+    return Metadata(url=url, language="ja-JP", seasons=[Season(None, episodes=episodes)])
