@@ -82,10 +82,10 @@ class Season():
         self.guest_stars = guest_stars if guest_stars is not None else []
 
 class Metadata():
-    def __init__(self, url=None, id=None, name=None, seasons=None, overview=None, poster=None, backdrop=None, logo=None, language=None, runtime=None, release_date=None):
+    def __init__(self, url=None, id=None, title=None, seasons=None, overview=None, poster=None, backdrop=None, logo=None, language=None, runtime=None, release_date=None):
         self.id = id
         self.url = url
-        self.name = name
+        self.title = title
         self.seasons = seasons
         self.overview = overview
         self.poster = poster
@@ -225,7 +225,7 @@ def save_metadata_json(filename, metadata):
     data = {
         "url": metadata.url,
         "id": metadata.id,
-        "name": metadata.name,
+        "title": metadata.title,
         "overview": metadata.overview,
         "poster": metadata.poster,
         "backdrop": metadata.backdrop,

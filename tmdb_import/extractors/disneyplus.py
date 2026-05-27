@@ -52,4 +52,4 @@ def disneyplus_extractor(url, language="zh-CN"):
             season_eps[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
         season_list.append(Season(season_number, episodes=season_eps))
 
-    return Metadata(url=url, language=language, name=season_name, overview=season_overview, poster=season_poster, backdrop=season_backdrop, logo=season_logo, seasons=season_list)
+    return Metadata(url=url, language=language, title=season_name, overview=season_overview, poster=season_poster, backdrop=season_backdrop, logo=season_logo, seasons=season_list)

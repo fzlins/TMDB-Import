@@ -75,12 +75,26 @@ def tver_extractor(url):
     platform_token = session_data["result"]["platform_token"]
     logging.debug(f"Platform session created (uid prefix: {platform_uid[:8]})")
 
-    # Step 2: Get all seasons for the series
+    # Step 2: Get series metadata (title, poster, etc.)
+    series_data = _request(
+        f"{_SERVICE_URL}/api/v1/callSeries/{series_id}"
+    )
+    series_info = series_data.get("result", {})
+    series_title = series_info.get("title", "")
+    series_poster = ""
+    if "thumbnailPath" in series_info:
+        series_poster = f"{_STATICS_URL}{series_info['thumbnailPath']}"
+    
+    logging.info(f"Series title: {series_title}")
+    if series_poster:
+        logging.info(f"Series poster: {series_poster}")
+
+    # Step 3: Get all seasons for the series
     seasons_data = _request(
         f"{_SERVICE_URL}/api/v1/callSeriesSeasons/{series_id}"
     )
 
-    # Step 3: Collect episodes from main seasons only
+    # Step 4: Collect episodes from main seasons only
     episode_list = []
     seen_ids = set()
 
@@ -117,7 +131,7 @@ def tver_extractor(url):
                        _parse_ep_number(e.get("title", "")) or 0)
     )
 
-    # Step 4: Fetch episode details and build Episode objects
+    # Step 5: Fetch episode details and build Episode objects
     episodes = {}
     fallback_number = 1
 
@@ -161,4 +175,11 @@ def tver_extractor(url):
             ep_number, ep_name, air_date, runtime, description, backdrop
         )
 
-    return Metadata(url=url, id=series_id, language="ja-JP", seasons=[Season(None, episodes=episodes)])
+    return Metadata(
+        url=url, 
+        id=series_id, 
+        title=series_title,
+        poster=series_poster,
+        language="ja-JP", 
+        seasons=[Season(None, episodes=episodes)]
+    )

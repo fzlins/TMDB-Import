@@ -35,7 +35,7 @@ def asahi_extractor(url):
 
         season_obj = Season(
             season_number=season_number,
-            name=season_name,
+            title=season_name,
             overview=season_overview,
             poster=season_backdrop,
             episodes={},

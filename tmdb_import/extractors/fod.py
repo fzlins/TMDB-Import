@@ -54,4 +54,4 @@ def fod_extractor(url):
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
         episodeNumber = episodeNumber + 1
 
-    return Metadata(url=url, language="ja-JP", name=season_name, overview=season_overview, backdrop=season_backdrop, seasons=[Season(None, episodes=episodes)])
+    return Metadata(url=url, language="ja-JP", title=season_name, overview=season_overview, backdrop=season_backdrop, seasons=[Season(None, episodes=episodes)])

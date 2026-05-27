@@ -33,10 +33,16 @@ def kktv_extractor(url):
     logging.info(f"overview: {season_overview}")
     season_poster = get_large_image(soureData["data"]["cover"])
     logging.info(f"poster: {season_poster}")
-    season_backdrop = soureData["data"]["stills"]
-    for backdrop in season_backdrop:
-        backdrop = get_large_image(backdrop)
-        logging.info(f"backdrop: {backdrop}")
+    
+    # Extract backdrop - use first still image if available
+    season_backdrop = None
+    season_backdrop_list = soureData["data"]["stills"]
+    if season_backdrop_list:
+        season_backdrop = get_large_image(season_backdrop_list[0])
+        logging.info(f"backdrop: {season_backdrop}")
+        # Log remaining backdrops
+        for backdrop in season_backdrop_list[1:]:
+            logging.info(f"additional backdrop: {get_large_image(backdrop)}")
     
 
     episodes = {}
@@ -51,4 +57,12 @@ def kktv_extractor(url):
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
         episodeNumber = episodeNumber + 1
 
-    return Metadata(url=url, language="zh-TW", name=season_name, overview=season_overview, poster=season_poster, seasons=[Season(None, episodes=episodes)])
+    return Metadata(
+        url=url, 
+        language="zh-TW", 
+        title=season_name, 
+        overview=season_overview, 
+        poster=season_poster,
+        backdrop=season_backdrop,
+        seasons=[Season(None, episodes=episodes)]
+    )

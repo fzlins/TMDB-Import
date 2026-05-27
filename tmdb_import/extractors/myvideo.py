@@ -13,6 +13,7 @@ def myvideo_extractor(url):
 
     season_name = None
     season_overview = None
+    season_backdrop = None
     try:
         season_name = page.locator("div[class='title'] h2").text_content()
         logging.info(f"name: {season_name}")
@@ -21,9 +22,12 @@ def myvideo_extractor(url):
         #season_poster = get_large_image(season_poster)
         #logging.info(f"poster: {season_poster}")
         season_backdrops = page.locator("figure[class='movieStillsItem'] picture img").all()
-        for backdrop in season_backdrops:
-            season_backdrop = get_large_image(backdrop.get_attribute("src"))
+        if season_backdrops:
+            season_backdrop = get_large_image(season_backdrops[0].get_attribute("src"))
             logging.info(f"backdrop: {season_backdrop}")
+            # Log remaining backdrops
+            for backdrop_elem in season_backdrops[1:]:
+                logging.info(f"additional backdrop: {get_large_image(backdrop_elem.get_attribute('src'))}")
     except Exception as e:
         logging.warning(f"Could not extract season-level information: {e}")
 
@@ -54,7 +58,14 @@ def myvideo_extractor(url):
         episode_number = episode_number + 1
 
     cleanup_playwright_page(page)
-    return Metadata(url=url, language="zh-TW", name=season_name, overview=season_overview, seasons=[Season(None, episodes=episodes)])
+    return Metadata(
+        url=url, 
+        language="zh-TW", 
+        title=season_name, 
+        overview=season_overview,
+        backdrop=season_backdrop,
+        seasons=[Season(None, episodes=episodes)]
+    )
 
 def get_large_image(url):
     return url.split('_', 1)[0] + '.' + url.rsplit('.', 1)[-1]

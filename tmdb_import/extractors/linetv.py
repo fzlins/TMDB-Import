@@ -30,10 +30,15 @@ def linetv_extractor(url):
     season_name = soureData.get("drama_name", "")
     logging.info(f"name: {season_name}")
     
+    # Extract show-level metadata
+    season_overview = None
+    season_backdrop = None
+    season_poster = None
+    
     # Extract and log description
     if "introduction" in soureData:
-        season_description = soureData["introduction"]
-        logging.info(f"description: {season_description}")
+        season_overview = soureData["introduction"]
+        logging.info(f"overview: {season_overview}")
     
     # Extract and log backdrop (horizontal poster)
     if "horizontal_poster_url" in soureData:
@@ -75,4 +80,12 @@ def linetv_extractor(url):
             )
     
     logging.info(f"Total episodes found: {len(episodes)}")
-    return Metadata(url=url, language="zh-TW", name=season_name, seasons=[Season(None, episodes=episodes)])
+    return Metadata(
+        url=url, 
+        language="zh-TW", 
+        title=season_name, 
+        overview=season_overview,
+        poster=season_poster,
+        backdrop=season_backdrop,
+        seasons=[Season(None, episodes=episodes)]
+    )

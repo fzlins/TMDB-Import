@@ -127,7 +127,7 @@ from tmdb_import import extract_from_url, save_metadata_json, create_csv
 metadata = extract_from_url("https://tver.jp/series/...")
 
 # Access metadata
-print(metadata.name)        # Show name
+print(metadata.title)       # Show title
 print(metadata.overview)    # Show overview
 print(metadata.poster)      # Poster URL
 print(metadata.language)    # Language code (e.g., 'ja-JP')
@@ -151,7 +151,7 @@ for season in metadata.seasons:
 - `create_csv(filename, episodes_dict)`: Save episodes to CSV file
 
 **Metadata Structure:**
-- `Metadata`: Show-level data (name, overview, poster, backdrop, logo, language, seasons)
+- `Metadata`: Show-level data (title, overview, poster, backdrop, logo, language, seasons)
 - `Season`: Season-level data (season_number, name, overview, poster, episodes)
 - `Episode`: Episode data (episode_number, name, air_date, runtime, overview, backdrop)
 

@@ -44,4 +44,4 @@ def bilibili_extractor(url):
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
         episode_number = episode_number + 1
 
-    return Metadata(url=url, language="zh-CN", name=season_name, poster=season_poster, backdrop=season_backdrop, seasons=[Season(None, episodes=episodes)])
+    return Metadata(url=url, language="zh-CN", title=season_name, poster=season_poster, backdrop=season_backdrop, seasons=[Season(None, episodes=episodes)])

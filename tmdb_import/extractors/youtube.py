@@ -190,4 +190,4 @@ def youtube_extractor(url):
         logging.info(f"[{ep_num}] {video['title']} ({video['runtime']} min, {air_date})")
 
     logging.info(f"Extracted {len(episodes)} episodes from playlist '{playlist_name}'")
-    return Metadata(url=url, name=playlist_name, seasons=[Season(None, episodes=episodes)])
+    return Metadata(url=url, title=playlist_name, seasons=[Season(None, episodes=episodes)])
