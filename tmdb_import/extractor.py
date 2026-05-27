@@ -121,30 +121,11 @@ def extract_from_url(url, language="zh-CN"):
                 logging.info(f"Converting Chinese text to {chinese_target}")
                 convert_metadata(metadata, chinese_target)
 
-        save_metadata_json("metadata.json", metadata)
-
-        all_episodes = {}
+        # Process episodes in metadata: remove duplicates and apply filters
+        from .common import process_episodes
         for season in metadata.seasons:
-            if not isinstance(season.episodes, dict):
-                continue
-
-            for episode in season.episodes.values():
-                csv_episode_number = format_episode_number_for_csv(
-                    season.season_number,
-                    episode.episode_number,
-                )
-
-                all_episodes[csv_episode_number] = Episode(
-                    csv_episode_number,
-                    episode.name,
-                    episode.air_date,
-                    episode.runtime,
-                    episode.overview,
-                    episode.backdrop,
-                )
-
-        if all_episodes:
-            create_csv("import.csv", all_episodes)
+            if isinstance(season.episodes, dict) and season.episodes:
+                season.episodes = process_episodes(season.episodes)
 
     logging.info(f"Extracting data is complete")
     return metadata

@@ -161,4 +161,4 @@ def tver_extractor(url):
             ep_number, ep_name, air_date, runtime, description, backdrop
         )
 
-    return Metadata(url=url, language="ja-JP", seasons=[Season(None, episodes=episodes)])
+    return Metadata(url=url, id=series_id, language="ja-JP", seasons=[Season(None, episodes=episodes)])

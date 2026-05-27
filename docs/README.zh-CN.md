@@ -35,7 +35,7 @@ playwright install chromium
 ## 基本用法
 
 ```
-python -m tmdb-import [选项] "URL"
+python -m tmdb_import [选项] "URL"
 ```
 
 ## 浏览器模式说明
@@ -47,11 +47,11 @@ python -m tmdb-import [选项] "URL"
 ### 抓取剧集数据
 
 ```
-python -m tmdb-import "http://www.***.com/video.html"
-python -m tmdb-import -d "http://www.***.com/video.html"  # 启用调试日志
-python -m tmdb-import --headless "http://www.***.com/video.html"  # 无头模式运行
-python -m tmdb-import -d --headless "http://www.***.com/video.html"  # 调试+无头模式
-python -m tmdb-import "http://www.***.com/video.html" --debug  # 选项也可放在 URL 后
+python -m tmdb_import "http://www.***.com/video.html"
+python -m tmdb_import -d "http://www.***.com/video.html"  # 启用调试日志
+python -m tmdb_import --headless "http://www.***.com/video.html"  # 无头模式运行
+python -m tmdb_import -d --headless "http://www.***.com/video.html"  # 调试+无头模式
+python -m tmdb_import "http://www.***.com/video.html" --debug  # 选项也可放在 URL 后
 ```
 
 - 通过网页链接来抓取剧集数据，包括标题、剧情介绍、时长、发布时间（大多数为当前平台的时间）和背景图链接。
@@ -62,11 +62,11 @@ python -m tmdb-import "http://www.***.com/video.html" --debug  # 选项也可放
 ### 导入数据到 TMDB
 
 ```
-python -m tmdb-import "https://www.themoviedb.org/tv/{tv_id}/season/{season_number}?language={language}"
-# 示例: python -m tmdb-import "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
-# 启用调试: python -m tmdb-import -d "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
-# 无头模式: python -m tmdb-import --headless "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
-# 组合选项: python -m tmdb-import -d --headless "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
+python -m tmdb_import "https://www.themoviedb.org/tv/{tv_id}/season/{season_number}?language={language}"
+# 示例: python -m tmdb_import "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
+# 启用调试: python -m tmdb_import -d "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
+# 无头模式: python -m tmdb_import --headless "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
+# 组合选项: python -m tmdb_import -d --headless "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
 ```
 
 - 导入目录下的 import.csv 的数据到 TMDB。上传背景图时，自动切除黑边并适配 TMDB 所要求的宽高比。第一次运行需要在登陆界面手动登陆，也可在 `config.ini` 中填写 `tmdb_username` 和 `tmdb_password` 实现自动登陆。更多选项请参阅[配置说明](#配置说明)。
@@ -74,25 +74,69 @@ python -m tmdb-import "https://www.themoviedb.org/tv/{tv_id}/season/{season_numb
 ### 图片处理
 
 ```
-python -m tmdb-import backdrop "https://www.***.com/image.jpg"
-python -m tmdb-import --headless backdrop "https://www.***.com/image.jpg"  # 无头模式处理背景图
+python -m tmdb_import backdrop "https://www.***.com/image.jpg"
+python -m tmdb_import --headless backdrop "https://www.***.com/image.jpg"  # 无头模式处理背景图
 ```
 
 - 裁剪出适配 TMDB 的背景图
 
 ```
-python -m tmdb-import poster "https://www.***.com/image.jpg"
-python -m tmdb-import --headless poster "https://www.***.com/image.jpg"  # 无头模式处理海报
+python -m tmdb_import poster "https://www.***.com/image.jpg"
+python -m tmdb_import --headless poster "https://www.***.com/image.jpg"  # 无头模式处理海报
 ```
 
 - 裁剪出适配 TMDB 的海报图片
 
 ```
-python -m tmdb-import fitsize width*height "https://www.***.com/image.jpg"
-python -m tmdb-import --headless fitsize 1920*1080 "https://www.***.com/image.jpg"  # 无头模式裁剪
+python -m tmdb_import fitsize width*height "https://www.***.com/image.jpg"
+python -m tmdb_import --headless fitsize 1920*1080 "https://www.***.com/image.jpg"  # 无头模式裁剪
 ```
 
 - 按给出的长宽裁剪图片
+
+## 作为 Python 库使用
+
+TMDB-Import 也可以作为 Python 库在您的项目中使用：
+
+```python
+# 添加到 sys.path（如果未通过 pip 安装）
+import sys
+sys.path.insert(0, r'/path/to/TMDB-Import')
+
+# 直接导入（包现在使用下划线）
+from tmdb_import import extract_from_url, save_metadata_json, create_csv
+
+# 提取元数据
+metadata = extract_from_url("https://tver.jp/series/...")
+
+# 访问元数据
+print(metadata.name)        # 剧集名称
+print(metadata.overview)    # 剧集简介
+print(metadata.poster)      # 海报 URL
+print(metadata.language)    # 语言代码（如 'ja-JP'）
+
+# 访问剧集信息
+for season in metadata.seasons:
+    for episode_num, episode in season.episodes.items():
+        print(f"第{episode_num}集: {episode.name}")
+
+# 可选：手动保存文件
+save_metadata_json("output.json", metadata)
+for season in metadata.seasons:
+    if season.episodes:
+        create_csv("output.csv", season.episodes)
+        break
+```
+
+**可用函数：**
+- `extract_from_url(url, language="zh-CN")`：从 URL 提取和处理元数据
+- `save_metadata_json(filename, metadata)`：将元数据保存为 JSON 文件
+- `create_csv(filename, episodes_dict)`：将剧集保存为 CSV 文件
+
+**元数据结构：**
+- `Metadata`：剧集级数据（name, overview, poster, backdrop, logo, language, seasons）
+- `Season`：季级数据（season_number, name, overview, poster, episodes）
+- `Episode`：集级数据（episode_number, name, air_date, runtime, overview, backdrop）
 
 # 配置说明
 
@@ -106,7 +150,7 @@ python -m tmdb-import --headless fitsize 1920*1080 "https://www.***.com/image.jp
 | `tmdb_password` | *(留空)* | TMDB 账号密码，用于自动登陆 |
 | `backdrop_forced_upload` | `false` | 值为 `true` 时，即使 TMDB 已有背景图也强制上传 |
 | `backdrop_vote_after_upload` | `false` | 值为 `true` 时，上传背景图后自动点赞 |
-| `filter_words` | *(留空)* | 过滤词，多个过滤词用逗号分隔；集名包含过滤词的条目将被排除在 CSV 之外（如 `番外,加更`） |
+| `filter_words` | *(留空)* | 过滤词，多个过滤词用逗号分隔；集名包含过滤词的集将被过滤。剩余集会自动重新编号，但保留原有缺集（例如，若原始有 1,2,3,4,5,6,10 集，过滤掉 2,4 后，结果为 1,2,3,8，保留第 6 集后的缺集） |
 | `rename_csv_on_import` | `false` | 值为 `true` 时，导入前将 `import.csv` 重命名为 `import_{tmdb_id}_s{season}_{language}.csv` |
 | `delete_csv_after_import` | `false` | 值为 `true` 时，导入完成后删除 CSV 文件 |
 | `chinese_convert` | *(留空)* | 抓取后对中文文本进行字体转换。留空则不转换。可选值：`zh-CN`（大陆简体）、`zh-TW`（台湾繁体）、`zh-HK`（香港繁体）。仅当来源语言为中文（`zh-*`）时生效。 |
@@ -166,5 +210,5 @@ Windows 11、Chrome/Chromium、Python 3 和 Visual Studio Code。
 | [viu](https://www.viu.com)        | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN    |
 | [yahoo](https://tv.yahoo.co.jp)      | &#10004; | &#10004; | &#10004; |    x     |    x     | 跟随网站 |
 | [wavve](https://www.wavve.com)      | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | ko-KR    |
-| [youku](https://www.youku.com)      |    x     | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN    |
+| [youku](https://www.youku.com)      | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN    |
 | [youtube](https://www.youtube.com)  | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | 跟随网站 |
