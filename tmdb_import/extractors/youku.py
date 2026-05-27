@@ -102,7 +102,7 @@ def youku_extractor(url):
     return Metadata(
         url=url, 
         id=showID, 
-        name=show_name,
+        title=show_name,
         overview=show_overview,
         poster=show_poster,
         backdrop=show_backdrop,

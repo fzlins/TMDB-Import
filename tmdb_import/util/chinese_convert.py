@@ -84,7 +84,7 @@ def convert_metadata(metadata: Metadata, target: str) -> None:
     Convert all text fields in *metadata* in-place to the *target* Chinese variant.
 
     Fields converted:
-      - Metadata.name, Metadata.overview
+      - Metadata.title, Metadata.overview
       - Season.name, Season.overview  (for every season)
       - Episode.name, Episode.overview (for every episode in every season)
       - Person.name, Person.overview   (crew and guest_stars in every season)
@@ -93,7 +93,7 @@ def convert_metadata(metadata: Metadata, target: str) -> None:
     punct_table = _PUNCT_TABLES.get(target)
 
     # Top-level fields
-    metadata.name = _convert_text(metadata.name, converter, punct_table)
+    metadata.title = _convert_text(metadata.title, converter, punct_table)
     metadata.overview = _convert_text(metadata.overview, converter, punct_table)
 
     if not metadata.seasons:

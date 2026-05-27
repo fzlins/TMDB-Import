@@ -42,4 +42,4 @@ def ixigua_extractor(url):
     finally:
         cleanup_playwright_page(page)
         
-    return Metadata(url=url, language="zh-CN", name=season_name, overview=season_overview, seasons=[Season(None, episodes=episodes)])
+    return Metadata(url=url, language="zh-CN", title=season_name, overview=season_overview, seasons=[Season(None, episodes=episodes)])

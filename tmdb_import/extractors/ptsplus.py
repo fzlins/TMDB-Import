@@ -165,4 +165,4 @@ def ptsplus_extractor(url):
 
     total_episodes = sum(len(s.episodes) for s in season_list)
     logging.info(f"Successfully extracted {total_episodes} episodes")
-    return Metadata(url=url, language="zh-TW", name=program_name, seasons=season_list)
+    return Metadata(url=url, language="zh-TW", title=program_name, seasons=season_list)

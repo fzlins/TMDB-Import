@@ -99,7 +99,7 @@ def litv_extractor(url):
 
         total_episodes = sum(len(s.episodes) for s in season_list)
         logging.info(f"Extracted {total_episodes} episode(s) from {len(season_list)} season(s)")
-        return Metadata(url=url, language="zh-TW", name=title, seasons=season_list)
+        return Metadata(url=url, language="zh-TW", title=title, seasons=season_list)
         
     except Exception as e:
         logging.error(f"Error extracting data from LiTV: {e}")

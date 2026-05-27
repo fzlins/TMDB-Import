@@ -138,7 +138,7 @@ from tmdb_import import extract_from_url, save_metadata_json, create_csv
 metadata = extract_from_url("https://tver.jp/series/...")
 
 # 访问元数据
-print(metadata.name)        # 剧集名称
+print(metadata.title)       # 剧集标题
 print(metadata.overview)    # 剧集简介
 print(metadata.poster)      # 海报 URL
 print(metadata.language)    # 语言代码（如 'ja-JP'）
@@ -162,7 +162,7 @@ for season in metadata.seasons:
 - `create_csv(filename, episodes_dict)`：将剧集保存为 CSV 文件
 
 **元数据结构：**
-- `Metadata`：剧集级数据（name, overview, poster, backdrop, logo, language, seasons）
+- `Metadata`：剧集级数据（title, overview, poster, backdrop, logo, language, seasons）
 - `Season`：季级数据（season_number, name, overview, poster, episodes）
 - `Episode`：集级数据（episode_number, name, air_date, runtime, overview, backdrop）
 

@@ -17,10 +17,14 @@ def sohu_extractor(url):
     logging.info(f"album_url: {album_url}")
     name = soureData["albumName"]
     logging.info(f"name: {name}")
-    #cover = soureData["data"]["imageUrl"]
-    #logging.info(f"Image: {cover}")
     description = soureData["albumDesc"]
     logging.info(f"description: {description}")
+    
+    # Extract poster if available
+    poster = None
+    if "data" in soureData and "imageUrl" in soureData["data"]:
+        poster = soureData["data"]["imageUrl"]
+        logging.info(f"poster: {poster}")
 
     episodes = {}
     for episode in soureData["videos"]:
@@ -33,4 +37,11 @@ def sohu_extractor(url):
 
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
 
-    return Metadata(url=url, language="zh-CN", name=name, overview=description, seasons=[Season(None, episodes=episodes)])
+    return Metadata(
+        url=url, 
+        language="zh-CN", 
+        title=name, 
+        overview=description,
+        poster=poster,
+        seasons=[Season(None, episodes=episodes)]
+    )

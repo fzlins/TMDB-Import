@@ -80,7 +80,7 @@ def apple_extractor(url):
             season_episodes[season_num][episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
 
         season_list = [Season(sn, episodes=eps) for sn, eps in sorted(season_episodes.items())]
-        return Metadata(url=url, id=guid, language=language, name=season_name, overview=season_overview, poster=season_poster, backdrop=season_backdrop, logo=season_logo, seasons=season_list)
+        return Metadata(url=url, id=guid, language=language, title=season_name, overview=season_overview, poster=season_poster, backdrop=season_backdrop, logo=season_logo, seasons=season_list)
     elif urlPath.__contains__("/movie/"):
         apiRequest = f"https://tv.apple.com/api/uts/v3/movies/{guid}?caller=web&sf={sf}&v=58&pfm=web&locale={location}&utsk=AAAAAAAAA"
         logging.debug(f"API request url: {apiRequest}")
@@ -111,7 +111,7 @@ def apple_extractor(url):
         movie_air_date = datetime.fromtimestamp(soureData["data"]["content"]["releaseDate"]/1000).date()
         logging.info(f"air date: {movie_air_date}")
 
-    return Metadata(url=url, id=guid, language=language, name=movie_name, overview=movie_overview, poster=movie_poster, backdrop=movie_backdrop, logo=movie_logo, runtime=movie_runtime, release_date=movie_air_date, seasons=[])
+    return Metadata(url=url, id=guid, language=language, title=movie_name, overview=movie_overview, poster=movie_poster, backdrop=movie_backdrop, logo=movie_logo, runtime=movie_runtime, release_date=movie_air_date, seasons=[])
 
 def get_larger_image(image):
     image_heght = image["height"]

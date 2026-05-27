@@ -56,6 +56,22 @@ def tvbanywhere_extractor(url):
     logging.info(f"name: {programme_name}")
     logging.info(f"overview: {programme_desc[:100]}...")
     logging.info(f"total episodes: {total_episodes}")
+    
+    # Extract poster/backdrop from programme images if available
+    programme_poster = None
+    programme_backdrop = None
+    programme_images = soureData.get('programme_images', [])
+    if programme_images:
+        # Use first image as poster/backdrop
+        programme_poster = programme_images[0].get('image_path', '')
+        if len(programme_images) > 1:
+            programme_backdrop = programme_images[1].get('image_path', '')
+        else:
+            programme_backdrop = programme_poster
+        if programme_poster:
+            logging.info(f"poster: {programme_poster}")
+        if programme_backdrop and programme_backdrop != programme_poster:
+            logging.info(f"backdrop: {programme_backdrop}")
 
     episode_api_url = f"https://apisfm.tvbanywhere.com.sg/episode/list/country_code/US/platform/webtv/language/{lang_code}/programme_id/{programme_id}/offset/0/limit/100"
     logging.debug(f"Episode API request url: {episode_api_url}")
@@ -84,4 +100,12 @@ def tvbanywhere_extractor(url):
     except Exception as e:
         logging.error(f"Failed to get episode list: {e}")
 
-    return Metadata(url=url, id=programme_id, name=programme_name, overview=programme_desc, seasons=[Season(None, episodes=episodes)])
+    return Metadata(
+        url=url, 
+        id=programme_id, 
+        title=programme_name, 
+        overview=programme_desc,
+        poster=programme_poster,
+        backdrop=programme_backdrop,
+        seasons=[Season(None, episodes=episodes)]
+    )

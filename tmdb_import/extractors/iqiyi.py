@@ -58,4 +58,4 @@ def iqiyi_extractor(url):
 
         episodes[episode_number] = Episode(episode_number, episode_name, episode_air_date, episode_runtime, episode_overview, episode_backdrop)
 
-    return Metadata(url=url, id=albumId, language="zh-CN", name=name, overview=description, poster=cover, seasons=[Season(None, episodes=episodes)])
+    return Metadata(url=url, id=albumId, language="zh-CN", title=name, overview=description, poster=cover, seasons=[Season(None, episodes=episodes)])
