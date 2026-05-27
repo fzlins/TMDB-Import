@@ -8,18 +8,46 @@
 
 ## 安装依赖包
 
-### 方式一：使用 requirements.txt 安装（推荐）
+### 完整安装（所有功能）
 ```bash
 pip install -r requirements.txt
 playwright install chromium
 ```
 
-### 方式二：单独安装各个依赖包
+### 最小化安装（仅核心功能）
+```bash
+pip install python-dateutil
+```
+最小化安装支持大部分不需要浏览器自动化的提取器。
+
+### 可选依赖
+
+依赖项按需加载。当某个功能需要缺失的包时，程序会显示友好的错误提示：
+
+- **浏览器自动化**（用于优酷、爱奇艺等需要 JavaScript 渲染的网站）
+  ```bash
+  pip install playwright
+  playwright install chromium
+  ```
+
+- **中文简繁转换**（简体 ↔ 繁体）
+  ```bash
+  pip install opencc-python-reimplemented
+  ```
+  在 `config.ini` 中设置 `chinese_convert = zh-CN`（或 `zh-TW`、`zh-HK`）启用
+
+- **图片处理**（背景图/海报裁剪和格式转换）
+  ```bash
+  pip install Pillow bordercrop
+  ```
+
+### 单独安装各个依赖包
 ```bash
 pip install playwright
 pip install python-dateutil
 pip install Pillow
 pip install bordercrop
+pip install opencc-python-reimplemented
 playwright install chromium
 ```
 

@@ -1,13 +1,26 @@
-from PIL import Image, ImageOps
 import logging
-import bordercrop
 import re
 
 TYPE_BACKDROP = "backdrop"
 TYPE_POSTER = "poster"
 TYPE_FITSIZE = "fitsize"
 
+def _check_image_dependencies():
+    """Check if image processing dependencies are installed."""
+    try:
+        from PIL import Image, ImageOps
+        import bordercrop
+        return True
+    except ImportError as e:
+        missing = "Pillow" if "PIL" in str(e) else "bordercrop"
+        raise ImportError(
+            f"{missing} is required for image processing. "
+            f"Install all dependencies: pip install -r requirements.txt"
+        ) from e
+
 def convert_to_jpg(image_path):
+    _check_image_dependencies()
+    from PIL import Image
     image = Image.open(image_path)
     if image.mode != "RGB":
         logging.info(f"Convert {image.mode} to RGB")
@@ -19,6 +32,9 @@ def convert_to_jpg(image_path):
     image.close()
 
 def crop_black_border(image_path):
+    _check_image_dependencies()
+    from PIL import Image
+    import bordercrop
     try:
         image = Image.open(image_path)       
         tempImage = bordercrop.crop(image_path, 2, round(min(image.size[0], image.size[1])*0.9999), 50)
@@ -31,7 +47,9 @@ def crop_black_border(image_path):
         logging.error(err)
     image.close()
 
-def fit_aspect_ratio(image_path, type, fit_width, fit_height):   
+def fit_aspect_ratio(image_path, type, fit_width, fit_height):
+    _check_image_dependencies()
+    from PIL import Image, ImageOps
     image = Image.open(image_path)
     image_widith, image_heigh = image.size
     logging.debug(f"Image size: {image_widith} * {image_heigh}")

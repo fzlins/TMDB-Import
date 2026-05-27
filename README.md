@@ -8,18 +8,46 @@ This script uses the Playwright automation framework and only supports Chrome/Ch
 
 ## Install Dependencies
 
-### Option 1: Install from requirements.txt (Recommended)
+### Full Installation (All Features)
 ```bash
 pip install -r requirements.txt
 playwright install chromium
 ```
 
-### Option 2: Install packages individually
+### Minimal Installation (Core Features Only)
+```bash
+pip install python-dateutil
+```
+This minimal installation supports most extractors that don't require browser automation.
+
+### Optional Dependencies
+
+Dependencies are loaded on-demand. The program will show helpful error messages when a feature requires a missing package:
+
+- **Browser Automation** (for sites like Youku, IQIYI that require JavaScript rendering)
+  ```bash
+  pip install playwright
+  playwright install chromium
+  ```
+
+- **Chinese Variant Conversion** (Simplified ↔ Traditional)
+  ```bash
+  pip install opencc-python-reimplemented
+  ```
+  Enable in `config.ini` by setting `chinese_convert = zh-CN` (or `zh-TW`, `zh-HK`)
+
+- **Image Processing** (for backdrop/poster cropping and format conversion)
+  ```bash
+  pip install Pillow bordercrop
+  ```
+
+### Individual Package Installation
 ```bash
 pip install playwright
 pip install python-dateutil
 pip install Pillow
 pip install bordercrop
+pip install opencc-python-reimplemented
 playwright install chromium
 ```
 

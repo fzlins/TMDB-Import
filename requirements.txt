@@ -1,17 +1,21 @@
 # TMDB-Import Requirements
 # This file lists all Python dependencies for the project
 
-# Browser automation framework
-playwright>=1.40.0
-
-# Date and time utilities
+# === Core Dependencies ===
+# Required for basic functionality (date parsing, etc.)
 python-dateutil>=2.8.0
 
-# Image processing library
+# === Optional Dependencies ===
+# These are loaded on-demand and will show helpful error messages if missing
+
+# Browser automation framework (required for Youku, IQIYI, and other JS-heavy sites)
+playwright>=1.40.0
+
+# Image processing library (required for backdrop/poster processing)
 Pillow>=10.0.0
 
-# Image border cropping
+# Image border cropping (required for black border removal)
 bordercrop>=0.1.7
 
-# Chinese variant conversion (Simplified ↔ Traditional)
+# Chinese variant conversion - Simplified ↔ Traditional (required when chinese_convert is enabled in config.ini)
 opencc-python-reimplemented>=0.1.7
