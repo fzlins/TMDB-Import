@@ -93,7 +93,37 @@ def main(**kwargs):
             import_from_url(args[0])
         else:
             from .extractor import extract_from_url
-            extract_from_url(args[0])
+            from .common import save_metadata_json, create_csv, format_episode_number_for_csv, Episode
+            
+            metadata = extract_from_url(args[0])
+            
+            if metadata:
+                # Save processed metadata
+                save_metadata_json("metadata.json", metadata)
+
+                # Build CSV data from processed metadata
+                all_episodes = {}
+                for season in metadata.seasons:
+                    if not isinstance(season.episodes, dict):
+                        continue
+
+                    for episode in season.episodes.values():
+                        csv_episode_number = format_episode_number_for_csv(
+                            season.season_number,
+                            episode.episode_number,
+                        )
+
+                        all_episodes[csv_episode_number] = Episode(
+                            csv_episode_number,
+                            episode.name,
+                            episode.air_date,
+                            episode.runtime,
+                            episode.overview,
+                            episode.backdrop,
+                        )
+
+                if all_episodes:
+                    create_csv("import.csv", all_episodes)
 
 if __name__ == '__main__':
     main()

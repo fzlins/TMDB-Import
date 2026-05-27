@@ -33,7 +33,7 @@ playwright install chromium
 
 ## Basic Usage
 ```
-python -m tmdb-import [options] "URL"
+python -m tmdb_import [options] "URL"
 ```
 
 ## Browser Mode Description
@@ -43,11 +43,11 @@ python -m tmdb-import [options] "URL"
 
 ### Extract Episode Data
 ```
-python -m tmdb-import "http://www.***.com/video.html"
-python -m tmdb-import -d "http://www.***.com/video.html"  # Enable debug logging
-python -m tmdb-import --headless "http://www.***.com/video.html"  # Run in headless mode
-python -m tmdb-import -d --headless "http://www.***.com/video.html"  # Debug + headless mode
-python -m tmdb-import "http://www.***.com/video.html" --debug  # Options can also be placed after URL
+python -m tmdb_import "http://www.***.com/video.html"
+python -m tmdb_import -d "http://www.***.com/video.html"  # Enable debug logging
+python -m tmdb_import --headless "http://www.***.com/video.html"  # Run in headless mode
+python -m tmdb_import -d --headless "http://www.***.com/video.html"  # Debug + headless mode
+python -m tmdb_import "http://www.***.com/video.html" --debug  # Options can also be placed after URL
 ```
 - Extract episode data through web links, including title, plot description, duration, release time (mostly current platform time), and background image links.
 - Output files:
@@ -56,32 +56,76 @@ python -m tmdb-import "http://www.***.com/video.html" --debug  # Options can als
 
 ### Import Data to TMDB
 ```
-python -m tmdb-import "https://www.themoviedb.org/tv/{tv_id}/season/{season_number}?language={language}"
-# Example: python -m tmdb-import "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
-# Enable debug: python -m tmdb-import -d "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
-# Headless mode: python -m tmdb-import --headless "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
-# Combined options: python -m tmdb-import -d --headless "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
+python -m tmdb_import "https://www.themoviedb.org/tv/{tv_id}/season/{season_number}?language={language}"
+# Example: python -m tmdb_import "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
+# Enable debug: python -m tmdb_import -d "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
+# Headless mode: python -m tmdb_import --headless "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
+# Combined options: python -m tmdb_import -d --headless "https://www.themoviedb.org/tv/203646/season/1?language=zh-CN"
 ```
 - Import data from import.csv in the directory to TMDB. When uploading backdrop images, automatically crop black borders and adapt to the aspect ratio required by TMDB. On first run, manual login is required (or set `tmdb_username` and `tmdb_password` in `config.ini` for automatic login). See [Configuration](#configuration) for more options.
 
 ### Image Processing
 ```
-python -m tmdb-import backdrop "https://www.***.com/image.jpg"
-python -m tmdb-import --headless backdrop "https://www.***.com/image.jpg"  # Process backdrop in headless mode
+python -m tmdb_import backdrop "https://www.***.com/image.jpg"
+python -m tmdb_import --headless backdrop "https://www.***.com/image.jpg"  # Process backdrop in headless mode
 ```
 - Crop backdrop images to fit TMDB requirements
 
 ```
-python -m tmdb-import poster "https://www.***.com/image.jpg"
-python -m tmdb-import --headless poster "https://www.***.com/image.jpg"  # Process poster in headless mode
+python -m tmdb_import poster "https://www.***.com/image.jpg"
+python -m tmdb_import --headless poster "https://www.***.com/image.jpg"  # Process poster in headless mode
 ```
 - Crop poster images to fit TMDB requirements
 
 ```
-python -m tmdb-import fitsize width*height "https://www.***.com/image.jpg"
-python -m tmdb-import --headless fitsize 1920*1080 "https://www.***.com/image.jpg"  # Crop in headless mode
+python -m tmdb_import fitsize width*height "https://www.***.com/image.jpg"
+python -m tmdb_import --headless fitsize 1920*1080 "https://www.***.com/image.jpg"  # Crop in headless mode
 ```
 - Crop images according to specified width and height
+
+## Using as a Python Library
+
+TMDB-Import can also be used as a library in your Python projects:
+
+```python
+# Add to sys.path (if not installed via pip)
+import sys
+sys.path.insert(0, r'/path/to/TMDB-Import')
+
+# Import directly (package uses underscore now)
+from tmdb_import import extract_from_url, save_metadata_json, create_csv
+
+# Extract metadata
+metadata = extract_from_url("https://tver.jp/series/...")
+
+# Access metadata
+print(metadata.name)        # Show name
+print(metadata.overview)    # Show overview
+print(metadata.poster)      # Poster URL
+print(metadata.language)    # Language code (e.g., 'ja-JP')
+
+# Access episodes
+for season in metadata.seasons:
+    for episode_num, episode in season.episodes.items():
+        print(f"E{episode_num}: {episode.name}")
+
+# Optional: Save files manually
+save_metadata_json("output.json", metadata)
+for season in metadata.seasons:
+    if season.episodes:
+        create_csv("output.csv", season.episodes)
+        break
+```
+
+**Available Functions:**
+- `extract_from_url(url, language="zh-CN")`: Extract and process metadata from URL
+- `save_metadata_json(filename, metadata)`: Save metadata to JSON file
+- `create_csv(filename, episodes_dict)`: Save episodes to CSV file
+
+**Metadata Structure:**
+- `Metadata`: Show-level data (name, overview, poster, backdrop, logo, language, seasons)
+- `Season`: Season-level data (season_number, name, overview, poster, episodes)
+- `Episode`: Episode data (episode_number, name, air_date, runtime, overview, backdrop)
 
 # Configuration
 
@@ -95,7 +139,7 @@ The `config.ini` file in the working directory controls the behaviour of the scr
 | `tmdb_password` | *(empty)* | TMDB account password for automatic login |
 | `backdrop_forced_upload` | `false` | When `true`, upload a backdrop image even if one already exists on TMDB |
 | `backdrop_vote_after_upload` | `false` | When `true`, automatically cast a thumbs-up vote on the newly uploaded backdrop |
-| `filter_words` | *(empty)* | Comma-separated words; episodes whose titles contain any of these words are excluded from the CSV (e.g. `番外,加更`) |
+| `filter_words` | *(empty)* | Comma-separated words; episodes whose titles contain any of these words are filtered out. Remaining episodes are automatically renumbered while preserving gaps (e.g., if episodes 1,2,3,4,5,6,10 exist and episodes 2,4 are filtered, result will be 1,2,3,8 to preserve the gap after episode 6) |
 | `rename_csv_on_import` | `false` | When `true`, rename `import.csv` to `import_{tmdb_id}_s{season}_{language}.csv` before importing |
 | `delete_csv_after_import` | `false` | When `true`, delete the CSV file after a successful import |
 | `chinese_convert` | *(empty)* | Convert Chinese text variant after extraction. Leave empty to disable. Options: `zh-CN` (Simplified), `zh-TW` (Taiwan Traditional), `zh-HK` (Hong Kong Traditional). Only applied when the source language is Chinese (`zh-*`). |
@@ -153,5 +197,5 @@ Windows 11, Chrome/Chromium, Python 3, and Visual Studio Code.
 | [viu](https://www.viu.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
 | [yahoo](https://tv.yahoo.co.jp) | &#10004; | &#10004; | &#10004; | x | x | Follow site |
 | [wavve](https://www.wavve.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | ko-KR |
-| [youku](https://www.youku.com) | x | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
+| [youku](https://www.youku.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
 | [youtube](https://www.youtube.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | Follow site |

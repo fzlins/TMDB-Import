@@ -153,6 +153,7 @@ def filter_by_name(import_data, filter_words):
     filtered_data = {}
     filter_list = [word.strip() for word in filter_words.split(',')]
     
+    # First pass: filter episodes
     for episode_number, episode in import_data.items():
         should_keep = True
         if not episode.name:
@@ -166,7 +167,37 @@ def filter_by_name(import_data, filter_words):
         if should_keep:
             filtered_data[episode_number] = episode
 
+    # If any episodes were filtered, renumber the remaining ones
+    if len(filtered_data) < len(import_data):
+        # Get all original episode numbers (filtered + remaining)
+        all_numbers = sorted([int(k) for k in import_data.keys()])
+        filtered_numbers = sorted([int(k) for k in filtered_data.keys()])
+        
+        renumbered_data = {}
+        for original_num in filtered_numbers:
+            # Count how many episodes before this one were filtered out
+            filtered_before = sum(1 for n in all_numbers if n < original_num and n not in filtered_numbers)
+            new_num = original_num - filtered_before
+            
+            episode = filtered_data[str(original_num)]
+            episode.episode_number = str(new_num)
+            renumbered_data[str(new_num)] = episode
+        
+        return renumbered_data
+    
     return filtered_data
+
+def process_episodes(import_data):
+    """
+    Process episodes data: remove duplicates and apply filters.
+    Should be called before saving to JSON or CSV.
+    """
+    filter_words = config.get("DEFAULT", "filter_words", fallback="")
+    import_data = remove_duplicate_overview(import_data)
+    import_data = remove_duplicate_backdrop(import_data)
+    import_data = remove_duplicate_name(import_data)
+    import_data = filter_by_name(import_data, filter_words)
+    return import_data
 
 def save_metadata_json(filename, metadata):
     import json
@@ -216,23 +247,6 @@ def create_csv(filename, import_data = {}):
     import_data = remove_duplicate_backdrop(import_data)
     import_data = remove_duplicate_name(import_data)
     import_data = filter_by_name(import_data, filter_words)
-    
-    # Check if any episode uses season format (S{season}E{episode})
-    import re
-    has_season_format = any(
-        isinstance(ep_num, str) and re.match(r'^S\d+E\d+$', str(ep_num))
-        for ep_num in import_data.keys()
-    )
-    
-    # Only renumber episodes if not using season format
-    if not has_season_format:
-        renumbered_data = {}
-        episode_count = 1
-        for original_episode_number, episode in import_data.items():
-            episode.episode_number = str(episode_count)
-            renumbered_data[episode.episode_number] = episode
-            episode_count += 1
-        import_data = renumbered_data
 
     import csv
     with open(filename, "w", newline='', encoding=encoding) as csvfile:

@@ -59,11 +59,17 @@ def youku_extractor(url):
         logging.error(f"API returned error: {show_data}")
         return Metadata(url=url, seasons=[])
     
+    # Extract show metadata
+    show_name = show_data.get('name')
+    show_overview = show_data.get('description')
+    show_poster = show_data.get('poster_large')
+    show_backdrop = show_data.get('thumbnail_large')
+    
     logging.info(f"show link: {show_data['link']}")
-    logging.info(f"name: {show_data['name']}")
-    logging.info(f"poster url: {show_data['poster_large']}")
-    logging.info(f"backdrop url: {show_data['thumbnail_large']}")
-    logging.info(f"description url: {show_data['description']}")
+    logging.info(f"name: {show_name}")
+    logging.info(f"poster url: {show_poster}")
+    logging.info(f"backdrop url: {show_backdrop}")
+    logging.info(f"description: {show_overview}")
     
     episodes = {}
     episodeNumber = 1
@@ -93,4 +99,13 @@ def youku_extractor(url):
             break
         page += 1
 
-    return Metadata(url=url, language="zh-CN", seasons=[Season(None, episodes=episodes)])
+    return Metadata(
+        url=url, 
+        id=showID, 
+        name=show_name,
+        overview=show_overview,
+        poster=show_poster,
+        backdrop=show_backdrop,
+        language="zh-CN", 
+        seasons=[Season(None, episodes=episodes)]
+    )

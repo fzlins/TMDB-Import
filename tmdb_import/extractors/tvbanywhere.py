@@ -84,4 +84,4 @@ def tvbanywhere_extractor(url):
     except Exception as e:
         logging.error(f"Failed to get episode list: {e}")
 
-    return Metadata(url=url, name=programme_name, overview=programme_desc, seasons=[Season(None, episodes=episodes)])
+    return Metadata(url=url, id=programme_id, name=programme_name, overview=programme_desc, seasons=[Season(None, episodes=episodes)])
