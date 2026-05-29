@@ -213,7 +213,6 @@ Windows 11、Chrome/Chromium、Python 3 和 Visual Studio Code。
 | [bilibili.tv](https://www.bilibili.tv) | &#10004; |    x     |    x     | &#10004; | &#10004; | 跟随网站 |
 | [crunchyroll](https://www.crunchyroll.com)| &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | 跟随网站 |
 | [cctv](https://tv.cctv.com)       | &#10004; | &#10004; | &#10004; |    x     | &#10004; | zh-CN    |
-| [disney+](https://www.disneyplus.com)    | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN    |
 | [fod](https://fod.fujitv.co.jp)        | &#10004; | &#10004; |    x     | &#10004; | &#10004; | ja-JP    |
 | [hbomax](https://www.hbomax.com)     | &#10004; | &#10004; |    x     | &#10004; | &#10004; | 跟随网站 |
 | [iqiyi](https://www.iqiyi.com)      | &#10004; |    x     |    x     |    x     | &#10004; | zh-CN    |

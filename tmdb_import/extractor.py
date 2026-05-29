@@ -28,9 +28,6 @@ def extract_from_url(url, language="zh-CN"):
     elif domain.endswith(".cctv.com"):
         from .extractors import cctv
         metadata = cctv.cctv_extractor(url)
-    elif domain.endswith(".disneyplus.com"):
-        from .extractors import disneyplus
-        metadata = disneyplus.disneyplus_extractor(url=url, language=language)
     elif domain.endswith(".hbomax.com"):
         from .extractors import hbomax
         metadata = hbomax.hbomax_extractor(url=url)
