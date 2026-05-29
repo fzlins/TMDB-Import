@@ -222,7 +222,7 @@ Windows 11、Chrome/Chromium、Python 3 和 Visual Studio Code。
 | [linetv](https://www.linetv.tw)     | &#10004; |    x     | &#10004; |    x     | &#10004; | zh-TW    |
 | [litv](https://www.litv.tv)       | &#10004; |    x     |    x     |    x     | &#10004; | zh-TW    |
 | [mgtv](https://www.mgtv.com)       | &#10004; |    x     | &#10004; | &#10004; |    x     | zh-CN    |
-| [migu](https://www.miguvideo.com)  | &#10004; | &#10004; | &#10004; | &#10004; |    x     | zh-CN    |
+| [migu](https://www.miguvideo.com)  | &#10004; | &#10004; | &#10004; |    x     |    x     | zh-CN    |
 | [mytvsuper](https://www.mytvsuper.com)  | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-HK    |
 | [myvideo](https://www.myvideo.net.tw)    | &#10004; | &#10004; |    x     |    x     | &#10004; | zh-TW    |
 | [netflix](https://www.netflix.com)    | &#10004; | &#10004; |    x     | x |    x     | 跟随网站 |
