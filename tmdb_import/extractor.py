@@ -61,6 +61,9 @@ def extract_from_url(url, language="zh-CN"):
     elif domain.endswith(".mgtv.com"):
         from .extractors import mgtv
         metadata = mgtv.mgtv_extractor(url)
+    elif domain.endswith(".miguvideo.com"):
+        from .extractors import migu
+        metadata = migu.migu_extractor(url)
     elif domain.endswith("myvideo.net.tw"):
         from .extractors import myvideo
         metadata = myvideo.myvideo_extractor(url)
