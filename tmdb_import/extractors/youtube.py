@@ -64,11 +64,18 @@ def _extract_playlist_video_list(response):
 
 
 def _extract_continuation_items(response):
-    try:
-        actions = response["onResponseReceivedActions"]
-        return actions[0]["appendContinuationItemsAction"]["continuationItems"]
-    except (KeyError, IndexError):
-        return []
+    items = []
+
+    for key in ("onResponseReceivedActions", "onResponseReceivedEndpoints"):
+        for action in response.get(key, []):
+            append_action = action.get("appendContinuationItemsAction", {})
+            items.extend(append_action.get("continuationItems", []))
+
+    continuation_contents = response.get("continuationContents", {})
+    playlist_continuation = continuation_contents.get("playlistVideoListContinuation", {})
+    items.extend(playlist_continuation.get("contents", []))
+
+    return items
 
 
 def _parse_video_items(items):
@@ -90,16 +97,34 @@ def _parse_video_items(items):
     return videos
 
 
-def _get_continuation_token(items):
-    for item in items:
-        cr = item.get("continuationItemRenderer")
-        if cr:
-            return (
-                cr.get("continuationEndpoint", {})
-                .get("continuationCommand", {})
-                .get("token")
-            )
-    return None
+def _find_continuation_tokens(node):
+    tokens = []
+
+    def _add(token):
+        if isinstance(token, str) and token and token not in tokens:
+            tokens.append(token)
+
+    def _walk(current):
+        if isinstance(current, dict):
+            _add(current.get("continuationCommand", {}).get("token"))
+            _add(current.get("nextContinuationData", {}).get("continuation"))
+            _add(current.get("reloadContinuationData", {}).get("continuation"))
+            for value in current.values():
+                _walk(value)
+        elif isinstance(current, list):
+            for value in current:
+                _walk(value)
+
+    _walk(node)
+    return tokens
+
+
+def _enqueue_tokens(pending_tokens, seen_tokens, candidates):
+    for token in candidates:
+        if token in seen_tokens:
+            continue
+        seen_tokens.add(token)
+        pending_tokens.append(token)
 
 
 def youtube_extractor(url):
@@ -135,15 +160,18 @@ def youtube_extractor(url):
     if pvl:
         items = pvl.get("contents", [])
         all_videos.extend(_parse_video_items(items))
-        token = _get_continuation_token(items)
-        while token:
+        pending_tokens = []
+        seen_tokens = set()
+        _enqueue_tokens(pending_tokens, seen_tokens, _find_continuation_tokens(pvl))
+        while pending_tokens:
+            token = pending_tokens.pop(0)
             cont_response = _post("browse", {
                 "context": _context(),
                 "continuation": token,
             })
             cont_items = _extract_continuation_items(cont_response)
             all_videos.extend(_parse_video_items(cont_items))
-            token = _get_continuation_token(cont_items)
+            _enqueue_tokens(pending_tokens, seen_tokens, _find_continuation_tokens(cont_response))
 
     logging.info(f"Total videos collected: {len(all_videos)}")
 
