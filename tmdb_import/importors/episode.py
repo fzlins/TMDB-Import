@@ -309,7 +309,7 @@ def import_episode(tmdb_id, season_number, language, csv_filename="import.csv"):
                     if len(page.locator("li[id='no_results']").all()) != 1 and not backdrop_forced_upload:
                         continue
 
-                    page.locator("span[class='glyphicons_v2 circle-empty-plus']").click()
+                    page.locator("a.add_image.upload").click()
                     time.sleep(random.uniform(1, 2))
                     page.locator("input[id='upload_files']").set_input_files(image_path)
                     page.wait_for_function("() => document.querySelector('span[class=\"k-file-validation-message\"]')?.textContent?.includes('successfully')", timeout=30000)
