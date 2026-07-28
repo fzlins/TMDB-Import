@@ -57,15 +57,9 @@ def _pick_lang_text(text_map, lang_key):
     if not isinstance(text_map, dict):
         return ""
 
-    candidates = [lang_key, "en", "ko", "es", "pt"]
-    for key in candidates:
-        value = text_map.get(key)
-        if value:
-            return value
-
-    for value in text_map.values():
-        if value:
-            return value
+    value = text_map.get(lang_key)
+    if value:
+        return value
     return ""
 
 
@@ -120,7 +114,7 @@ def kocowa_extractor(url):
         overview = _pick_lang_text(meta.get("summary", {}), title_lang_key)
 
     poster = meta.get("poster", {}).get("portrait") or ""
-    backdrop = meta.get("poster", {}).get("landscape_tv") or meta.get("poster", {}).get("landscape") or ""
+    backdrop = meta.get("poster", {}).get("landscape") or ""
 
     release_date = ""
     start_date = content.get("start_date")
@@ -177,7 +171,7 @@ def kocowa_extractor(url):
                 except (ValueError, TypeError):
                     episode_runtime = ""
 
-            episode_backdrop = episode_meta.get("poster", {}).get("landscape_tv") or episode_meta.get("poster", {}).get("landscape") or ""
+            episode_backdrop = episode_meta.get("poster", {}).get("landscape") or ""
 
             episodes[episode_number] = Episode(
                 episode_number,
