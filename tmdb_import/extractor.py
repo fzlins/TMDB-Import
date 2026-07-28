@@ -46,6 +46,9 @@ def extract_from_url(url, language="zh-CN"):
     elif domain.endswith("kktv.me"):
         from .extractors import kktv
         metadata = kktv.kktv_extractor(url)
+    elif domain.endswith("kocowa.com"):
+        from .extractors import kocowa
+        metadata = kocowa.kocowa_extractor(url)
     elif domain.endswith(".ptsplus.tv"):
         from .extractors import ptsplus
         metadata = ptsplus.ptsplus_extractor(url)

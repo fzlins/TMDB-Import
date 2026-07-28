@@ -218,6 +218,7 @@ Windows 11、Chrome/Chromium、Python 3 和 Visual Studio Code。
 | [iqiyi](https://www.iqiyi.com)      | &#10004; |    x     |    x     |    x     | &#10004; | zh-CN    |
 | [ixigua](https://www.ixigua.com)     | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN    |
 | [kktv](https://kktv.me)       | &#10004; |    x     | &#10004; | &#10004; | &#10004; | zh-TW    |
+| [kocowa](https://www.kocowa.com)     | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | 跟随网站 |
 | [linetv](https://www.linetv.tw)     | &#10004; |    x     | &#10004; |    x     | &#10004; | zh-TW    |
 | [litv](https://www.litv.tv)       | &#10004; |    x     |    x     |    x     | &#10004; | zh-TW    |
 | [mgtv](https://www.mgtv.com)       | &#10004; |    x     | &#10004; | &#10004; |    x     | zh-CN    |
