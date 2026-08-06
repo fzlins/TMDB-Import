@@ -311,7 +311,7 @@ def import_episode(tmdb_id, season_number, language, csv_filename="import.csv"):
 
                     page.locator("a.add_image.upload").click()
                     time.sleep(random.uniform(1, 2))
-                    page.locator("input[id='upload_files']").set_input_files(image_path)
+                    page.locator("input[id='upload_files'][accept='image/*']").set_input_files(image_path)
                     page.wait_for_function("() => document.querySelector('span.file_status.success')", timeout=30000)
 
                     # thumbs up upload backdrop
