@@ -2,7 +2,19 @@
 
 [![English](https://img.shields.io/badge/docs-English-blue)](../README.md) [![简体中文](https://img.shields.io/badge/docs-简体中文-yellow)](./README.zh-CN.md) [![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/fzlins/TMDB-Import)
 
+一个强大的 Python 工具，可从 40+ 个流媒体平台提取电视剧元数据，并自动导入到电影数据库 (TMDB)。支持元数据提取、图像处理和 TMDB 导入，采用浏览器自动化技术。
+
 脚本使用 Playwright 自动化框架，仅支持 Chrome/Chromium 浏览器。Playwright 会自动下载和管理浏览器，无需手动安装驱动程序。
+
+## 目录
+- [安装](#安装)
+- [使用说明](#使用说明)
+- [配置说明](#配置说明)
+- [已支持平台](#已支持平台)
+- [作为 Python 库使用](#作为-python-库使用)
+- [故障排查](#故障排查)
+- [常见问题](#常见问题)
+- [许可证](#许可证)
 
 # 安装
 
@@ -160,6 +172,7 @@ for season in metadata.seasons:
 - `extract_from_url(url, language="zh-CN")`：从 URL 提取和处理元数据
 - `save_metadata_json(filename, metadata)`：将元数据保存为 JSON 文件
 - `create_csv(filename, episodes_dict)`：将剧集保存为 CSV 文件
+- `import_to_tmdb(url, username, password)`：导入数据到 TMDB
 
 **元数据结构：**
 - `Metadata`：剧集级数据（title, overview, poster, backdrop, logo, language, seasons）
@@ -202,7 +215,7 @@ chinese_convert =
 
 Windows 11、Chrome/Chromium、Python 3 和 Visual Studio Code。
 
-# 已支持
+# 已支持平台
 
 | 网站       |   标题   | 剧情介绍 |   时长   | 发布时间 |  背景图  | 默认语言 |
 | :--------- | :------: | :------: | :------: | :------: | :------: | :------- |
@@ -241,3 +254,82 @@ Windows 11、Chrome/Chromium、Python 3 和 Visual Studio Code。
 | [wavve](https://www.wavve.com)      | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | ko-KR    |
 | [youku](https://www.youku.com)      | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN    |
 | [youtube](https://www.youtube.com)  | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | 跟随网站 |
+
+## 故障排查
+
+### 浏览器相关问题
+- **错误："Playwright not found"**
+  - 解决方案：运行 `pip install playwright` 和 `playwright install chromium`
+  - 验证：`playwright install chromium`
+
+- **无头模式崩溃**
+  - 检查操作系统和 Chromium 版本兼容性
+  - 先尝试 GUI 模式：移除 `--headless` 标志
+  - 更新 Playwright：`pip install --upgrade playwright`
+
+- **"超时" 或 "页面无法加载"**
+  - 增加代码中的超时时间或使用 `--debug` 获取详细日志
+  - 检查网络连接
+  - 目标网站可能已更改其结构
+
+### 元数据提取
+- **数据缺失（字段为空）**
+  - 检查"已支持平台"表中该功能的可用性
+  - 使用 `--debug` 标志查看提取的数据
+  - 该平台可能无法提供这些信息
+
+- **中文转换不工作**
+  - 验证安装：`pip install opencc-python-reimplemented`
+  - 确保 `config.ini` 中 `chinese_convert` 值正确
+  - 仅当源语言为中文（`zh-*`）时有效
+
+### TMDB 导入
+- **登陆失败**
+  - 验证 `config.ini` 中的用户名/密码或手动输入
+  - 检查 TMDB 账户是否已锁定
+  - 如果需要，启用双因素认证 (2FA)
+
+- **图像上传错误**
+  - 验证图像格式（支持 JPEG、PNG）
+  - 检查图像大小是否符合 TMDB 要求
+  - 设置 `backdrop_forced_upload = true` 以替换现有图像
+
+### 图像处理
+- **图像裁剪产生空白结果**
+  - 验证图像 URL 是否可访问
+  - 尝试不同图像（原图像可能已损坏）
+  - 检查图像格式兼容性
+
+- **黑边检测不工作**
+  - 增加配置中的边框检测阈值
+  - 某些图像可能没有清晰的边框可检测
+
+## 常见问题
+
+**Q: 我需要 TMDB 账户吗？**
+- A: 仅导入功能需要。提取功能不需要账户。
+
+**Q: 没有 Playwright 能使用吗？**
+- A: 可以，使用最小化安装。仅提取的网站无需浏览器自动化。
+
+**Q: 这支持多语言电视剧吗？**
+- A: 支持。在 TMDB URL 中使用 `language` 参数指定目标语言。
+
+**Q: 如何自动化批量导入？**
+- A: 使用 `config.ini` 进行自动化设置，并创建一个在循环中调用 `extract_from_url()` 的 Python 脚本。
+
+**Q: 如果网站不在支持列表中怎么办？**
+- A: 您可以创建自定义提取器或在 GitHub 上请求支持。
+
+**Q: 有 GUI 吗？**
+- A: 这是一个命令行工具。浏览器在普通模式下会显示 GUI 窗口。
+
+**Q: 提取通常需要多长时间？**
+- A: 5-30 秒，取决于网站复杂度和网络速度。启用 `--headless` 以获得更快的性能。
+
+**Q: 我能贡献新的平台支持吗？**
+- A: 可以！欢迎贡献。在 `tmdb_import/extractors/` 中创建新提取器。
+
+## 许可证
+
+MIT 许可证 - 详见 LICENSE 文件。

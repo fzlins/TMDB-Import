@@ -2,7 +2,19 @@
 
 [![English](https://img.shields.io/badge/docs-English-blue)](./README.md) [![简体中文](https://img.shields.io/badge/docs-简体中文-yellow)](./docs/README.zh-CN.md) [![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/fzlins/TMDB-Import)
 
-This script uses the Playwright automation framework and only supports Chrome/Chromium browsers. Playwright automatically downloads and manages browsers, eliminating the need for manual driver installation.
+A powerful Python tool for extracting TV series metadata from 40+ streaming platforms and automatically importing it into The Movie Database (TMDB). Supports metadata extraction, image processing, and TMDB import with browser automation.
+
+This script uses the Playwright automation framework and supports Chrome/Chromium browsers. Playwright automatically downloads and manages browsers, eliminating the need for manual driver installation.
+
+## Table of Contents
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Supported Platforms](#supported-platforms)
+- [Using as Python Library](#using-as-a-python-library)
+- [Troubleshooting](#troubleshooting)
+- [FAQ](#faq)
+- [License](#license)
 
 # Installation
 
@@ -149,6 +161,7 @@ for season in metadata.seasons:
 - `extract_from_url(url, language="zh-CN")`: Extract and process metadata from URL
 - `save_metadata_json(filename, metadata)`: Save metadata to JSON file
 - `create_csv(filename, episodes_dict)`: Save episodes to CSV file
+- `import_to_tmdb(url, username, password)`: Import data to TMDB
 
 **Metadata Structure:**
 - `Metadata`: Show-level data (title, overview, poster, backdrop, logo, language, seasons)
@@ -190,7 +203,7 @@ chinese_convert =
 # Test Environment
 Windows 11, Chrome/Chromium, Python 3, and Visual Studio Code.
 
-# Supported Sites
+# Supported Platforms
 | Website | Title | Plot | Duration | Release Date | Backdrop | Default Language |
 | :-----| :----: | :----: | :----: | :----: | :----: | :----- |
 | [anidb](https://anidb.net) | &#10004; | x | &#10004; | &#10004; | x | Follow site |
@@ -228,3 +241,82 @@ Windows 11, Chrome/Chromium, Python 3, and Visual Studio Code.
 | [wavve](https://www.wavve.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | ko-KR |
 | [youku](https://www.youku.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | zh-CN |
 | [youtube](https://www.youtube.com) | &#10004; | &#10004; | &#10004; | &#10004; | &#10004; | Follow site |
+
+## Troubleshooting
+
+### Browser Issues
+- **Error: "Playwright not found"**
+  - Solution: Run `pip install playwright` and `playwright install chromium`
+  - Verify with: `playwright install chromium`
+
+- **Headless mode crashes**
+  - Check your OS and Chromium version compatibility
+  - Try GUI mode first: Remove `--headless` flag
+  - Update Playwright: `pip install --upgrade playwright`
+
+- **"Timeout" or "Page not loading"**
+  - Increase timeout in code or use `--debug` for detailed logs
+  - Check your internet connection
+  - The target site may have changed its structure
+
+### Metadata Extraction
+- **Missing data (empty fields)**
+  - Check the "Supported Platforms" table for feature availability
+  - Use `--debug` flag to see what data was extracted
+  - The platform may not provide that information
+
+- **Chinese conversion not working**
+  - Verify installation: `pip install opencc-python-reimplemented`
+  - Ensure `config.ini` has correct `chinese_convert` value
+  - Only works when source language is Chinese (`zh-*`)
+
+### TMDB Import
+- **Login failure**
+  - Verify username/password in `config.ini` or enter manually
+  - Check TMDB account is not locked
+  - Enable 2FA if required by account settings
+
+- **Image upload errors**
+  - Verify image format (JPEG, PNG supported)
+  - Check image size meets TMDB requirements
+  - `backdrop_forced_upload = true` to replace existing images
+
+### Image Processing
+- **Image cropping produces blank results**
+  - Verify image URL is accessible
+  - Try different image (may be corrupted)
+  - Check image format compatibility
+
+- **Black border detection not working**
+  - Increase border detection threshold in config
+  - Some images may not have clear borders to detect
+
+## FAQ
+
+**Q: Do I need a TMDB account?**
+- A: Only for the import function. Extraction works without an account.
+
+**Q: Can I use this without Playwright?**
+- A: Yes, with minimal installation. Extraction-only sites don't need browser automation.
+
+**Q: Does this support TV shows with multiple languages?**
+- A: Yes. Use the `language` parameter in the TMDB URL to specify the target language.
+
+**Q: How do I automate batch imports?**
+- A: Use `config.ini` for automation settings and create a Python script that calls `extract_from_url()` in a loop.
+
+**Q: What if a site is not in the supported list?**
+- A: You can create a custom extractor or request support on GitHub.
+
+**Q: Is there a GUI?**
+- A: This is a command-line tool. The browser displays a GUI window in normal mode.
+
+**Q: How long does extraction typically take?**
+- A: 5-30 seconds depending on site complexity and network speed. Enable `--headless` for faster performance.
+
+**Q: Can I contribute new platform support?**
+- A: Yes! Contributions are welcome. Create a new extractor in `tmdb_import/extractors/`.
+
+## License
+
+MIT License - See LICENSE file for details.
