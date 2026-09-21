@@ -94,6 +94,9 @@ def extract_from_url(url, language="zh-CN"):
     elif domain.endswith("thetvdb.com"):
         from .extractors import tvdb
         metadata = tvdb.tvdb_extractor(url)
+    elif domain.endswith(".tving.com"):
+        from .extractors import tving
+        metadata = tving.tving_extractor(url)
     elif domain.endswith(".viki.com"):
         from .extractors import viki
         metadata = viki.viki_extractor(url)
