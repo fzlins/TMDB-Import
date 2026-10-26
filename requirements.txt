@@ -12,7 +12,7 @@ python-dateutil>=2.8.0
 playwright>=1.40.0
 
 # Image processing library (required for backdrop/poster processing)
-Pillow>=10.0.0
+Pillow>=13.0.0
 
 # Image border cropping (required for black border removal)
 bordercrop>=0.1.7
